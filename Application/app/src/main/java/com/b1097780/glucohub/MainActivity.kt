@@ -1,10 +1,13 @@
 package com.b1097780.glucohub
 
 import android.os.Bundle
+import android.view.Menu
+import android.view.MenuItem
 import android.view.View
+import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.drawerlayout.widget.DrawerLayout
+import androidx.appcompat.widget.Toolbar
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -21,14 +24,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        applyUserTheme()
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // NavController
+        // Setup custom toolbar
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        // Setup NavController
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
-        // AppBarConfiguration
+        // AppBarConfiguration for top-level destinations
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_home,
@@ -38,47 +47,74 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout
         )
 
-        // Setup ActionBar and Bottom Navigation
+        // Link NavController with toolbar and bottom navigation
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
 
-        // Observe destination changes to toggle Bottom Navigation visibility
+        // Toolbar custom buttons
+        val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
+        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
+        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+
+        // Drawer button functionality
+        customMenuButton.setOnClickListener {
+            binding.drawerLayout.openDrawer(binding.navViewDrawer)
+        }
+
+
+        // Observe navigation destination changes
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.navigation_settings, R.id.nav_logout -> {
+                    // Hide toolbar buttons and bottom navigation
                     binding.navView.visibility = View.GONE
+                    customMenuButton.visibility = View.GONE
+                    customCoinButton.visibility = View.GONE
+                    customStreakButton.visibility = View.GONE
                 }
                 else -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    // Show toolbar buttons and bottom navigation
                     binding.navView.visibility = View.VISIBLE
+                    customMenuButton.visibility = View.VISIBLE
+                    customCoinButton.visibility = View.VISIBLE
+                    customStreakButton.visibility = View.VISIBLE
                 }
             }
         }
 
-        // Handle Drawer Navigation
+        // Handle navigation drawer actions
         binding.navViewDrawer.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_settings -> {
                     navController.navigate(R.id.navigation_settings)
-                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-                    true
                 }
                 R.id.nav_logout -> {
                     performLogout()
-                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-                    true
                 }
                 else -> {
                     menuItem.onNavDestinationSelected(navController)
-                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-                    true
                 }
             }
+            binding.drawerLayout.closeDrawer(binding.navViewDrawer)
+            true
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
+    private fun applyUserTheme() {
+        val sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
+        val themePreference = sharedPreferences.getString("theme", "default")
+
+        when (themePreference) {
+            "default" -> setTheme(R.style.Theme_GlucoHub_default)
+            "purple" -> setTheme(R.style.Theme_GlucoHub_purple)
+            else -> setTheme(R.style.Theme_GlucoHub_default)
+        }
     }
 
     private fun performLogout() {

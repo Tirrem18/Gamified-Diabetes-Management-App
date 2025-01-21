@@ -2,6 +2,7 @@
 <androidx.drawerlayout.widget.DrawerLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -11,6 +12,68 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
+        <!-- Custom Toolbar -->
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:background="?attr/colorPrimaryVariant"
+            android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
+            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+            app:contentInsetStart="0dp"
+            app:contentInsetEnd="0dp"
+            android:contentInsetStart="0dp"
+            android:contentInsetEnd="0dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <!-- Use ConstraintLayout to control button positions -->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <!-- First Button -->
+                <ImageButton
+                    android:id="@+id/custom_menu_button"
+                    android:layout_width="75dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/custom_button_background"
+                    android:src="@drawable/menu"
+                    android:contentDescription="Menu Button"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/custom_coin_button" />
+
+                <!-- Middle Button -->
+                <ImageButton
+                    android:id="@+id/custom_coin_button"
+                    android:layout_width="95dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/custom_button_background"
+                    android:src="@drawable/menu"
+                    android:contentDescription="Coin Button"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/custom_menu_button"
+                    app:layout_constraintEnd_toStartOf="@id/custom_streak_button" />
+
+                <!-- Last Button -->
+                <ImageButton
+                    android:id="@+id/custom_streak_button"
+                    android:layout_width="75dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/custom_button_background"
+                    android:src="@drawable/menu"
+                    android:contentDescription="Streak Button"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/custom_coin_button"
+                    app:layout_constraintEnd_toEndOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.appcompat.widget.Toolbar>
+
         <!-- NavHostFragment -->
         <fragment
             android:id="@+id/nav_host_fragment_activity_main"
@@ -18,7 +81,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:defaultNavHost="true"
-            app:navGraph="@navigation/mobile_navigation" />
+            app:navGraph="@navigation/mobile_navigation"
+            tools:ignore="FragmentTagUsage" />
 
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
