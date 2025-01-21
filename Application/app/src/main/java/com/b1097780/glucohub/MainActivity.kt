@@ -24,25 +24,20 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Apply the user's selected theme
         applyUserTheme()
-
-
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Set up custom toolbar
+        // Setup custom toolbar
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
 
-
-        // NavController
+        // Setup NavController
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
 
-        // AppBarConfiguration
+        // AppBarConfiguration for top-level destinations
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_home,
@@ -52,50 +47,57 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout
         )
 
-        // Link toolbar and navigation controller
+        // Link NavController with toolbar and bottom navigation
         setupActionBarWithNavController(navController, appBarConfiguration)
-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+        binding.navView.setupWithNavController(navController)
 
-        // Custom navigation drawer button
-        val customDrawerButton = findViewById<ImageButton>(R.id.custom_menu_button)
-        customDrawerButton.setOnClickListener {
+        // Toolbar custom buttons
+        val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
+        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
+        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+
+        // Drawer button functionality
+        customMenuButton.setOnClickListener {
             binding.drawerLayout.openDrawer(binding.navViewDrawer)
         }
 
-        // Setup Bottom Navigation
-        binding.navView.setupWithNavController(navController)
 
-        // Observe destination changes to toggle Bottom Navigation visibility
+        // Observe navigation destination changes
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
                 R.id.navigation_settings, R.id.nav_logout -> {
+                    // Hide toolbar buttons and bottom navigation
                     binding.navView.visibility = View.GONE
+                    customMenuButton.visibility = View.GONE
+                    customCoinButton.visibility = View.GONE
+                    customStreakButton.visibility = View.GONE
                 }
                 else -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    // Show toolbar buttons and bottom navigation
                     binding.navView.visibility = View.VISIBLE
+                    customMenuButton.visibility = View.VISIBLE
+                    customCoinButton.visibility = View.VISIBLE
+                    customStreakButton.visibility = View.VISIBLE
                 }
             }
         }
 
-        // Handle Drawer Navigation
+        // Handle navigation drawer actions
         binding.navViewDrawer.setNavigationItemSelectedListener { menuItem ->
             when (menuItem.itemId) {
                 R.id.nav_settings -> {
                     navController.navigate(R.id.navigation_settings)
-                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-                    true
                 }
                 R.id.nav_logout -> {
                     performLogout()
-                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-                    true
                 }
                 else -> {
                     menuItem.onNavDestinationSelected(navController)
-                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-                    true
                 }
             }
+            binding.drawerLayout.closeDrawer(binding.navViewDrawer)
+            true
         }
     }
 

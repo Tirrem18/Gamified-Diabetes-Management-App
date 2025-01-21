@@ -1,0 +1,170 @@
+Index: app/src/main/java/com/b1097780/glucohub/MainActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.b1097780.glucohub\r\n\r\nimport android.os.Bundle\r\nimport android.view.Menu\r\nimport android.view.MenuItem\r\nimport android.view.View\r\nimport android.widget.ImageButton\r\nimport androidx.appcompat.app.AlertDialog\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport androidx.appcompat.widget.Toolbar\r\nimport androidx.navigation.findNavController\r\nimport androidx.navigation.ui.AppBarConfiguration\r\nimport androidx.navigation.ui.navigateUp\r\nimport androidx.navigation.ui.onNavDestinationSelected\r\nimport androidx.navigation.ui.setupActionBarWithNavController\r\nimport androidx.navigation.ui.setupWithNavController\r\nimport com.b1097780.glucohub.databinding.ActivityMainBinding\r\nimport com.google.android.material.bottomnavigation.BottomNavigationView\r\nimport com.google.android.material.navigation.NavigationView\r\n\r\nclass MainActivity : AppCompatActivity() {\r\n\r\n    private lateinit var binding: ActivityMainBinding\r\n    private lateinit var appBarConfiguration: AppBarConfiguration\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        // Apply the user's selected theme\r\n        applyUserTheme()\r\n\r\n\r\n        super.onCreate(savedInstanceState)\r\n        binding = ActivityMainBinding.inflate(layoutInflater)\r\n        setContentView(binding.root)\r\n\r\n        // Set up custom toolbar\r\n        val toolbar = findViewById<Toolbar>(R.id.toolbar)\r\n        setSupportActionBar(toolbar)\r\n        supportActionBar?.setDisplayShowTitleEnabled(false)\r\n        supportActionBar?.setDisplayHomeAsUpEnabled(false)\r\n\r\n\r\n        // NavController\r\n        val navController = findNavController(R.id.nav_host_fragment_activity_main)\r\n\r\n        // AppBarConfiguration\r\n        appBarConfiguration = AppBarConfiguration(\r\n            setOf(\r\n                R.id.navigation_home,\r\n                R.id.navigation_dashboard,\r\n                R.id.navigation_notifications\r\n            ),\r\n            binding.drawerLayout\r\n        )\r\n\r\n        // Link toolbar and navigation controller\r\n        setupActionBarWithNavController(navController, appBarConfiguration)\r\n        supportActionBar?.setDisplayHomeAsUpEnabled(false)\r\n\r\n        // Custom navigation drawer button\r\n        val customDrawerButton = findViewById<ImageButton>(R.id.custom_menu_button)\r\n        customDrawerButton.setOnClickListener {\r\n            binding.drawerLayout.openDrawer(binding.navViewDrawer)\r\n        }\r\n\r\n        // Setup Bottom Navigation\r\n        binding.navView.setupWithNavController(navController)\r\n\r\n        // Observe destination changes to toggle Bottom Navigation visibility\r\n        navController.addOnDestinationChangedListener { _, destination, _ ->\r\n            when (destination.id) {\r\n                R.id.navigation_settings, R.id.nav_logout -> {\r\n                    binding.navView.visibility = View.GONE\r\n                }\r\n                else -> {\r\n                    binding.navView.visibility = View.VISIBLE\r\n                }\r\n            }\r\n        }\r\n\r\n        // Handle Drawer Navigation\r\n        binding.navViewDrawer.setNavigationItemSelectedListener { menuItem ->\r\n            when (menuItem.itemId) {\r\n                R.id.nav_settings -> {\r\n                    navController.navigate(R.id.navigation_settings)\r\n                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)\r\n                    true\r\n                }\r\n                R.id.nav_logout -> {\r\n                    performLogout()\r\n                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)\r\n                    true\r\n                }\r\n                else -> {\r\n                    menuItem.onNavDestinationSelected(navController)\r\n                    binding.drawerLayout.closeDrawer(binding.navViewDrawer)\r\n                    true\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    override fun onSupportNavigateUp(): Boolean {\r\n        val navController = findNavController(R.id.nav_host_fragment_activity_main)\r\n        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()\r\n    }\r\n\r\n    private fun applyUserTheme() {\r\n        val sharedPreferences = getSharedPreferences(\"user_preferences\", MODE_PRIVATE)\r\n        val themePreference = sharedPreferences.getString(\"theme\", \"default\")\r\n\r\n        when (themePreference) {\r\n            \"default\" -> setTheme(R.style.Theme_GlucoHub_default)\r\n            \"purple\" -> setTheme(R.style.Theme_GlucoHub_purple)\r\n            else -> setTheme(R.style.Theme_GlucoHub_default)\r\n        }\r\n    }\r\n\r\n    private fun performLogout() {\r\n        val builder = AlertDialog.Builder(this)\r\n        builder.setTitle(\"Logout\")\r\n            .setMessage(\"This would log you out when implemented.\")\r\n            .setPositiveButton(\"OK\") { dialog, _ -> dialog.dismiss() }\r\n            .setNegativeButton(\"Cancel\") { dialog, _ -> dialog.dismiss() }\r\n        builder.create().show()\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/java/com/b1097780/glucohub/MainActivity.kt b/app/src/main/java/com/b1097780/glucohub/MainActivity.kt
+--- a/app/src/main/java/com/b1097780/glucohub/MainActivity.kt	(revision 638796ffaa3f91c32c98d746815d22c07f196d04)
++++ b/app/src/main/java/com/b1097780/glucohub/MainActivity.kt	(date 1737497775320)
+@@ -1,8 +1,6 @@
+ package com.b1097780.glucohub
+ 
+ import android.os.Bundle
+-import android.view.Menu
+-import android.view.MenuItem
+ import android.view.View
+ import android.widget.ImageButton
+ import androidx.appcompat.app.AlertDialog
+@@ -13,10 +11,7 @@
+ import androidx.navigation.ui.navigateUp
+ import androidx.navigation.ui.onNavDestinationSelected
+ import androidx.navigation.ui.setupActionBarWithNavController
+-import androidx.navigation.ui.setupWithNavController
+ import com.b1097780.glucohub.databinding.ActivityMainBinding
+-import com.google.android.material.bottomnavigation.BottomNavigationView
+-import com.google.android.material.navigation.NavigationView
+ 
+ class MainActivity : AppCompatActivity() {
+ 
+@@ -27,7 +22,6 @@
+         // Apply the user's selected theme
+         applyUserTheme()
+ 
+-
+         super.onCreate(savedInstanceState)
+         binding = ActivityMainBinding.inflate(layoutInflater)
+         setContentView(binding.root)
+@@ -38,7 +32,6 @@
+         supportActionBar?.setDisplayShowTitleEnabled(false)
+         supportActionBar?.setDisplayHomeAsUpEnabled(false)
+ 
+-
+         // NavController
+         val navController = findNavController(R.id.nav_host_fragment_activity_main)
+ 
+@@ -54,25 +47,39 @@
+ 
+         // Link toolbar and navigation controller
+         setupActionBarWithNavController(navController, appBarConfiguration)
+-        supportActionBar?.setDisplayHomeAsUpEnabled(false)
+ 
+         // Custom navigation drawer button
+-        val customDrawerButton = findViewById<ImageButton>(R.id.custom_menu_button)
+-        customDrawerButton.setOnClickListener {
++        val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
++        customMenuButton.setOnClickListener {
+             binding.drawerLayout.openDrawer(binding.navViewDrawer)
+         }
+ 
+-        // Setup Bottom Navigation
+-        binding.navView.setupWithNavController(navController)
++// Additional buttons in the toolbar
++        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
++        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+ 
+-        // Observe destination changes to toggle Bottom Navigation visibility
++// Observe destination changes to toggle visibility of UI elements
+         navController.addOnDestinationChangedListener { _, destination, _ ->
+             when (destination.id) {
+                 R.id.navigation_settings, R.id.nav_logout -> {
++                    // Hide bottom navigation and toolbar buttons
+                     binding.navView.visibility = View.GONE
++                    customMenuButton.visibility = View.GONE
++                    customCoinButton.visibility = View.GONE
++                    customStreakButton.visibility = View.GONE
++
++                    // Disable default navigation back button
++                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                 }
+                 else -> {
++                    // Show bottom navigation and toolbar buttons
+                     binding.navView.visibility = View.VISIBLE
++                    customMenuButton.visibility = View.VISIBLE
++                    customCoinButton.visibility = View.VISIBLE
++                    customStreakButton.visibility = View.VISIBLE
++
++                    // Ensure no back button is displayed
++                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                 }
+             }
+         }
+@@ -123,4 +130,4 @@
+             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+         builder.create().show()
+     }
+-}
+\ No newline at end of file
++}
+Index: app/src/main/res/layout/activity_main.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.drawerlayout.widget.DrawerLayout\r\n    xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:id=\"@+id/drawer_layout\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\">\r\n\r\n    <!-- Main content -->\r\n    <androidx.constraintlayout.widget.ConstraintLayout\r\n        android:layout_width=\"match_parent\"\r\n        android:layout_height=\"match_parent\">\r\n\r\n        <!-- Custom Toolbar -->\r\n        <androidx.appcompat.widget.Toolbar\r\n            android:id=\"@+id/toolbar\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"80dp\"\r\n            android:background=\"?attr/colorPrimaryVariant\"\r\n            android:theme=\"@style/ThemeOverlay.AppCompat.ActionBar\"\r\n            app:popupTheme=\"@style/ThemeOverlay.AppCompat.Light\"\r\n            app:contentInsetStart=\"0dp\"\r\n            app:contentInsetEnd=\"0dp\"\r\n            android:contentInsetStart=\"0dp\"\r\n            android:contentInsetEnd=\"0dp\"\r\n            app:layout_constraintTop_toTopOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\">\r\n\r\n            <!-- Use ConstraintLayout to control button position -->\r\n            <androidx.constraintlayout.widget.ConstraintLayout\r\n                android:layout_width=\"match_parent\"\r\n                android:layout_height=\"match_parent\">\r\n\r\n                <!-- Custom Drawer Button -->\r\n                <ImageButton\r\n                    android:id=\"@+id/custom_menu_button\"\r\n                    android:layout_width=\"75dp\"\r\n                    android:layout_height=\"60dp\"\r\n                    android:background=\"@drawable/custom_button_background\"\r\n                    android:src=\"@drawable/menu\"\r\n                    android:contentDescription=\"Open Navigation Drawer\"\r\n                    app:layout_constraintTop_toTopOf=\"parent\"\r\n                    app:layout_constraintBottom_toBottomOf=\"parent\"\r\n                    app:layout_constraintStart_toStartOf=\"parent\" />\r\n\r\n                <ImageButton\r\n                    android:id=\"@+id/custom_coin_button\"\r\n                    android:layout_width=\"95dp\"\r\n                    android:layout_height=\"60dp\"\r\n                    android:background=\"@drawable/custom_button_background\"\r\n                    android:src=\"@drawable/menu\"\r\n                    android:contentDescription=\"Open Navigation Drawer\"\r\n                    app:layout_constraintTop_toTopOf=\"parent\"\r\n                    app:layout_constraintBottom_toBottomOf=\"parent\"\r\n                    app:layout_constraintStart_toStartOf=\"parent\" />\r\n\r\n                <ImageButton\r\n                    android:id=\"@+id/custom_streak_button\"\r\n                    android:layout_width=\"75dp\"\r\n                    android:layout_height=\"60dp\"\r\n                    android:background=\"@drawable/custom_button_background\"\r\n                    android:src=\"@drawable/menu\"\r\n                    android:contentDescription=\"Open Navigation Drawer\"\r\n                    app:layout_constraintTop_toTopOf=\"parent\"\r\n                    app:layout_constraintBottom_toBottomOf=\"parent\"\r\n                    app:layout_constraintStart_toStartOf=\"parent\" />\r\n            </androidx.constraintlayout.widget.ConstraintLayout>\r\n        </androidx.appcompat.widget.Toolbar>\r\n\r\n        <!-- NavHostFragment -->\r\n        <fragment\r\n            android:id=\"@+id/nav_host_fragment_activity_main\"\r\n            android:name=\"androidx.navigation.fragment.NavHostFragment\"\r\n            android:layout_width=\"match_parent\"\r\n            android:layout_height=\"match_parent\"\r\n            app:defaultNavHost=\"true\"\r\n            app:navGraph=\"@navigation/mobile_navigation\"\r\n            tools:ignore=\"FragmentTagUsage\" />\r\n\r\n        <!-- Bottom Navigation -->\r\n        <com.google.android.material.bottomnavigation.BottomNavigationView\r\n            android:id=\"@+id/nav_view\"\r\n            android:layout_width=\"0dp\"\r\n            android:layout_height=\"wrap_content\"\r\n            app:layout_constraintBottom_toBottomOf=\"parent\"\r\n            app:layout_constraintStart_toStartOf=\"parent\"\r\n            app:layout_constraintEnd_toEndOf=\"parent\"\r\n            app:menu=\"@menu/bottom_nav_menu\" />\r\n    </androidx.constraintlayout.widget.ConstraintLayout>\r\n\r\n    <!-- Navigation Drawer -->\r\n    <com.google.android.material.navigation.NavigationView\r\n        android:id=\"@+id/nav_view_drawer\"\r\n        android:layout_width=\"wrap_content\"\r\n        android:layout_height=\"match_parent\"\r\n        android:layout_gravity=\"start\"\r\n        app:menu=\"@menu/drawer_menu\"\r\n        app:headerLayout=\"@layout/nav_header_main\" />\r\n</androidx.drawerlayout.widget.DrawerLayout>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/app/src/main/res/layout/activity_main.xml b/app/src/main/res/layout/activity_main.xml
+--- a/app/src/main/res/layout/activity_main.xml	(revision 638796ffaa3f91c32c98d746815d22c07f196d04)
++++ b/app/src/main/res/layout/activity_main.xml	(date 1737496595714)
+@@ -28,44 +28,49 @@
+             app:layout_constraintStart_toStartOf="parent"
+             app:layout_constraintEnd_toEndOf="parent">
+ 
+-            <!-- Use ConstraintLayout to control button position -->
++            <!-- Use ConstraintLayout to control button positions -->
+             <androidx.constraintlayout.widget.ConstraintLayout
+                 android:layout_width="match_parent"
+                 android:layout_height="match_parent">
+ 
+-                <!-- Custom Drawer Button -->
++                <!-- First Button (30% of Width) -->
+                 <ImageButton
+                     android:id="@+id/custom_menu_button"
+-                    android:layout_width="75dp"
++                    android:layout_width="85dp"
+                     android:layout_height="60dp"
+                     android:background="@drawable/custom_button_background"
+                     android:src="@drawable/menu"
+-                    android:contentDescription="Open Navigation Drawer"
++                    android:contentDescription="Menu Button"
+                     app:layout_constraintTop_toTopOf="parent"
+                     app:layout_constraintBottom_toBottomOf="parent"
+-                    app:layout_constraintStart_toStartOf="parent" />
++                    app:layout_constraintStart_toStartOf="parent"
++                    app:layout_constraintEnd_toStartOf="@id/custom_coin_button" />
+ 
++                <!-- Middle Button (Centered) -->
+                 <ImageButton
+                     android:id="@+id/custom_coin_button"
+-                    android:layout_width="95dp"
++                    android:layout_width="115dp"
+                     android:layout_height="60dp"
+                     android:background="@drawable/custom_button_background"
+                     android:src="@drawable/menu"
+-                    android:contentDescription="Open Navigation Drawer"
++                    android:contentDescription="Coin Button"
+                     app:layout_constraintTop_toTopOf="parent"
+                     app:layout_constraintBottom_toBottomOf="parent"
+-                    app:layout_constraintStart_toStartOf="parent" />
++                    app:layout_constraintStart_toEndOf="@id/custom_menu_button"
++                    app:layout_constraintEnd_toStartOf="@id/custom_streak_button" />
+ 
++                <!-- Last Button (70% of Width) -->
+                 <ImageButton
+                     android:id="@+id/custom_streak_button"
+-                    android:layout_width="75dp"
++                    android:layout_width="85dp"
+                     android:layout_height="60dp"
+                     android:background="@drawable/custom_button_background"
+                     android:src="@drawable/menu"
+-                    android:contentDescription="Open Navigation Drawer"
++                    android:contentDescription="Streak Button"
+                     app:layout_constraintTop_toTopOf="parent"
+                     app:layout_constraintBottom_toBottomOf="parent"
+-                    app:layout_constraintStart_toStartOf="parent" />
++                    app:layout_constraintStart_toEndOf="@id/custom_coin_button"
++                    app:layout_constraintEnd_toEndOf="parent" />
+             </androidx.constraintlayout.widget.ConstraintLayout>
+         </androidx.appcompat.widget.Toolbar>
+ 

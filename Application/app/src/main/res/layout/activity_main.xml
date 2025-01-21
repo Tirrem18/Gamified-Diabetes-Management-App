@@ -33,39 +33,43 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <!-- Custom Drawer Button -->
+                <!-- First Button -->
                 <ImageButton
                     android:id="@+id/custom_menu_button"
                     android:layout_width="75dp"
                     android:layout_height="60dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/menu"
-                    android:contentDescription="Open Navigation Drawer"
+                    android:contentDescription="Menu Button"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent" />
 
+                <!-- Middle Button -->
                 <ImageButton
                     android:id="@+id/custom_coin_button"
                     android:layout_width="95dp"
                     android:layout_height="60dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/menu"
-                    android:contentDescription="Open Navigation Drawer"
+                    android:contentDescription="Coin Button"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintStart_toEndOf="@id/custom_menu_button"
+                    app:layout_constraintEnd_toStartOf="@id/custom_streak_button" />
 
+                <!-- Last Button -->
                 <ImageButton
                     android:id="@+id/custom_streak_button"
                     android:layout_width="75dp"
                     android:layout_height="60dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/menu"
-                    android:contentDescription="Open Navigation Drawer"
+                    android:contentDescription="Streak Button"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintStart_toStartOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/custom_coin_button" />
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
 
