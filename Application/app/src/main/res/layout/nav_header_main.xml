@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_vertical"
-    android:background="?attr/colorPrimary"
+    android:background="?android:windowBackground"
     android:padding="16dp">
 
     <ImageView
@@ -21,7 +21,7 @@
         android:layout_height="wrap_content"
         android:text="Welcome!"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-        android:textColor="@android:color/white" />
+        android:textColor="?android:attr/textColorSecondary" />
 
     <TextView
         android:id="@+id/nav_header_subtitle"
@@ -29,5 +29,5 @@
         android:layout_height="wrap_content"
         android:text="Your Email"
         android:textAppearance="@style/TextAppearance.AppCompat.Caption"
-        android:textColor="@android:color/white" />
+        android:textColor="?android:attr/textColorSecondary" />
 </LinearLayout>
