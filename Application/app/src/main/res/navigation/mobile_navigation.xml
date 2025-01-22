@@ -42,4 +42,10 @@
         android:name="com.b1097780.glucohub.ui.settings.SettingsFragment"
         android:label="Settings"
         tools:layout="@layout/fragment_settings" />
+
+    <fragment
+        android:id="@+id/navigation_profile"
+        android:name="com.b1097780.glucohub.ui.profile.ProfileFragment"
+        android:label="Profile"
+        tools:layout="@layout/fragment_profile" />
 </navigation>
