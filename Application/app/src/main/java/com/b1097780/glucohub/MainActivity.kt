@@ -25,81 +25,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Setup custom toolbar
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-
-        // Setup NavController
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
-
-        // AppBarConfiguration for top-level destinations
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_home,
-                R.id.navigation_dashboard,
-                R.id.navigation_notifications
-            ),
-            binding.drawerLayout
-        )
-
-        // Link NavController with toolbar and bottom navigation
-        setupActionBarWithNavController(navController, appBarConfiguration)
-        binding.navView.setupWithNavController(navController)
-
-        // Toolbar custom buttons
-        val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
-        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
-        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
-
-        // Drawer button functionality
-        customMenuButton.setOnClickListener {
-            binding.drawerLayout.openDrawer(binding.navViewDrawer)
-        }
-
-
-        // Observe navigation destination changes
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            when (destination.id) {
-                R.id.navigation_settings, R.id.nav_logout -> {
-                    // Hide toolbar buttons and bottom navigation
-                    binding.navView.visibility = View.GONE
-                    customMenuButton.visibility = View.GONE
-                    customCoinButton.visibility = View.GONE
-                    customStreakButton.visibility = View.GONE
-                }
-                else -> {
-                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
-                    // Show toolbar buttons and bottom navigation
-                    binding.navView.visibility = View.VISIBLE
-                    customMenuButton.visibility = View.VISIBLE
-                    customCoinButton.visibility = View.VISIBLE
-                    customStreakButton.visibility = View.VISIBLE
-                }
-            }
-        }
-
-        // Handle navigation drawer actions
-        binding.navViewDrawer.setNavigationItemSelectedListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.nav_settings -> {
-                    navController.navigate(R.id.navigation_settings)
-                }
-                R.id.nav_logout -> {
-                    performLogout()
-                }
-                else -> {
-                    menuItem.onNavDestinationSelected(navController)
-                }
-            }
-            binding.drawerLayout.closeDrawer(binding.navViewDrawer)
-            true
-        }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+        setupToolbar()
+        setupNavController()
+        setupDrawerNavigation()
+        setupCustomButtons()
+        observeNavDestinationChanges()
     }
 
     private fun applyUserTheme() {
@@ -109,12 +39,101 @@ class MainActivity : AppCompatActivity() {
         when (themePreference) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
             "purple" -> setTheme(R.style.Theme_GlucoHub_purple)
+            "plain" -> setTheme(R.style.Theme_GlucoHub_plain)
             else -> setTheme(R.style.Theme_GlucoHub_default)
         }
     }
 
+    private fun setupToolbar() {
+        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        setSupportActionBar(toolbar)
+        supportActionBar?.setDisplayShowTitleEnabled(false)
+    }
+
+    private fun setupNavController() {
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        appBarConfiguration = AppBarConfiguration(
+            setOf(
+                R.id.navigation_home,
+                R.id.navigation_dashboard,
+                R.id.navigation_notifications
+            ),
+            binding.drawerLayout
+        )
+        setupActionBarWithNavController(navController, appBarConfiguration)
+        binding.navView.setupWithNavController(navController)
+    }
+
+    private fun setupDrawerNavigation() {
+        binding.navViewDrawer.setNavigationItemSelectedListener { menuItem ->
+            val navController = findNavController(R.id.nav_host_fragment_activity_main)
+            when (menuItem.itemId) {
+                R.id.nav_settings -> navController.navigate(R.id.navigation_settings)
+                R.id.nav_logout -> performLogout()
+                else -> menuItem.onNavDestinationSelected(navController)
+            }
+            binding.drawerLayout.closeDrawer(binding.navViewDrawer)
+            true
+        }
+    }
+
+    private fun setupCustomButtons() {
+        val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
+        val customBackButton = findViewById<ImageButton>(R.id.custom_back_button)
+        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
+        customMenuButton.setOnClickListener {
+            binding.drawerLayout.openDrawer(binding.navViewDrawer)
+        }
+        customBackButton.setOnClickListener {
+            onBackPressedDispatcher.onBackPressed()
+        }
+        customStreakButton.setOnClickListener {
+            // Navigate to the Streaks fragment
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_streaks)
+        }
+        customCoinButton.setOnClickListener {
+            // Navigate to the coins fragment
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_coins)
+        }
+    }
+
+    private fun observeNavDestinationChanges() {
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
+        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
+        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+        val customBackButton = findViewById<ImageButton>(R.id.custom_back_button)
+
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            when (destination.id) {
+                R.id.navigation_settings, R.id.nav_logout,R.id.navigation_streaks,R.id.navigation_coins -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    binding.navView.visibility = View.GONE
+                    customMenuButton.visibility = View.GONE
+                    customCoinButton.visibility = View.GONE
+                    customStreakButton.visibility = View.GONE
+                    customBackButton.visibility = View.VISIBLE
+                }
+                else -> {
+                    supportActionBar?.setDisplayHomeAsUpEnabled(false)
+                    binding.navView.visibility = View.VISIBLE
+                    customMenuButton.visibility = View.VISIBLE
+                    customCoinButton.visibility = View.VISIBLE
+                    customStreakButton.visibility = View.VISIBLE
+                    customBackButton.visibility = View.GONE
+                }
+            }
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        val navController = findNavController(R.id.nav_host_fragment_activity_main)
+        return navController.navigateUp(appBarConfiguration) || super.onSupportNavigateUp()
+    }
+
     private fun performLogout() {
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
         builder.setTitle("Logout")
             .setMessage("This would log you out when implemented.")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
