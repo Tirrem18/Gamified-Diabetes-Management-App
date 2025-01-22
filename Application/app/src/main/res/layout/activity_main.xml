@@ -20,8 +20,6 @@
             android:background="?attr/colorPrimaryVariant"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-            app:contentInsetStart="0dp"
-            app:contentInsetEnd="0dp"
             android:contentInsetStart="0dp"
             android:contentInsetEnd="0dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -33,7 +31,21 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-                <!-- First Button -->
+                <!-- Custom Back Button -->
+                <ImageButton
+                    android:id="@+id/custom_back_button"
+                    android:layout_width="75dp"
+                    android:layout_height="60dp"
+                    android:background="@drawable/custom_button_background"
+                    android:src="@drawable/ic_home_black_24dp"
+                    android:contentDescription="@string/back_button"
+                    android:visibility="gone"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/custom_coin_button" />
+
+                <!-- First Button (Menu) -->
                 <ImageButton
                     android:id="@+id/custom_menu_button"
                     android:layout_width="75dp"

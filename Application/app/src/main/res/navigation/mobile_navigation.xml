@@ -4,6 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     app:startDestination="@id/navigation_home">
 
+    <!-- Top Navigation Destinations -->
+    <fragment
+        android:id="@+id/navigation_streaks"
+        android:name="com.b1097780.glucohub.ui.streaks.CoinsFragment"
+        android:label="Streaks"
+        tools:layout="@layout/fragment_streaks" />
+
     <!-- Bottom Navigation Destinations -->
     <fragment
         android:id="@+id/navigation_home"
