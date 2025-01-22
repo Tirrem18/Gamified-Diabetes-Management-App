@@ -48,7 +48,7 @@
                 <!-- First Button (Menu) -->
                 <ImageButton
                     android:id="@+id/custom_menu_button"
-                    android:layout_width="75dp"
+                    android:layout_width="85dp"
                     android:layout_height="60dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/menu"
@@ -61,7 +61,7 @@
                 <!-- Middle Button -->
                 <ImageButton
                     android:id="@+id/custom_coin_button"
-                    android:layout_width="95dp"
+                    android:layout_width="105dp"
                     android:layout_height="60dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/ic_dashboard_black_24dp"
@@ -74,7 +74,7 @@
                 <!-- Last Button -->
                 <ImageButton
                     android:id="@+id/custom_streak_button"
-                    android:layout_width="75dp"
+                    android:layout_width="85dp"
                     android:layout_height="60dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/ic_home_black_24dp"

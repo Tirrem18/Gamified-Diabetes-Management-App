@@ -6,8 +6,14 @@
 
     <!-- Top Navigation Destinations -->
     <fragment
+        android:id="@+id/navigation_coins"
+        android:name="com.b1097780.glucohub.ui.coins.CoinsFragment"
+        android:label="Coins"
+        tools:layout="@layout/fragment_coins" />
+
+    <fragment
         android:id="@+id/navigation_streaks"
-        android:name="com.b1097780.glucohub.ui.streaks.CoinsFragment"
+        android:name="com.b1097780.glucohub.ui.streaks.StreaksFragment"
         android:label="Streaks"
         tools:layout="@layout/fragment_streaks" />
 

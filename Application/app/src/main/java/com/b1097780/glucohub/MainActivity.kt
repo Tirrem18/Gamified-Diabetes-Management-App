@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
         when (themePreference) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
             "purple" -> setTheme(R.style.Theme_GlucoHub_purple)
+            "plain" -> setTheme(R.style.Theme_GlucoHub_plain)
             else -> setTheme(R.style.Theme_GlucoHub_default)
         }
     }
@@ -80,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
         val customBackButton = findViewById<ImageButton>(R.id.custom_back_button)
         val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
         customMenuButton.setOnClickListener {
             binding.drawerLayout.openDrawer(binding.navViewDrawer)
         }
@@ -89,6 +91,10 @@ class MainActivity : AppCompatActivity() {
         customStreakButton.setOnClickListener {
             // Navigate to the Streaks fragment
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_streaks)
+        }
+        customCoinButton.setOnClickListener {
+            // Navigate to the coins fragment
+            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_coins)
         }
     }
 
@@ -101,7 +107,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.navigation_settings, R.id.nav_logout,R.id.navigation_streaks -> {
+                R.id.navigation_settings, R.id.nav_logout,R.id.navigation_streaks,R.id.navigation_coins -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     binding.navView.visibility = View.GONE
                     customMenuButton.visibility = View.GONE
@@ -127,7 +133,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun performLogout() {
-        val builder = AlertDialog.Builder(this)
+        val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
         builder.setTitle("Logout")
             .setMessage("This would log you out when implemented.")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
