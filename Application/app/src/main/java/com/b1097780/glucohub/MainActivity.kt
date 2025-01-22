@@ -69,6 +69,7 @@ class MainActivity : AppCompatActivity() {
             val navController = findNavController(R.id.nav_host_fragment_activity_main)
             when (menuItem.itemId) {
                 R.id.nav_settings -> navController.navigate(R.id.navigation_settings)
+                R.id.nav_profile -> navController.navigate(R.id.navigation_profile)
                 R.id.nav_logout -> performLogout()
                 else -> menuItem.onNavDestinationSelected(navController)
             }
@@ -107,7 +108,7 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.navigation_settings, R.id.nav_logout,R.id.navigation_streaks,R.id.navigation_coins -> {
+                R.id.navigation_settings, R.id.nav_logout,R.id.navigation_streaks,R.id.navigation_coins,R.id.navigation_profile -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     binding.navView.visibility = View.GONE
                     customMenuButton.visibility = View.GONE
