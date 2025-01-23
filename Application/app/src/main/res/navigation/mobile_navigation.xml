@@ -25,16 +25,22 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/navigation_dashboard"
-        android:name="com.b1097780.glucohub.ui.dashboard.DashboardFragment"
-        android:label="Dashboard"
-        tools:layout="@layout/fragment_dashboard" />
+        android:id="@+id/navigation_glucose"
+        android:name="com.b1097780.glucohub.ui.glucose.GlucoseFragment"
+        android:label="Glucose"
+        tools:layout="@layout/fragment_glucose" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.b1097780.glucohub.ui.notifications.NotificationsFragment"
+        android:id="@+id/navigation_planner"
+        android:name="com.b1097780.glucohub.ui.planner.PlannerFragment"
         android:label="Notifications"
-        tools:layout="@layout/fragment_notifications" />
+        tools:layout="@layout/fragment_planner" />
+
+    <fragment
+        android:id="@+id/navigation_data"
+        android:name="com.b1097780.glucohub.ui.data.DataFragment"
+        android:label="Data"
+        tools:layout="@layout/fragment_data" />
 
     <!-- Drawer Item (Settings) -->
     <fragment

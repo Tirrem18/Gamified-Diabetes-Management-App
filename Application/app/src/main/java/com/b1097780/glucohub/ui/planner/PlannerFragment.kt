@@ -1,4 +1,4 @@
-package com.b1097780.glucohub.ui.dashboard
+package com.b1097780.glucohub.ui.planner
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,11 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.b1097780.glucohub.databinding.FragmentDashboardBinding
+import com.b1097780.glucohub.databinding.FragmentPlannerBinding
 
-class DashboardFragment : Fragment() {
+class PlannerFragment : Fragment() {
 
-    private var _binding: FragmentDashboardBinding? = null
+    private var _binding: FragmentPlannerBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,14 +22,14 @@ class DashboardFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dashboardViewModel =
-            ViewModelProvider(this).get(DashboardViewModel::class.java)
+        val plannerViewModel =
+            ViewModelProvider(this).get(PlannerViewModel::class.java)
 
-        _binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        _binding = FragmentPlannerBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textDashboard
-        dashboardViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textPlanner
+        plannerViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root

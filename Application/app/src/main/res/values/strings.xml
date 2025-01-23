@@ -9,4 +9,7 @@
     <string name="menu_button">Menu Button</string>
     <string name="streak_button">Streak Button</string>
     <string name="back_button">Back Button</string>
+    <string name="title_glucose">Glucose</string>
+    <string name="title_data">Data</string>
+    <string name="title_planner">Planner</string>
 </resources>
