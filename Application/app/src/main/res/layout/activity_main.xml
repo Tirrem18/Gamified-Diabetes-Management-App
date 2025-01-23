@@ -16,20 +16,25 @@
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="80dp"
+            android:layout_height="wrap_content"
+            android:padding="3dp"
             android:background="?attr/colorPrimaryVariant"
             android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
             app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
             android:contentInsetStart="0dp"
             android:contentInsetEnd="0dp"
+            android:contentInsetLeft="0dp"
+            android:contentInsetRight="0dp"
+            android:contentInsetStartWithNavigation="0dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- Use ConstraintLayout to control button positions -->
+            <!-- Use ConstraintLayout to center button positions -->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
+
 
                 <!-- Custom Back Button -->
                 <ImageButton
@@ -56,7 +61,8 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintEnd_toStartOf="@id/custom_coin_button" />
+                    app:layout_constraintEnd_toStartOf="@id/custom_coin_button"
+                    android:translationX="-9dp"/>
 
                 <!-- Middle Button -->
                 <ImageButton
@@ -69,7 +75,8 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/custom_menu_button"
-                    app:layout_constraintEnd_toStartOf="@id/custom_streak_button" />
+                    app:layout_constraintEnd_toStartOf="@id/custom_streak_button"
+                    android:translationX="-9dp"/>
 
                 <!-- Last Button -->
                 <ImageButton
@@ -82,7 +89,8 @@
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/custom_coin_button"
-                    app:layout_constraintEnd_toEndOf="parent" />
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:translationX="-9dp"/>
             </androidx.constraintlayout.widget.ConstraintLayout>
         </androidx.appcompat.widget.Toolbar>
 
