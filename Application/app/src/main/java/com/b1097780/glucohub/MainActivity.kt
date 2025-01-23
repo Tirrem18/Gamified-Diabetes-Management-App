@@ -55,8 +55,10 @@ class MainActivity : AppCompatActivity() {
         appBarConfiguration = AppBarConfiguration(
             setOf(
                 R.id.navigation_home,
-                R.id.navigation_dashboard,
-                R.id.navigation_notifications
+                R.id.navigation_glucose,
+                R.id.navigation_planner,
+                R.id.navigation_data
+
             ),
             binding.drawerLayout
         )

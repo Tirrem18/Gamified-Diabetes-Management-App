@@ -35,7 +35,7 @@
                 <ImageButton
                     android:id="@+id/custom_back_button"
                     android:layout_width="75dp"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/ic_home_black_24dp"
                     android:contentDescription="@string/back_button"
@@ -49,9 +49,9 @@
                 <ImageButton
                     android:id="@+id/custom_menu_button"
                     android:layout_width="85dp"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:background="@drawable/custom_button_background"
-                    android:src="@drawable/menu"
+                    android:src="@drawable/ic_menu"
                     android:contentDescription="@string/menu_button"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
@@ -62,7 +62,7 @@
                 <ImageButton
                     android:id="@+id/custom_coin_button"
                     android:layout_width="105dp"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/ic_dashboard_black_24dp"
                     android:contentDescription="@string/coin_button"
@@ -75,7 +75,7 @@
                 <ImageButton
                     android:id="@+id/custom_streak_button"
                     android:layout_width="85dp"
-                    android:layout_height="60dp"
+                    android:layout_height="50dp"
                     android:background="@drawable/custom_button_background"
                     android:src="@drawable/ic_home_black_24dp"
                     android:contentDescription="@string/streak_button"
@@ -99,6 +99,7 @@
         <!-- Bottom Navigation -->
         <com.google.android.material.bottomnavigation.BottomNavigationView
             android:id="@+id/nav_view"
+            android:background="?attr/colorPrimaryVariant"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
