@@ -2,6 +2,7 @@ package com.b1097780.glucohub
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -19,8 +20,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
 
+    // CUSTOMISE
+    private var theme = "plain" // Change this to "default", "purple", or "plain"
+    private var defaultCoinValue = 1000 // Default coin value
+    private var defaultStreakValue = 500 // Default streak value
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        applyUserTheme()
+        applyUserTheme(theme)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -30,17 +36,16 @@ class MainActivity : AppCompatActivity() {
         setupDrawerNavigation()
         setupCustomButtons()
         observeNavDestinationChanges()
+        updateCoinButton(defaultCoinValue)
+        updateStreakButton(defaultStreakValue)
     }
 
-    private fun applyUserTheme() {
-        val sharedPreferences = getSharedPreferences("user_preferences", MODE_PRIVATE)
-        val themePreference = sharedPreferences.getString("theme", "default")
-
-        when (themePreference) {
+    private fun applyUserTheme(selectedTheme: String) {
+        when (selectedTheme) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
             "purple" -> setTheme(R.style.Theme_GlucoHub_purple)
             "plain" -> setTheme(R.style.Theme_GlucoHub_plain)
-            else -> setTheme(R.style.Theme_GlucoHub_default)
+            else -> setTheme(R.style.Theme_GlucoHub_default) // Fallback to default
         }
     }
 
@@ -58,7 +63,6 @@ class MainActivity : AppCompatActivity() {
                 R.id.navigation_glucose,
                 R.id.navigation_planner,
                 R.id.navigation_data
-
             ),
             binding.drawerLayout
         )
@@ -83,20 +87,24 @@ class MainActivity : AppCompatActivity() {
     private fun setupCustomButtons() {
         val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
         val customBackButton = findViewById<ImageButton>(R.id.custom_back_button)
-        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
-        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
+        val customStreakButton = findViewById<Button>(R.id.custom_streak_button)
+        val customCoinButton = findViewById<Button>(R.id.custom_coin_button)
+
         customMenuButton.setOnClickListener {
             binding.drawerLayout.openDrawer(binding.navViewDrawer)
         }
+
         customBackButton.setOnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
+
         customStreakButton.setOnClickListener {
             // Navigate to the Streaks fragment
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_streaks)
         }
+
         customCoinButton.setOnClickListener {
-            // Navigate to the coins fragment
+            // Navigate to the Coins fragment
             findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_coins)
         }
     }
@@ -104,13 +112,13 @@ class MainActivity : AppCompatActivity() {
     private fun observeNavDestinationChanges() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
         val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
-        val customCoinButton = findViewById<ImageButton>(R.id.custom_coin_button)
-        val customStreakButton = findViewById<ImageButton>(R.id.custom_streak_button)
+        val customCoinButton = findViewById<Button>(R.id.custom_coin_button)
+        val customStreakButton = findViewById<Button>(R.id.custom_streak_button)
         val customBackButton = findViewById<ImageButton>(R.id.custom_back_button)
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.navigation_settings, R.id.nav_logout,R.id.navigation_streaks,R.id.navigation_coins,R.id.navigation_profile -> {
+                R.id.navigation_settings, R.id.nav_logout, R.id.navigation_streaks, R.id.navigation_coins, R.id.navigation_profile -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     binding.navView.visibility = View.GONE
                     customMenuButton.visibility = View.GONE
@@ -126,6 +134,32 @@ class MainActivity : AppCompatActivity() {
                     customStreakButton.visibility = View.VISIBLE
                     customBackButton.visibility = View.GONE
                 }
+            }
+        }
+    }
+
+    private fun updateCoinButton(value: Int) {
+        val formattedValue = formatNumber(value,false)
+        binding.customCoinButton.text = formattedValue
+    }
+
+    private fun updateStreakButton(value: Int) {
+        val formattedValue = formatNumber(value,true)
+        binding.customStreakButton.text = formattedValue
+    }
+
+    private fun formatNumber(value: Int, isStreak: Boolean): String {
+        return if (isStreak) {
+            // Streak logic: Convert to K+ format if ≥ 1000
+            when {
+                value > 999 -> "1K+"
+                else -> value.toString()
+            }
+        } else {
+            // Coins logic: Exact value unless ≥ 100,000
+            when {
+                value > 99999 -> "100K+"
+                else -> value.toString() // Exact value otherwise
             }
         }
     }

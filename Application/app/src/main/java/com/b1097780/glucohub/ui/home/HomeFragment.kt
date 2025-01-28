@@ -34,6 +34,8 @@ class HomeFragment : Fragment() {
         setupObservers(homeViewModel)
         setupGlucoseChart()
 
+
+
         return root
     }
 
@@ -49,6 +51,7 @@ class HomeFragment : Fragment() {
         homeViewModel.plannerText.observe(viewLifecycleOwner) {
             binding.textPlanner.text = it
         }
+
     }
 
     private fun setupGlucoseChart() {
@@ -125,7 +128,11 @@ class HomeFragment : Fragment() {
             Pair(8.50f, 4f),
             Pair(9.25f, 6.3f),
             Pair(9.85f, 7.4f),
+            Pair(10.01f, 7.9f),
+            Pair(10.45f, 7.4f),
+            Pair(10.95f, 7.4f),
             Pair(11.5f, 5.9f),
+            Pair(11.9f, 4.9f),
             Pair(12.5f, 6.0f),
             Pair(13.0f, 5.8f),
             Pair(14.25f, 6.3f),
