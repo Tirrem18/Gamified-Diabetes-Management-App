@@ -12,4 +12,8 @@
     <string name="title_glucose">Glucose</string>
     <string name="title_data">Data</string>
     <string name="title_planner">Planner</string>
+    <string name="first_button">First Button</string>
+    <string name="second_button">Second Button</string>
+    <string name="planner">Planner</string>
+    <string name="glucose">Glucose</string>
 </resources>

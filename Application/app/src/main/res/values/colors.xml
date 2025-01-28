@@ -7,11 +7,14 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="grey">#D3D3D3</color>
+
 
     //My app colours
     <color name="blue">#38aeee</color>
     <color name="darkblue">#0f6aa3</color>
     <color name="darkestblue">#1a2c39</color>
+
+    <color name="grey">#e8e8e8</color>
+    <color name="darkgrey">#D3D3D3</color>
 
 </resources>
