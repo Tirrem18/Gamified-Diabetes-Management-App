@@ -21,9 +21,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     // CUSTOMISE
-    private var theme = "plain" // Change this to "default", "purple", or "plain"
-    private var defaultCoinValue = 1000 // Default coin value
-    private var defaultStreakValue = 500 // Default streak value
+    private var theme = "purple" // Change this to "default", "purple", or "plain"
+    private var defaultCoinValue = 99999 // Default coin value
+    private var defaultStreakValue = 999 // Default streak value
 
     override fun onCreate(savedInstanceState: Bundle?) {
         applyUserTheme(theme)
