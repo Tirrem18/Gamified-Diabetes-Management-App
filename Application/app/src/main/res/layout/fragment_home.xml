@@ -49,7 +49,14 @@
         android:background="@drawable/custom_button_background"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/text_glucose" />
+        app:layout_constraintTop_toBottomOf="@id/text_glucose">
+
+        <!-- Line Chart for Glucose -->
+        <com.github.mikephil.charting.charts.LineChart
+            android:id="@+id/lineChart"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </FrameLayout>
 
     <!-- Planner Section -->
     <TextView
