@@ -1,11 +1,20 @@
 package com.b1097780.glucohub.ui.home
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.text.InputType
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
+import android.widget.EditText
+import android.widget.ImageButton
+import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.b1097780.glucohub.R
 import com.b1097780.glucohub.databinding.FragmentHomeBinding
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -33,8 +42,7 @@ class HomeFragment : Fragment() {
 
         setupObservers(homeViewModel)
         setupGlucoseChart()
-
-
+        setupButtonPopup() // Setup buttons to show popup
 
         return root
     }
@@ -51,22 +59,44 @@ class HomeFragment : Fragment() {
         homeViewModel.plannerText.observe(viewLifecycleOwner) {
             binding.textPlanner.text = it
         }
+    }
 
+    private fun setupButtonPopup() {
+        val button1 = binding.button1
+        val button2 = binding.button2
+        val shrinkAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button)
+
+        val showPopup = {
+            AlertDialog.Builder(requireContext())
+                .setTitle("Notification")
+                .setMessage("Button Clicked")
+                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .show()
+        }
+
+        button1.setOnClickListener {
+            it.startAnimation(shrinkAnimation)
+            Handler(Looper.getMainLooper()).postDelayed({
+                showNumberInputPopup()
+            }, 200)
+        }
+
+        button2.setOnClickListener {
+            it.startAnimation(shrinkAnimation)
+            Handler(Looper.getMainLooper()).postDelayed({ showPopup() }, 200)
+
+        }
     }
 
     private fun setupGlucoseChart() {
         val lineChart: LineChart = binding.lineChart
 
-        // Get current time and calculate the starting hour for the X-axis
         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
         val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
         val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
         val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
 
-        // Configure chart with startHour
         configureLineChart(lineChart, startHour, roundedCurrentHour)
-
-        // Load data into the chart using startHour
         loadChartData(lineChart, startHour, roundedCurrentHour)
     }
 
@@ -82,7 +112,7 @@ class HomeFragment : Fragment() {
         xAxis.position = XAxis.XAxisPosition.BOTTOM
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
-        xAxis.labelCount = 6 // Ensures only 6 labels show
+        xAxis.labelCount = 6
         xAxis.axisMinimum = 0f
         xAxis.axisMaximum = 5f
         xAxis.valueFormatter = getTimeValueFormatter(startHour)
@@ -103,20 +133,51 @@ class HomeFragment : Fragment() {
         return object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 val hour = (startHour + value.toInt()) % 24
-                return String.format("%02d:00", hour) // Ensures labels like 07:00, 08:00, 09:00
+                return String.format("%02d:00", hour)
             }
         }
     }
 
+    private fun showNumberInputPopup() {
+        val editText = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_NUMBER
+        }
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+            .setTitle("Enter a Value")
+            .setMessage("Please enter a number between 0 and 20:")
+            .setView(editText)
+            .setPositiveButton("OK", null) // Set null for now to validate input manually
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                val inputText = editText.text.toString()
+                val number = inputText.toIntOrNull()
+
+                if (number != null && number in 0..20) {
+                    Toast.makeText(requireContext(), "You entered: $number", Toast.LENGTH_SHORT).show()
+                    dialog.dismiss()
+                } else {
+                    editText.error = "Enter a valid number (0-20)"
+                }
+            }
+        }
+
+        dialog.show()
+    }
+
+
     private fun loadChartData(lineChart: LineChart, startHour: Int, endHour: Int) {
         val entries = ArrayList<Entry>()
 
-        // Sample glucose data (Actual time in hours.fraction, Glucose level)
         val sampleData = listOf(
             Pair(1.7f, 5.5f),
             Pair(2.5f, 6.0f),
             Pair(3.0f, 5.8f),
-            Pair(4.25f, 6.3f), // Last known point before 5:00
+            Pair(4.25f, 6.3f),
             Pair(5.5f, 5.9f),
             Pair(5.7f, 5.9f),
             Pair(5.95f, 6.5f),
@@ -150,7 +211,6 @@ class HomeFragment : Fragment() {
             Pair(21.5f, 5.9f)
         )
 
-        // Find the last data point before startHour (5:00)
         var lastBeforeStart: Pair<Float, Float>? = null
         for (data in sampleData) {
             if (data.first < startHour) {
@@ -160,14 +220,11 @@ class HomeFragment : Fragment() {
             }
         }
 
-        // If there's a valid previous point, interpolate a point at startHour (5:00)
         lastBeforeStart?.let { (time, value) ->
-            val interpolatedValue = value // Using the last known value directly
-            val xValue = 0f // Start of the graph
-            entries.add(Entry(xValue, interpolatedValue))
+            val xValue = 0f
+            entries.add(Entry(xValue, value))
         }
 
-        // Convert to X-Axis values (0-5 range)
         for ((time, value) in sampleData) {
             if (time >= startHour && time <= endHour) {
                 val xValue = ((time - startHour) / (endHour - startHour)) * 5f
@@ -180,14 +237,12 @@ class HomeFragment : Fragment() {
         dataSet.circleRadius = 4f
         dataSet.setDrawValues(false)
         dataSet.lineWidth = 2f
-        dataSet.color = android.graphics.Color.BLACK // Black Line
-        dataSet.setCircleColor(android.graphics.Color.WHITE) // White Dots
-
-        // Enable **Curved Lines**
+        dataSet.color = android.graphics.Color.BLACK
+        dataSet.setCircleColor(android.graphics.Color.WHITE)
         dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
         val lineData = LineData(dataSet)
         lineChart.data = lineData
-        lineChart.invalidate() // Refresh
+        lineChart.invalidate()
     }
 }

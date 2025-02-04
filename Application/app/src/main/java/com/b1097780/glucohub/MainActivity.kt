@@ -1,12 +1,16 @@
 package com.b1097780.glucohub
 
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -89,23 +93,35 @@ class MainActivity : AppCompatActivity() {
         val customBackButton = findViewById<ImageButton>(R.id.custom_back_button)
         val customStreakButton = findViewById<Button>(R.id.custom_streak_button)
         val customCoinButton = findViewById<Button>(R.id.custom_coin_button)
+        val shrinkAnimation = AnimationUtils.loadAnimation(this, R.anim.shrink_button)
+
 
         customMenuButton.setOnClickListener {
-            binding.drawerLayout.openDrawer(binding.navViewDrawer)
+            it.startAnimation(shrinkAnimation)
+            Handler(Looper.getMainLooper()).postDelayed({
+                binding.drawerLayout.openDrawer(binding.navViewDrawer)
+            }, 150) // Delay for 200ms
         }
 
         customBackButton.setOnClickListener {
-            onBackPressedDispatcher.onBackPressed()
+            it.startAnimation(shrinkAnimation)
+            Handler(Looper.getMainLooper()).postDelayed({
+                onBackPressedDispatcher.onBackPressed()
+            }, 150)
         }
 
         customStreakButton.setOnClickListener {
-            // Navigate to the Streaks fragment
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_streaks)
+            it.startAnimation(shrinkAnimation)
+            Handler(Looper.getMainLooper()).postDelayed({
+                findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_streaks)
+            }, 150)
         }
 
         customCoinButton.setOnClickListener {
-            // Navigate to the Coins fragment
-            findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_coins)
+            it.startAnimation(shrinkAnimation)
+            Handler(Looper.getMainLooper()).postDelayed({
+                findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_coins)
+            }, 150)
         }
     }
 
