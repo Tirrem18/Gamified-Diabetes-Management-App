@@ -194,6 +194,7 @@ class HomeFragment : Fragment() {
             Pair(10.95f, 7.4f),
             Pair(11.5f, 5.9f),
             Pair(11.9f, 4.9f),
+            Pair(11.99f, 6f),
             Pair(12.5f, 6.0f),
             Pair(13.0f, 5.8f),
             Pair(14.25f, 6.3f),
