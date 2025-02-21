@@ -25,7 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     // CUSTOMISE
-    private var theme = "default" // Change this to "default", "purple", or "plain"
+    private var theme = "grey" // Change this to "default", "purple", or "plain"
     private var defaultCoinValue = 999999 // Default coin value
     private var defaultStreakValue = 9999 // Default streak value
 
@@ -48,7 +48,8 @@ class MainActivity : AppCompatActivity() {
         when (selectedTheme) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
             "purple" -> setTheme(R.style.Theme_GlucoHub_purple)
-            "plain" -> setTheme(R.style.Theme_GlucoHub_plain)
+            "grey" -> setTheme(R.style.Theme_GlucoHub_grey)
+            "pink" -> setTheme(R.style.Theme_GlucoHub_pink)
             else -> setTheme(R.style.Theme_GlucoHub_default) // Fallback to default
         }
     }
