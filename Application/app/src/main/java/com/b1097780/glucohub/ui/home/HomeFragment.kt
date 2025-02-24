@@ -62,7 +62,6 @@ class HomeFragment : Fragment() {
             binding.textPlanner.text = it
         }
 
-        // Observe Glucose Data and update the chart
         homeViewModel.glucoseEntries.observe(viewLifecycleOwner) { glucoseData ->
             loadChartData(glucoseData)
         }
@@ -90,8 +89,8 @@ class HomeFragment : Fragment() {
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
         xAxis.labelCount = 6
-        xAxis.axisMinimum = 0f // ✅ Start from 0 (mapped to `startHour`)
-        xAxis.axisMaximum = 5f // ✅ End at 5 (mapped to `roundedCurrentHour`)
+        xAxis.axisMinimum = 0f
+        xAxis.axisMaximum = 5f
         xAxis.valueFormatter = getTimeValueFormatter(startHour)
         xAxis.textColor = Color.BLACK
 
@@ -106,99 +105,34 @@ class HomeFragment : Fragment() {
         rightAxis.isEnabled = false
     }
 
-
     private fun getTimeValueFormatter(startHour: Int): ValueFormatter {
         return object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
                 val hour = (startHour + value.toInt()) % 24
-                return String.format("%02d:00", hour)  // Format as HH:00
+                return String.format("%02d:00", hour)
             }
         }
-    }
-
-
-    private fun loadChartData(entries: List<Entry>) {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
-        val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
-        val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it } // Ensure 24-hour format
-
-        // Filter to include only entries within the last 5 hours
-        val filteredEntries = entries.filter { it.x in startHour.toFloat()..roundedCurrentHour.toFloat() }
-
-        // Find if there’s a data point exactly at `startHour` or within `0.05`
-        val exactOrCloseMatch = filteredEntries.any { Math.abs(it.x - startHour) <= 0.05 }
-
-        // Find the last value before `startHour`
-        var lastBeforeStart: Entry? = null
-        for (entry in entries) {
-            if (entry.x < startHour) {
-                lastBeforeStart = entry // Keep updating until we find the last before `startHour`
-            } else {
-                break
-            }
-        }
-
-        val adjustedEntries = mutableListOf<Entry>()
-
-        // If there's no exact match and lastBeforeStart is within 20 minutes (0.33 hours), add it
-        if (!exactOrCloseMatch && lastBeforeStart != null && (startHour - lastBeforeStart.x) <= 0.33) {
-            adjustedEntries.add(Entry(0f, lastBeforeStart.y))
-        }
-
-        // Adjust X values so that the first entry starts at `0`
-        adjustedEntries.addAll(filteredEntries.map { Entry(it.x - startHour, it.y) })
-
-        val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
-        dataSet.setDrawCircles(true)
-        dataSet.circleRadius = 4f
-        dataSet.setDrawValues(false)
-        dataSet.lineWidth = 2f
-        dataSet.color = Color.BLACK
-        dataSet.setCircleColor(Color.WHITE)
-        dataSet.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
-
-        val lineData = LineData(dataSet)
-        lineChart.data = lineData
-        lineChart.invalidate() // Refresh chart
     }
 
     private fun setupButtons() {
-        val button1 = binding.button1
-        val button2 = binding.button2
-        val shrinkAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button)
-
-        val showPopup = {
-            AlertDialog.Builder(requireContext())
-                .setTitle("Notification")
-                .setMessage("Button Clicked")
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .show()
-        }
-
-        button1.setOnClickListener {
-            it.startAnimation(shrinkAnimation)
+        binding.button1.setOnClickListener {
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button))
             Handler(Looper.getMainLooper()).postDelayed({
                 showNumberInputPopup()
             }, 200)
-        }
-
-        button2.setOnClickListener {
-            it.startAnimation(shrinkAnimation)
-            Handler(Looper.getMainLooper()).postDelayed({ showPopup() }, 200)
         }
     }
 
     private fun showNumberInputPopup() {
         val editText = EditText(requireContext()).apply {
-            inputType = InputType.TYPE_CLASS_NUMBER
+            inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL or InputType.TYPE_CLASS_NUMBER
         }
 
         val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
             .setTitle("Enter Glucose Level")
-            .setMessage("Enter a value between 0 and 20:")
+            .setMessage("Please enter your current glucose level:")
             .setView(editText)
-            .setPositiveButton("OK", null) // Set null to manually validate input
+            .setPositiveButton("OK", null)
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
             .create()
 
@@ -208,22 +142,98 @@ class HomeFragment : Fragment() {
                 val inputText = editText.text.toString()
                 val number = inputText.toFloatOrNull()
 
-                if (number != null && number in 0f..20f) {
-                    val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toFloat() +
-                            Calendar.getInstance().get(Calendar.MINUTE) / 60f // Convert minutes to float
+                if (number == null || number < 0f || number > 40f) {
+                    editText.error = "This number is too high. Please enter a value below 40."
+                    return@setOnClickListener
+                }
 
-                    homeViewModel.addGlucoseEntry(currentHour, number) // ✅ Add to ViewModel
-                    dialog.dismiss()
-                } else {
-                    editText.error = "Enter a valid number (0-20)"
+                val currentTime = getCurrentTime()
+
+                when {
+                    number > 25f -> {
+                        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+                            .setTitle("High Glucose Alert")
+                            .setMessage("A glucose level above 25 is dangerously high. Are you sure?")
+                            .setPositiveButton("Confirm") { _, _ ->
+                                homeViewModel.addGlucoseEntry(currentTime, number)
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
+                            .show()
+                    }
+                    number < 2f -> {
+                        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+                            .setTitle("Low Glucose Warning")
+                            .setMessage("A glucose level below 2 is critically low. Are you sure?")
+                            .setPositiveButton("Confirm") { _, _ ->
+                                homeViewModel.addGlucoseEntry(currentTime, number)
+                                dialog.dismiss()
+                            }
+                            .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
+                            .show()
+                    }
+                    else -> {
+                        homeViewModel.addGlucoseEntry(currentTime, number)
+                        dialog.dismiss()
+                    }
                 }
             }
         }
-
         dialog.show()
     }
 
+    private fun getCurrentTime(): Float {
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toFloat()
+        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE) / 60f
+        return currentHour + currentMinute
+    }
 
+    private fun loadChartData(entries: List<Entry>) {
+        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
+        val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
+        val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
 
+        val filteredEntries = entries.filter { it.x in startHour.toFloat()..roundedCurrentHour.toFloat() }
+        val exactOrCloseMatch = filteredEntries.any { Math.abs(it.x - startHour) <= 0.05 }
+
+        var lastBeforeStart: Entry? = null
+        for (entry in entries) {
+            if (entry.x < startHour) {
+                lastBeforeStart = entry
+            } else {
+                break
+            }
+        }
+
+        val adjustedEntries = mutableListOf<Entry>()
+
+        if (!exactOrCloseMatch && lastBeforeStart != null && (startHour - lastBeforeStart.x) <= 0.33) {
+            adjustedEntries.add(Entry(0f, lastBeforeStart.y))
+        }
+
+        adjustedEntries.addAll(filteredEntries.map { Entry(it.x - startHour, if (it.y > 20f) 20f else it.y) })
+
+        val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
+        dataSet.setDrawCircles(true)
+        dataSet.circleRadius = 4f
+        dataSet.setDrawValues(false)
+        dataSet.lineWidth = 2f
+        dataSet.color = Color.BLACK
+        dataSet.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
+
+        val circleColors = adjustedEntries.map {
+            when {
+                it.y <= 3.9 -> Color.RED    // 🔴 Low Blood Sugar
+                it.y >= 10 -> Color.YELLOW  // 🟡 High Blood Sugar
+                else -> Color.WHITE         // ⚪ Normal
+            }
+        }
+        dataSet.circleColors = circleColors
+
+        val lineData = LineData(dataSet)
+        lineChart.data = lineData
+        lineChart.invalidate() // Refresh chart
+    }
 
 }
