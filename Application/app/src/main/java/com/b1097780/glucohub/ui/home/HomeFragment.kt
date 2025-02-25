@@ -44,11 +44,10 @@ class HomeFragment : Fragment() {
         // Load last entry time
         lastEntryTime = (activity as? MainActivity)?.loadLastEntryTime() ?: 0L
 
-        // Load saved glucose data
-        val savedEntries = (activity as? MainActivity)?.loadGlucoseEntries() ?: emptyList()
-        homeViewModel.setGlucoseEntries(savedEntries)
-        graphViewModel.setGlucoseEntries(savedEntries) // Ensure graph gets initial data
-
+        // ✅ Load saved glucose data from SharedPreferences into GraphViewModel
+        (activity as? MainActivity)?.let { mainActivity ->
+            graphViewModel.loadSavedEntries(mainActivity)
+        }
         return root
     }
 
@@ -66,10 +65,8 @@ class HomeFragment : Fragment() {
             binding.textPlanner.text = it
         }
 
-        homeViewModel.glucoseEntries.observe(viewLifecycleOwner) { glucoseData ->
-            graphViewModel.setGlucoseEntries(glucoseData) // Send new data to graph
-        }
     }
+
 
     private fun setupButtons() {
         binding.button1.setOnClickListener {
@@ -78,7 +75,7 @@ class HomeFragment : Fragment() {
             if ((currentTime - lastEntryTime) < 2 * 60 * 1000) { // 10 minutes in milliseconds
                 AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
                     .setTitle("Wait before entering again")
-                    .setMessage("Please wait at least 10 more minutes since entering your last blood glucose.")
+                    .setMessage("Please wait at least 10 minutes since entering your last blood glucose.")
                     .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     .show()
                 return@setOnClickListener
@@ -157,17 +154,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun processGlucoseEntry(currentTime: Float, number: Float) {
-        homeViewModel.addGlucoseEntry(currentTime, number)
-        graphViewModel.addGlucoseEntry(Entry(currentTime, number)) // Update graph
-        lastEntryTime = System.currentTimeMillis() // Update last entry time
+        (activity as? MainActivity)?.let { mainActivity ->
+            graphViewModel.addGlucoseEntry(Entry(currentTime, number), mainActivity) // ✅ Save to SharedPreferences
+        }
 
-        // Save last entry time
+        lastEntryTime = System.currentTimeMillis() // ✅ Updates last entry time
         (activity as? MainActivity)?.saveLastEntryTime(lastEntryTime)
 
-        // Save glucose entries
-        homeViewModel.glucoseEntries.observe(viewLifecycleOwner) { entries ->
-            (activity as? MainActivity)?.saveGlucoseEntries(entries)
-        }
 
         val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
         profileViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->

@@ -19,21 +19,4 @@ class HomeViewModel : ViewModel() {
     }
     val plannerText: LiveData<String> = _plannerTitle
 
-    // Sample glucose data (Time in hours, Glucose level)
-    private val _glucoseEntries = MutableLiveData<List<Entry>>().apply {}
-    val glucoseEntries: LiveData<List<Entry>> = _glucoseEntries
-
-    // Function to update glucose data (for Firebase later)
-    fun addGlucoseEntry(time: Float, value: Float) {
-        val currentList = _glucoseEntries.value?.toMutableList() ?: mutableListOf()
-        val cappedValue = if (value > 20f) 20f else value
-        currentList.add(Entry(time, cappedValue))
-        _glucoseEntries.value = currentList
-    }
-
-    fun setGlucoseEntries(entries: List<Entry>) {
-        _glucoseEntries.value = entries
-    }
-
-
 }
