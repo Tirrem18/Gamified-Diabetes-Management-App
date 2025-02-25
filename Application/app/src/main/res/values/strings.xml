@@ -16,4 +16,5 @@
     <string name="second_button">Second Button</string>
     <string name="planner">Planner</string>
     <string name="glucose">Glucose</string>
+    <string name="glucose_data_here">Glucose Data Here</string>
 </resources>

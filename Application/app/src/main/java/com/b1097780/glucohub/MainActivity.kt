@@ -10,7 +10,6 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
@@ -18,18 +17,22 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.b1097780.glucohub.databinding.ActivityMainBinding
+import com.github.mikephil.charting.data.Entry
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
+    private var userCoins: Int = 25 // Initial coins (or load from database/shared preferences)
+    private val sharedPrefs by lazy { getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE) }
 
     // CUSTOMISE
     private var theme = "" // Change this to "default", "purple", or "plain"
-    private var defaultCoinValue = 10 // Default coin value
-    private var defaultStreakValue = 10 // Default streak value
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        val sharedPreferences = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)
+        userCoins = sharedPreferences.getInt("userCoins", 10) // Default to 10 coins if not set
+
         applyUserTheme(theme)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -40,8 +43,7 @@ class MainActivity : AppCompatActivity() {
         setupDrawerNavigation()
         setupCustomButtons()
         observeNavDestinationChanges()
-        updateCoinButton(defaultCoinValue)
-        updateStreakButton(defaultStreakValue)
+        updateCoinButton(userCoins) // Update UI with loaded coins
     }
 
     private fun applyUserTheme(selectedTheme: String) {
@@ -62,15 +64,16 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupNavController() {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
-        appBarConfiguration = AppBarConfiguration(
-            setOf(
-                R.id.navigation_home,
-                R.id.navigation_glucose,
-                R.id.navigation_planner,
-                R.id.navigation_data
-            ),
-            binding.drawerLayout
-        )
+        appBarConfiguration =
+            AppBarConfiguration(
+                setOf(
+                    R.id.navigation_home,
+                    R.id.navigation_glucose,
+                    R.id.navigation_planner,
+                    R.id.navigation_data
+                ),
+                binding.drawerLayout
+            )
         setupActionBarWithNavController(navController, appBarConfiguration)
         binding.navView.setupWithNavController(navController)
     }
@@ -96,33 +99,43 @@ class MainActivity : AppCompatActivity() {
         val customCoinButton = findViewById<Button>(R.id.custom_coin_button)
         val shrinkAnimation = AnimationUtils.loadAnimation(this, R.anim.shrink_button)
 
-
         customMenuButton.setOnClickListener {
             it.startAnimation(shrinkAnimation)
-            Handler(Looper.getMainLooper()).postDelayed({
-                binding.drawerLayout.openDrawer(binding.navViewDrawer)
-            }, 150) // Delay for 200ms
+            Handler(Looper.getMainLooper())
+                .postDelayed(
+                    { binding.drawerLayout.openDrawer(binding.navViewDrawer) },
+                    150
+                ) // Delay for 200ms
         }
 
         customBackButton.setOnClickListener {
             it.startAnimation(shrinkAnimation)
-            Handler(Looper.getMainLooper()).postDelayed({
-                onBackPressedDispatcher.onBackPressed()
-            }, 150)
+            Handler(Looper.getMainLooper())
+                .postDelayed({ onBackPressedDispatcher.onBackPressed() }, 150)
         }
 
         customStreakButton.setOnClickListener {
             it.startAnimation(shrinkAnimation)
-            Handler(Looper.getMainLooper()).postDelayed({
-                findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_streaks)
-            }, 150)
+            Handler(Looper.getMainLooper())
+                .postDelayed(
+                    {
+                        findNavController(R.id.nav_host_fragment_activity_main)
+                            .navigate(R.id.navigation_streaks)
+                    },
+                    150
+                )
         }
 
         customCoinButton.setOnClickListener {
             it.startAnimation(shrinkAnimation)
-            Handler(Looper.getMainLooper()).postDelayed({
-                findNavController(R.id.nav_host_fragment_activity_main).navigate(R.id.navigation_coins)
-            }, 150)
+            Handler(Looper.getMainLooper())
+                .postDelayed(
+                    {
+                        findNavController(R.id.nav_host_fragment_activity_main)
+                            .navigate(R.id.navigation_coins)
+                    },
+                    150
+                )
         }
     }
 
@@ -135,7 +148,11 @@ class MainActivity : AppCompatActivity() {
 
         navController.addOnDestinationChangedListener { _, destination, _ ->
             when (destination.id) {
-                R.id.navigation_settings, R.id.nav_logout, R.id.navigation_streaks, R.id.navigation_coins, R.id.navigation_profile -> {
+                R.id.navigation_settings,
+                R.id.nav_logout,
+                R.id.navigation_streaks,
+                R.id.navigation_coins,
+                R.id.navigation_profile -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     binding.navView.visibility = View.GONE
                     customMenuButton.visibility = View.GONE
@@ -156,12 +173,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateCoinButton(value: Int) {
-        val formattedValue = formatNumber(value,false)
+        val formattedValue = formatNumber(value, false)
         binding.customCoinButton.text = formattedValue
     }
 
+    fun addCoinsFromFragment(amount: Int) {
+        addCoins(amount)
+    }
+
+    private fun addCoins(amount: Int) {
+        userCoins += amount
+        updateCoinButton(userCoins)
+
+        val sharedPreferences = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)
+        sharedPreferences.edit().putInt("userCoins", userCoins).apply()
+    }
+
     private fun updateStreakButton(value: Int) {
-        val formattedValue = formatNumber(value,true)
+        val formattedValue = formatNumber(value, true)
         binding.customStreakButton.text = formattedValue
     }
 
@@ -188,10 +217,39 @@ class MainActivity : AppCompatActivity() {
 
     private fun performLogout() {
         val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
-        builder.setTitle("Logout")
+        builder
+            .setTitle("Logout")
             .setMessage("This would log you out when implemented.")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         builder.create().show()
+    }
+
+    fun saveGlucoseEntries(entries: List<Entry>) {
+        val editor = sharedPrefs.edit()
+        val entryString = entries.joinToString(";") { "${it.x},${it.y}" } // Convert to a string
+        editor.putString("glucoseEntries", entryString)
+        editor.apply()
+    }
+
+    fun loadGlucoseEntries(): List<Entry> {
+        val entryString = sharedPrefs.getString("glucoseEntries", "") ?: ""
+        return entryString.split(";").mapNotNull {
+            val parts = it.split(",")
+            if (parts.size == 2) {
+                Entry(parts[0].toFloat(), parts[1].toFloat())
+            } else {
+                null
+            }
+        }
+    }
+
+
+    fun saveLastEntryTime(time: Long) {
+        sharedPrefs.edit().putLong("lastEntryTime", time).apply()
+    }
+
+    fun loadLastEntryTime(): Long {
+        return sharedPrefs.getLong("lastEntryTime", 0L)
     }
 }

@@ -7,21 +7,17 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.b1097780.glucohub.databinding.FragmentHomeBinding
-import com.github.mikephil.charting.charts.LineChart
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.components.YAxis
-import com.github.mikephil.charting.data.Entry
-import com.github.mikephil.charting.data.LineData
-import com.github.mikephil.charting.data.LineDataSet
-import com.github.mikephil.charting.formatter.ValueFormatter
-import android.graphics.Color
 import android.os.Handler
 import android.os.Looper
 import android.text.InputType
 import android.view.animation.AnimationUtils
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
+import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.R
+import com.b1097780.glucohub.ui.graph.GraphViewModel
+import com.b1097780.glucohub.ui.profile.ProfileViewModel
+import com.github.mikephil.charting.data.Entry
 import java.util.*
 
 class HomeFragment : Fragment() {
@@ -29,7 +25,8 @@ class HomeFragment : Fragment() {
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
     private lateinit var homeViewModel: HomeViewModel
-    private lateinit var lineChart: LineChart
+    private lateinit var graphViewModel: GraphViewModel
+    private var lastEntryTime: Long = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,13 +34,20 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
+        graphViewModel = ViewModelProvider(requireActivity()).get(GraphViewModel::class.java) // Shared ViewModel for graph updates
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        lineChart = binding.lineChart
-        setupGlucoseChart()
         setupButtons()
         setupObservers()
+
+        // Load last entry time
+        lastEntryTime = (activity as? MainActivity)?.loadLastEntryTime() ?: 0L
+
+        // Load saved glucose data
+        val savedEntries = (activity as? MainActivity)?.loadGlucoseEntries() ?: emptyList()
+        homeViewModel.setGlucoseEntries(savedEntries)
+        graphViewModel.setGlucoseEntries(savedEntries) // Ensure graph gets initial data
 
         return root
     }
@@ -63,59 +67,23 @@ class HomeFragment : Fragment() {
         }
 
         homeViewModel.glucoseEntries.observe(viewLifecycleOwner) { glucoseData ->
-            loadChartData(glucoseData)
-        }
-    }
-
-    private fun setupGlucoseChart() {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
-        val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
-        val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
-
-        configureLineChart(lineChart, startHour, roundedCurrentHour)
-    }
-
-    private fun configureLineChart(lineChart: LineChart, startHour: Int, endHour: Int) {
-        lineChart.description.isEnabled = false
-        lineChart.setTouchEnabled(true)
-        lineChart.isDragEnabled = true
-        lineChart.setScaleEnabled(false)
-        lineChart.setPinchZoom(false)
-        lineChart.setBackgroundColor(Color.TRANSPARENT)
-
-        val xAxis: XAxis = lineChart.xAxis
-        xAxis.position = XAxis.XAxisPosition.BOTTOM
-        xAxis.setDrawGridLines(false)
-        xAxis.granularity = 1f
-        xAxis.labelCount = 6
-        xAxis.axisMinimum = 0f
-        xAxis.axisMaximum = 5f
-        xAxis.valueFormatter = getTimeValueFormatter(startHour)
-        xAxis.textColor = Color.BLACK
-
-        val leftAxis: YAxis = lineChart.axisLeft
-        leftAxis.axisMinimum = 0f
-        leftAxis.axisMaximum = 20f
-        leftAxis.granularity = 4f
-        leftAxis.setDrawGridLines(true)
-        leftAxis.textColor = Color.BLACK
-
-        val rightAxis: YAxis = lineChart.axisRight
-        rightAxis.isEnabled = false
-    }
-
-    private fun getTimeValueFormatter(startHour: Int): ValueFormatter {
-        return object : ValueFormatter() {
-            override fun getFormattedValue(value: Float): String {
-                val hour = (startHour + value.toInt()) % 24
-                return String.format("%02d:00", hour)
-            }
+            graphViewModel.setGlucoseEntries(glucoseData) // Send new data to graph
         }
     }
 
     private fun setupButtons() {
         binding.button1.setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+
+            if ((currentTime - lastEntryTime) < 2 * 60 * 1000) { // 10 minutes in milliseconds
+                AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+                    .setTitle("Wait before entering again")
+                    .setMessage("Please wait at least 10 more minutes since entering your last blood glucose.")
+                    .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                    .show()
+                return@setOnClickListener
+            }
+
             it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button))
             Handler(Looper.getMainLooper()).postDelayed({
                 showNumberInputPopup()
@@ -143,7 +111,7 @@ class HomeFragment : Fragment() {
                 val number = inputText.toFloatOrNull()
 
                 if (number == null || number < 0f || number > 40f) {
-                    editText.error = "This number is too high. Please enter a value below 40."
+                    editText.error = "Invalid value. Enter a number between 0 and 40."
                     return@setOnClickListener
                 }
 
@@ -155,7 +123,7 @@ class HomeFragment : Fragment() {
                             .setTitle("High Glucose Alert")
                             .setMessage("A glucose level above 25 is dangerously high. Are you sure?")
                             .setPositiveButton("Confirm") { _, _ ->
-                                homeViewModel.addGlucoseEntry(currentTime, number)
+                                processGlucoseEntry(currentTime, number)
                                 dialog.dismiss()
                             }
                             .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
@@ -166,14 +134,14 @@ class HomeFragment : Fragment() {
                             .setTitle("Low Glucose Warning")
                             .setMessage("A glucose level below 2 is critically low. Are you sure?")
                             .setPositiveButton("Confirm") { _, _ ->
-                                homeViewModel.addGlucoseEntry(currentTime, number)
+                                processGlucoseEntry(currentTime, number)
                                 dialog.dismiss()
                             }
                             .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
                             .show()
                     }
                     else -> {
-                        homeViewModel.addGlucoseEntry(currentTime, number)
+                        processGlucoseEntry(currentTime, number)
                         dialog.dismiss()
                     }
                 }
@@ -188,52 +156,29 @@ class HomeFragment : Fragment() {
         return currentHour + currentMinute
     }
 
-    private fun loadChartData(entries: List<Entry>) {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
-        val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
-        val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
+    private fun processGlucoseEntry(currentTime: Float, number: Float) {
+        homeViewModel.addGlucoseEntry(currentTime, number)
+        graphViewModel.addGlucoseEntry(Entry(currentTime, number)) // Update graph
+        lastEntryTime = System.currentTimeMillis() // Update last entry time
 
-        val filteredEntries = entries.filter { it.x in startHour.toFloat()..roundedCurrentHour.toFloat() }
-        val exactOrCloseMatch = filteredEntries.any { Math.abs(it.x - startHour) <= 0.05 }
+        // Save last entry time
+        (activity as? MainActivity)?.saveLastEntryTime(lastEntryTime)
 
-        var lastBeforeStart: Entry? = null
-        for (entry in entries) {
-            if (entry.x < startHour) {
-                lastBeforeStart = entry
-            } else {
-                break
-            }
+        // Save glucose entries
+        homeViewModel.glucoseEntries.observe(viewLifecycleOwner) { entries ->
+            (activity as? MainActivity)?.saveGlucoseEntries(entries)
         }
 
-        val adjustedEntries = mutableListOf<Entry>()
+        val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        profileViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
+            val coinsEarned = 1 * multiplier
+            (activity as? MainActivity)?.addCoinsFromFragment(coinsEarned)
 
-        if (!exactOrCloseMatch && lastBeforeStart != null && (startHour - lastBeforeStart.x) <= 0.33) {
-            adjustedEntries.add(Entry(0f, lastBeforeStart.y))
+            AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+                .setTitle("Coins Earned!")
+                .setMessage("You've earned $coinsEarned coins!")
+                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .show()
         }
-
-        adjustedEntries.addAll(filteredEntries.map { Entry(it.x - startHour, if (it.y > 20f) 20f else it.y) })
-
-        val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
-        dataSet.setDrawCircles(true)
-        dataSet.circleRadius = 4f
-        dataSet.setDrawValues(false)
-        dataSet.lineWidth = 2f
-        dataSet.color = Color.BLACK
-        dataSet.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
-
-        val circleColors = adjustedEntries.map {
-            when {
-                it.y <= 3.9 -> Color.RED    // 🔴 Low Blood Sugar
-                it.y >= 10 -> Color.YELLOW  // 🟡 High Blood Sugar
-                else -> Color.WHITE         // ⚪ Normal
-            }
-        }
-        dataSet.circleColors = circleColors
-
-        val lineData = LineData(dataSet)
-        lineChart.data = lineData
-        lineChart.invalidate() // Refresh chart
     }
-
 }
