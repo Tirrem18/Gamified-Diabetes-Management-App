@@ -1,4 +1,4 @@
-package com.b1097780.glucohub.ui.graph
+package com.b1097780.glucohub.ui.home.GlucoseGraph
 
 import android.graphics.Color
 import android.os.Bundle

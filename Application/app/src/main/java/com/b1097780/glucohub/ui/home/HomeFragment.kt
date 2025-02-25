@@ -15,7 +15,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.R
-import com.b1097780.glucohub.ui.graph.GraphViewModel
+import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
 import com.b1097780.glucohub.ui.profile.ProfileViewModel
 import com.github.mikephil.charting.data.Entry
 import java.util.*

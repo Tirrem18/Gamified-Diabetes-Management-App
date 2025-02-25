@@ -54,7 +54,7 @@
         <!-- Line Chart with padding -->
         <fragment
             android:id="@+id/graph_fragment"
-            android:name="com.b1097780.glucohub.ui.graph.GraphFragment"
+            android:name="com.b1097780.glucohub.ui.home.GlucoseGraph.GraphFragment"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:layout="@layout/fragment_graph" />
