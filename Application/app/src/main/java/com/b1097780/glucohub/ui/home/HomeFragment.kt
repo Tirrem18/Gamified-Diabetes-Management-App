@@ -15,6 +15,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.R
+import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
 import com.b1097780.glucohub.ui.profile.ProfileViewModel
 import com.github.mikephil.charting.data.Entry
@@ -26,6 +27,7 @@ class HomeFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var homeViewModel: HomeViewModel
     private lateinit var graphViewModel: GraphViewModel
+    private lateinit var activityLogViewModel: ActivityLogViewModel
     private var lastEntryTime: Long = 0
 
     override fun onCreateView(
@@ -34,7 +36,8 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         homeViewModel = ViewModelProvider(this).get(HomeViewModel::class.java)
-        graphViewModel = ViewModelProvider(requireActivity()).get(GraphViewModel::class.java) // Shared ViewModel for graph updates
+        graphViewModel = ViewModelProvider(requireActivity()).get(GraphViewModel::class.java)
+        activityLogViewModel = ViewModelProvider(requireActivity()).get(ActivityLogViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
@@ -43,6 +46,8 @@ class HomeFragment : Fragment() {
 
         // Load last entry time
         lastEntryTime = (activity as? MainActivity)?.loadLastEntryTime() ?: 0L
+        activityLogViewModel.loadRecentBloodEntry(requireContext())
+
 
         // ✅ Load saved glucose data from SharedPreferences into GraphViewModel
         (activity as? MainActivity)?.let { mainActivity ->
@@ -62,7 +67,7 @@ class HomeFragment : Fragment() {
         }
 
         homeViewModel.plannerText.observe(viewLifecycleOwner) {
-            binding.textPlanner.text = it
+            binding.textActivityLog.text = it
         }
 
     }
@@ -72,7 +77,7 @@ class HomeFragment : Fragment() {
         binding.button1.setOnClickListener {
             val currentTime = System.currentTimeMillis()
 
-            if ((currentTime - lastEntryTime) < 2 * 60 * 1000) { // 10 minutes in milliseconds
+            if ((currentTime - lastEntryTime) < 9.1 * 60 * 1000) { // 10 minutes in milliseconds
                 AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
                     .setTitle("Wait before entering again")
                     .setMessage("Please wait at least 10 minutes since entering your last blood glucose.")
@@ -161,6 +166,8 @@ class HomeFragment : Fragment() {
         lastEntryTime = System.currentTimeMillis() // ✅ Updates last entry time
         (activity as? MainActivity)?.saveLastEntryTime(lastEntryTime)
 
+        // ✅ Notify Activity Log to refresh its data
+        activityLogViewModel.loadRecentBloodEntry(requireContext())
 
         val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
         profileViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
@@ -174,4 +181,5 @@ class HomeFragment : Fragment() {
                 .show()
         }
     }
+
 }

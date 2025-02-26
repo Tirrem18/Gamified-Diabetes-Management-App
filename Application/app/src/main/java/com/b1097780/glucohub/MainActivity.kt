@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private val sharedPrefs by lazy { getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE) }
 
     // CUSTOMISE
-    private var theme = "" // Change this to "default", "purple", or "plain"
+    private var theme = "grey" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPreferences = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)

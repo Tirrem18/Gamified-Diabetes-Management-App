@@ -146,11 +146,12 @@ class GraphFragment : Fragment() {
 
         val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
         dataSet.setDrawCircles(true)
-        dataSet.circleRadius = 5f
+        dataSet.circleRadius = 4.5f
         dataSet.setDrawValues(false)
-        dataSet.lineWidth = 2f
+        dataSet.lineWidth = 1.5f
         dataSet.color = Color.BLACK
         dataSet.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
+
 
         val circleColors = adjustedEntries.map {
             when {
