@@ -77,8 +77,14 @@ class GraphFragment : Fragment() {
         val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
 
         configureLineChart(lineChart, startHour, roundedCurrentHour)
-        lineChart.invalidate() // Refresh chart with new time range
+
+        // 🔥 Force refresh of the dataset
+        val latestEntries = graphViewModel.glucoseEntries.value.orEmpty()
+        loadChartData(latestEntries)
+
+        lineChart.invalidate() // Refresh chart
     }
+
 
     private fun configureLineChart(lineChart: LineChart, startHour: Int, endHour: Int) {
         lineChart.description.isEnabled = false
@@ -134,6 +140,7 @@ class GraphFragment : Fragment() {
             } else {
                 break
             }
+
         }
 
         val adjustedEntries = mutableListOf<Entry>()
@@ -150,7 +157,7 @@ class GraphFragment : Fragment() {
         dataSet.setDrawValues(false)
         dataSet.lineWidth = 1.5f
         dataSet.color = Color.BLACK
-        dataSet.mode = LineDataSet.Mode.HORIZONTAL_BEZIER
+        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
 
         val circleColors = adjustedEntries.map {

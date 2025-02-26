@@ -18,6 +18,8 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.b1097780.glucohub.databinding.ActivityMainBinding
 import com.github.mikephil.charting.data.Entry
+import java.util.Date
+import java.util.Locale
 
 class MainActivity : AppCompatActivity() {
 
@@ -27,7 +29,7 @@ class MainActivity : AppCompatActivity() {
     private val sharedPrefs by lazy { getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE) }
 
     // CUSTOMISE
-    private var theme = "grey" // Change this to "default", "purple", or "plain"
+    private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPreferences = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)
@@ -228,22 +230,33 @@ class MainActivity : AppCompatActivity() {
 
     fun saveGlucoseEntries(entries: List<Entry>) {
         val editor = sharedPrefs.edit()
-        val entryString = entries.joinToString(";") { "${it.x},${it.y}" } // Convert to a string
+        val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
+        val entryString = entries.joinToString(";") { entry ->
+            "$today,${entry.x},${entry.y}" // Save date along with time and level
+        }
+
         editor.putString("glucoseEntries", entryString)
         editor.apply()
     }
 
+
     fun loadGlucoseEntries(): List<Entry> {
         val entryString = sharedPrefs.getString("glucoseEntries", "") ?: ""
+        val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
         return entryString.split(";").mapNotNull {
             val parts = it.split(",")
-            if (parts.size == 2) {
-                Entry(parts[0].toFloat(), parts[1].toFloat())
+            if (parts.size == 3 && parts[0] == today) {
+                Entry(parts[1].toFloat(), parts[2].toFloat()) // Only return today's entries
             } else {
                 null
             }
         }
     }
+
 
 
     fun saveLastEntryTime(time: Long) {

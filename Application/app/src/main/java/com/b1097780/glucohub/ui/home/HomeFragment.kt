@@ -77,10 +77,10 @@ class HomeFragment : Fragment() {
         binding.button1.setOnClickListener {
             val currentTime = System.currentTimeMillis()
 
-            if ((currentTime - lastEntryTime) < 9.1 * 60 * 1000) { // 10 minutes in milliseconds
+            if ((currentTime - lastEntryTime) < 4.4 * 60 * 1000) { // 10 minutes in milliseconds
                 AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
                     .setTitle("Wait before entering again")
-                    .setMessage("Please wait at least 10 minutes since entering your last blood glucose.")
+                    .setMessage("Please wait at least 5 minutes since entering your last blood glucose.")
                     .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     .show()
                 return@setOnClickListener
