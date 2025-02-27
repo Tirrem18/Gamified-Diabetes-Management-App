@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
+import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.databinding.FragmentGraphBinding
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.XAxis
@@ -71,19 +72,29 @@ class GraphFragment : Fragment() {
     }
 
     private fun updateGraphTimeRange() {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val currentMinute = calendar.get(Calendar.MINUTE)
+
+        val isEarlyMorning = currentHour < 5  // Before 5 AM
+        val startHour = if (isEarlyMorning) {
+            0  // Start graph from 00:00
+        } else {
+            (currentHour - 5).let { if (it < 0) it + 24 else it }  // Show last 5 hours after 5 AM
+        }
+
         val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
-        val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
 
         configureLineChart(lineChart, startHour, roundedCurrentHour)
 
-        // 🔥 Force refresh of the dataset
-        val latestEntries = graphViewModel.glucoseEntries.value.orEmpty()
-        loadChartData(latestEntries)
+        // 🔥 Load data from ViewModel (ensures updates)
+        (activity as? MainActivity)?.let { mainActivity ->
+            graphViewModel.loadGlucoseEntries(mainActivity)
+        }
 
         lineChart.invalidate() // Refresh chart
     }
+
 
 
     private fun configureLineChart(lineChart: LineChart, startHour: Int, endHour: Int) {
@@ -125,52 +136,48 @@ class GraphFragment : Fragment() {
     }
 
     private fun loadChartData(entries: List<Entry>) {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE)
-        val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
-        val startHour = (roundedCurrentHour - 5).let { if (it < 0) it + 24 else it }
+        val calendar = Calendar.getInstance()
+        val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+        val isEarlyMorning = currentHour < 5 // Before 5 AM
+        val startHour = if (isEarlyMorning) 0 else (currentHour - 5).let { if (it < 0) it + 24 else it }
 
-        val filteredEntries = entries.filter { it.x in startHour.toFloat()..roundedCurrentHour.toFloat() }
-        val exactOrCloseMatch = filteredEntries.any { Math.abs(it.x - startHour) <= 0.05 }
-
-        var lastBeforeStart: Entry? = null
-        for (entry in entries) {
-            if (entry.x < startHour) {
-                lastBeforeStart = entry
-            } else {
-                break
-            }
-
+        // Adjust entries based on time of day
+        val filteredEntries = if (isEarlyMorning) {
+            entries // ✅ Keep all values from 00:00 before 5 AM
+        } else {
+            entries.filter { it.x in startHour.toFloat()..currentHour.toFloat() }
         }
 
-        val adjustedEntries = mutableListOf<Entry>()
+        val adjustedEntries = filteredEntries.map {
+            val adjustedX = if (isEarlyMorning) it.x else it.x - startHour
+            Entry(adjustedX, it.y)
+        }.toMutableList()
 
-        if (!exactOrCloseMatch && lastBeforeStart != null && (startHour - lastBeforeStart.x) <= 0.33) {
-            adjustedEntries.add(Entry(0f, lastBeforeStart.y))
-        }
-
-        adjustedEntries.addAll(filteredEntries.map { Entry(it.x - startHour, if (it.y > 20f) 20f else it.y) })
-
+        // Setup dataset
         val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
         dataSet.setDrawCircles(true)
         dataSet.circleRadius = 4.5f
         dataSet.setDrawValues(false)
         dataSet.lineWidth = 1.5f
         dataSet.color = Color.BLACK
-        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
+        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER // Smooth curves
 
-
+        // Color-code data points based on glucose levels
         val circleColors = adjustedEntries.map {
             when {
                 it.y <= 3.9 -> Color.RED    // 🔴 Low Blood Sugar
                 it.y >= 10 -> Color.YELLOW  // 🟡 High Blood Sugar
-                else -> Color.WHITE         // ⚪ Normal
+                else -> Color.WHITE         // ⚪ Normal Range
             }
         }
         dataSet.circleColors = circleColors
 
+        // Set data and refresh chart
         val lineData = LineData(dataSet)
         lineChart.data = lineData
         lineChart.invalidate() // Refresh chart
     }
+
+
+
 }

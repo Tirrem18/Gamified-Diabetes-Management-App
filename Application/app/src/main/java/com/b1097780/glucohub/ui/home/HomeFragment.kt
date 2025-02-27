@@ -49,10 +49,6 @@ class HomeFragment : Fragment() {
         activityLogViewModel.loadRecentBloodEntry(requireContext())
 
 
-        // ✅ Load saved glucose data from SharedPreferences into GraphViewModel
-        (activity as? MainActivity)?.let { mainActivity ->
-            graphViewModel.loadSavedEntries(mainActivity)
-        }
         return root
     }
 

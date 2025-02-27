@@ -1,10 +1,12 @@
 package com.b1097780.glucohub.ui.home.GlucoseGraph
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.b1097780.glucohub.MainActivity
 import com.github.mikephil.charting.data.Entry
+import java.text.SimpleDateFormat
+import java.util.*
 
 class GraphViewModel : ViewModel() {
 
@@ -15,18 +17,44 @@ class GraphViewModel : ViewModel() {
         _glucoseEntries.value = entries
     }
 
-    fun addGlucoseEntry(entry: Entry, mainActivity: MainActivity) {
+    fun addGlucoseEntry(entry: Entry, context: Context) {
         val updatedEntries = _glucoseEntries.value.orEmpty().toMutableList()
         updatedEntries.add(entry)
         _glucoseEntries.value = updatedEntries
 
-        // ✅ Save updated data to SharedPreferences
-        mainActivity.saveGlucoseEntries(updatedEntries)
+        // ✅ Save to SharedPreferences using context
+        saveGlucoseEntries(updatedEntries, context)
     }
 
-    fun loadSavedEntries(mainActivity: MainActivity) {
-        val savedEntries = mainActivity.loadGlucoseEntries()
-        _glucoseEntries.value = savedEntries
+    fun saveGlucoseEntries(entries: List<Entry>, context: Context) {
+        val sharedPrefs = context.getSharedPreferences("GlucoHubPrefs", Context.MODE_PRIVATE)
+        val editor = sharedPrefs.edit()
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
+        val entryString = entries.joinToString(";") { entry ->
+            "$today,${entry.x},${entry.y}" // Save date along with time and level
+        }
+
+        editor.putString("glucoseEntries", entryString)
+        editor.apply()
+    }
+
+    fun loadGlucoseEntries(context: Context) {
+        val sharedPrefs = context.getSharedPreferences("GlucoHubPrefs", Context.MODE_PRIVATE)
+        val entryString = sharedPrefs.getString("glucoseEntries", "") ?: ""
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
+        val loadedEntries = entryString.split(";").mapNotNull {
+            val parts = it.split(",")
+            if (parts.size == 3 && parts[0] == today) {
+                Entry(parts[1].toFloat(), parts[2].toFloat()) // ✅ Only return today's entries
+            } else {
+                null
+            }
+        }
+
+        _glucoseEntries.value = loadedEntries // ✅ Notify UI to update
     }
 }
-

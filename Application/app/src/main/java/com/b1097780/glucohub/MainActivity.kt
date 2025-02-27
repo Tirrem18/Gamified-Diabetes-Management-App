@@ -228,36 +228,6 @@ class MainActivity : AppCompatActivity() {
         builder.create().show()
     }
 
-    fun saveGlucoseEntries(entries: List<Entry>) {
-        val editor = sharedPrefs.edit()
-        val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-
-        val entryString = entries.joinToString(";") { entry ->
-            "$today,${entry.x},${entry.y}" // Save date along with time and level
-        }
-
-        editor.putString("glucoseEntries", entryString)
-        editor.apply()
-    }
-
-
-    fun loadGlucoseEntries(): List<Entry> {
-        val entryString = sharedPrefs.getString("glucoseEntries", "") ?: ""
-        val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-
-        return entryString.split(";").mapNotNull {
-            val parts = it.split(",")
-            if (parts.size == 3 && parts[0] == today) {
-                Entry(parts[1].toFloat(), parts[2].toFloat()) // Only return today's entries
-            } else {
-                null
-            }
-        }
-    }
-
-
 
     fun saveLastEntryTime(time: Long) {
         sharedPrefs.edit().putLong("lastEntryTime", time).apply()
