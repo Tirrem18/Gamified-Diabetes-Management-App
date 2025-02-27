@@ -80,7 +80,8 @@ class GraphFragment : Fragment() {
         val startHour = if (isEarlyMorning) {
             0  // Start graph from 00:00
         } else {
-            (currentHour - 5).let { if (it < 0) it + 24 else it }  // Show last 5 hours after 5 AM
+            currentHour - 5
+
         }
 
         val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
@@ -111,7 +112,7 @@ class GraphFragment : Fragment() {
         xAxis.granularity = 1f
         xAxis.labelCount = 6
         xAxis.axisMinimum = 0f
-        xAxis.axisMaximum = 5f
+        xAxis.axisMaximum = (endHour - startHour).toFloat() // 🔥 Ensures next hour is visible!
         xAxis.valueFormatter = getTimeValueFormatter(startHour)
         xAxis.textColor = Color.BLACK
 
@@ -126,6 +127,8 @@ class GraphFragment : Fragment() {
         rightAxis.isEnabled = false
     }
 
+
+
     private fun getTimeValueFormatter(startHour: Int): ValueFormatter {
         return object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
@@ -139,19 +142,21 @@ class GraphFragment : Fragment() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         val isEarlyMorning = currentHour < 5 // Before 5 AM
-        val startHour = if (isEarlyMorning) 0 else (currentHour - 5).let { if (it < 0) it + 24 else it }
+        val startHour = if (isEarlyMorning) 0 else currentHour - 5
+        val endHour = currentHour + 1 // 🔥 Ensure next hour is included!
 
-        // Adjust entries based on time of day
+        // Filtering logic: Include the next hour
         val filteredEntries = if (isEarlyMorning) {
             entries // ✅ Keep all values from 00:00 before 5 AM
         } else {
-            entries.filter { it.x in startHour.toFloat()..currentHour.toFloat() }
+            entries.filter { it.x in startHour.toFloat()..endHour.toFloat() }
         }
 
         val adjustedEntries = filteredEntries.map {
             val adjustedX = if (isEarlyMorning) it.x else it.x - startHour
             Entry(adjustedX, it.y)
         }.toMutableList()
+
 
         // Setup dataset
         val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
@@ -177,6 +182,8 @@ class GraphFragment : Fragment() {
         lineChart.data = lineData
         lineChart.invalidate() // Refresh chart
     }
+
+
 
 
 
