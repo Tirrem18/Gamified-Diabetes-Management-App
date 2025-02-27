@@ -41,6 +41,8 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+       //populateTestData()//test
+
         setupToolbar()
         setupNavController()
         setupDrawerNavigation()
@@ -236,4 +238,29 @@ class MainActivity : AppCompatActivity() {
     fun loadLastEntryTime(): Long {
         return sharedPrefs.getLong("lastEntryTime", 0L)
     }
+
+    private fun populateTestData() {
+        val sharedPrefs = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)
+        val editor = sharedPrefs.edit()
+        val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
+        // Generate test data for the full 24-hour day (hour, glucose level)
+        val testEntries = listOf(
+            "$today,0.0,8.0",  "$today,0.2,6.5",  "$today,0.5,10.0", "$today,1.0,5.9",
+            "$today,2.0,7.8",  "$today,3.0,12.4", "$today,4.0,9.2",  "$today,5.0,6.7",
+            "$today,6.0,7.1",  "$today,7.0,5.5",  "$today,8.0,9.0",  "$today,9.0,10.2",
+            "$today,10.0,6.9", "$today,11.0,5.8", "$today,12.0,8.5", "$today,13.0,7.0",
+            "$today,14.0,6.2", "$today,15.0,11.3", "$today,16.0,5.6", "$today,17.0,9.7",
+            "$today,18.0,7.5", "$today,19.0,10.8", "$today,20.0,6.4", "$today,21.0,8.9",
+            "$today,22.0,5.7", "$today,23.0,7.2"
+        )
+
+        // Convert list to a string and save in SharedPreferences
+        val entryString = testEntries.joinToString(";")
+        editor.putString("glucoseEntries", entryString)
+        editor.apply()
+    }
+
+
 }
