@@ -1,10 +1,11 @@
 package com.b1097780.glucohub.ui.home.ActivityLog
 
 import android.content.Context
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 data class ActivityLogEntry(val activity: String, val time: String, val details: String)
 
@@ -23,27 +24,34 @@ class ActivityLogViewModel : ViewModel() {
         val sharedPrefs = context.getSharedPreferences("GlucoHubPrefs", Context.MODE_PRIVATE)
         val glucoseEntries = sharedPrefs.getString("glucoseEntries", "") ?: ""
 
-
+        // ✅ Check if there is a valid glucose entry for today
         val lastEntry = glucoseEntries.split(";").lastOrNull()?.split(",")
-        val recentGlucose = lastEntry?.getOrNull(1)?.toFloatOrNull()?.toString() ?: "--"
-        val recentTime = lastEntry?.getOrNull(0)?.toFloatOrNull()?.let { formatTime(it) } ?: "--:--"
+        if (lastEntry == null || lastEntry.size < 3) {
+            _recentGlucoseTime.value = null // ✅ Now returns `null` instead of "--:--"
+            _recentGlucoseValue.value = null // ✅ Now returns `null` instead of "-- mmol/L"
+            return
+        }
 
-        _recentGlucoseTime.value = recentTime
-        _recentGlucoseValue.value = "$recentGlucose mmol/L"
+        val entryDate = lastEntry[0] // Date in format yyyyMMdd
+        val entryTime = lastEntry[1].toFloatOrNull() ?: 0f // Time in hours (float)
+        val glucoseLevel = lastEntry[2].toFloatOrNull()?.toString() ?: "--"
 
-        // Fake activity data (Replace this with actual activity logs from storage)
-        val activities = listOf(
-            ActivityLogEntry("Gym", "15:00 - 16:00", "Cardio + Arms"),
-            ActivityLogEntry("Meal", "16:14", "50 carbs, 6 Units"),
-            ActivityLogEntry("Long-acting", "17:30", "30 units")
-        )
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date()) // Get today's date in yyyyMMdd format
 
-        _activityLogEntries.value = activities
+        if (entryDate == today) {
+            _recentGlucoseTime.value = formatTime(entryTime) // ✅ Convert float time to HH:MM
+            _recentGlucoseValue.value = "$glucoseLevel mmol/L"
+        } else {
+            _recentGlucoseTime.value = null
+            _recentGlucoseValue.value = null
+        }
     }
+
 
     private fun formatTime(timeFloat: Float): String {
         val hours = timeFloat.toInt()
         val minutes = ((timeFloat - hours) * 60).toInt()
-        return String.format("%02d:%02d", hours, minutes)
+        return String.format("%02d:%02d", hours, minutes) // ✅ Properly formats to HH:MM
     }
 }

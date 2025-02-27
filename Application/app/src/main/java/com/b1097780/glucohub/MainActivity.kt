@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-       populateTestData()//test
+       //populateTestData()//test
 
         setupToolbar()
         setupNavController()
