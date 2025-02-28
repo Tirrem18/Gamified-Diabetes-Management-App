@@ -87,6 +87,14 @@ class HomeFragment : Fragment() {
                 showNumberInputPopup()
             }, 200)
         }
+
+        binding.button2.setOnClickListener {
+
+            it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button))
+            Handler(Looper.getMainLooper()).postDelayed({
+                showActivityInputPopup()
+            }, 200)
+        }
     }
 
     private fun showNumberInputPopup() {
@@ -143,6 +151,38 @@ class HomeFragment : Fragment() {
                         dialog.dismiss()
                     }
                 }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun showActivityInputPopup() {
+        val editText = EditText(requireContext()).apply {
+            inputType = InputType.TYPE_CLASS_TEXT // Accepts regular text input
+        }
+
+        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+            .setTitle("Enter Activity")
+            .setMessage("Please enter the activity you just completed:")
+            .setView(editText)
+            .setPositiveButton("OK", null)
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
+            .create()
+
+        dialog.setOnShowListener {
+            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+            okButton.setOnClickListener {
+                val inputText = editText.text.toString().trim()
+
+                if (inputText.isEmpty()) {
+                    editText.error = "Activity cannot be empty."
+                    return@setOnClickListener
+                }
+
+                // 🔥 Placeholder for saving or processing the activity (next step)
+                //processActivityEntry(inputText)
+
+                dialog.dismiss()
             }
         }
         dialog.show()
