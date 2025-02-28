@@ -76,12 +76,11 @@ class GraphFragment : Fragment() {
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         val currentMinute = calendar.get(Calendar.MINUTE)
 
-        val isEarlyMorning = currentHour < 5  // Before 5 AM
+        val isEarlyMorning = currentHour < 5  // ✅ True if it's before 5 AM
         val startHour = if (isEarlyMorning) {
-            0  // Start graph from 00:00
+            0  // ✅ Always start at 00:00 before 5 AM
         } else {
-            currentHour - 5
-
+            currentHour - 5 // ✅ After 5 AM, push forward dynamically
         }
 
         val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
@@ -98,6 +97,7 @@ class GraphFragment : Fragment() {
 
 
 
+
     private fun configureLineChart(lineChart: LineChart, startHour: Int, endHour: Int) {
         lineChart.description.isEnabled = false
         lineChart.setTouchEnabled(true)
@@ -111,8 +111,16 @@ class GraphFragment : Fragment() {
         xAxis.setDrawGridLines(false)
         xAxis.granularity = 1f
         xAxis.labelCount = 6
-        xAxis.axisMinimum = 0f
-        xAxis.axisMaximum = (endHour - startHour).toFloat() // 🔥 Ensures next hour is visible!
+
+        // ✅ Ensure proper time display before and after 5 AM
+        if (startHour == 0) {
+            xAxis.axisMinimum = 0f
+            xAxis.axisMaximum = 5f // ✅ Display 00:00 - 05:00 before 5 AM
+        } else {
+            xAxis.axisMinimum = 0f
+            xAxis.axisMaximum = (endHour - startHour).toFloat() // ✅ Shift dynamically after 5 AM
+        }
+
         xAxis.valueFormatter = getTimeValueFormatter(startHour)
         xAxis.textColor = Color.BLACK
 
@@ -126,6 +134,7 @@ class GraphFragment : Fragment() {
         val rightAxis: YAxis = lineChart.axisRight
         rightAxis.isEnabled = false
     }
+
 
 
 
