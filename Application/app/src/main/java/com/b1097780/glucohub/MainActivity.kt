@@ -32,15 +32,15 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPreferences = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)
-        //sharedPreferences.edit().clear().apply()
+
         userCoins = sharedPreferences.getInt("userCoins", 10) // Default to 10 coins if not set
 
         applyUserTheme(theme)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
-       populateTestData()//test
+        //sharedPreferences.edit().clear().apply()
+       //populateTestData()//test
 
         setupToolbar()
         setupNavController()

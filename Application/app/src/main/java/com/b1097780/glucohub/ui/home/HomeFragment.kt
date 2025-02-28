@@ -159,7 +159,9 @@ class HomeFragment : Fragment() {
 
     private fun showActivityInputPopup() {
         ActivityLogDialog(requireContext()) { activity, startTime, endTime, description ->
-            processActivityEntry(activity, startTime, endTime, description)
+            if (startTime != null) {
+                processActivityEntry(activity, startTime, endTime, description)
+            } // ✅ `endTime` is nullable
         }.show()
     }
 
@@ -195,14 +197,15 @@ class HomeFragment : Fragment() {
     }
 
     private fun processActivityEntry(activity: String, startTime: String, endTime: String?, description: String) {
-        val timeFrame = if (endTime != null) "$startTime - $endTime" else startTime
+        val timeFrame = if (endTime != null && endTime.isNotEmpty()) "$startTime - $endTime" else startTime
 
         println("Activity: $activity")
         println("Time: $timeFrame")
         println("Description: ${description.ifEmpty { "No description provided" }}")
 
-        // 🚀 Next step: Save to `ActivityLogViewModel` & display in UI
+        // 🚀 Save this activity (to SharedPreferences or ViewModel)
     }
+
 
 
 }
