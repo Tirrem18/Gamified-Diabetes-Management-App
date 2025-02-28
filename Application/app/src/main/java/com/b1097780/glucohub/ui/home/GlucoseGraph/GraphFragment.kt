@@ -76,7 +76,7 @@ class GraphFragment : Fragment() {
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         val currentMinute = calendar.get(Calendar.MINUTE)
 
-        val isEarlyMorning = currentHour < 5  // ✅ True if it's before 5 AM
+        val isEarlyMorning = currentHour < 5.01 // ✅ True if it's before 5 AM
         val startHour = if (isEarlyMorning) {
             0  // ✅ Always start at 00:00 before 5 AM
         } else {
