@@ -18,6 +18,7 @@
         <item name="buttonBarPositiveButtonStyle">?attr/colorPrimary</item>
         <item name="buttonBarNegativeButtonStyle">?attr/colorPrimary</item>
         <item name="android:textColor">?attr/android:textColorPrimary</item>
+        <item name="android:textColorHint">?attr/android:textColorPrimary</item>
     </style>
 
         <style name="Theme.GlucoHub.default" parent="Theme.MaterialComponents.DayNight.DarkActionBar">

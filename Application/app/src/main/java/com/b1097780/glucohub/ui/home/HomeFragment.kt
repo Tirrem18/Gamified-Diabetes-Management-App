@@ -15,6 +15,7 @@ import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.R
+import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogDialog
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
 import com.b1097780.glucohub.ui.profile.ProfileViewModel
@@ -157,36 +158,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun showActivityInputPopup() {
-        val editText = EditText(requireContext()).apply {
-            inputType = InputType.TYPE_CLASS_TEXT // Accepts regular text input
-        }
-
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-            .setTitle("Enter Activity")
-            .setMessage("Please enter the activity you just completed:")
-            .setView(editText)
-            .setPositiveButton("OK", null)
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .create()
-
-        dialog.setOnShowListener {
-            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            okButton.setOnClickListener {
-                val inputText = editText.text.toString().trim()
-
-                if (inputText.isEmpty()) {
-                    editText.error = "Activity cannot be empty."
-                    return@setOnClickListener
-                }
-
-                // 🔥 Placeholder for saving or processing the activity (next step)
-                //processActivityEntry(inputText)
-
-                dialog.dismiss()
-            }
-        }
-        dialog.show()
+        ActivityLogDialog(requireContext()) { activity, startTime, endTime, description ->
+            processActivityEntry(activity, startTime, endTime, description)
+        }.show()
     }
+
 
     private fun getCurrentTime(): Float {
         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toFloat()
@@ -217,5 +193,16 @@ class HomeFragment : Fragment() {
                 .show()
         }
     }
+
+    private fun processActivityEntry(activity: String, startTime: String, endTime: String?, description: String) {
+        val timeFrame = if (endTime != null) "$startTime - $endTime" else startTime
+
+        println("Activity: $activity")
+        println("Time: $timeFrame")
+        println("Description: ${description.ifEmpty { "No description provided" }}")
+
+        // 🚀 Next step: Save to `ActivityLogViewModel` & display in UI
+    }
+
 
 }
