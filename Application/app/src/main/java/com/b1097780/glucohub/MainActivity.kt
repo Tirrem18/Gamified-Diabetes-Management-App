@@ -28,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val sharedPrefs by lazy { getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE) }
 
     // CUSTOMISE
-    private var theme = "grey" // Change this to "default", "purple", or "plain"
+    private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val sharedPreferences = getSharedPreferences("GlucoHubPrefs", MODE_PRIVATE)
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //sharedPreferences.edit().clear().apply()
-       //populateTestData()//test
+        //populateTestData()//test
 
         setupToolbar()
         setupNavController()

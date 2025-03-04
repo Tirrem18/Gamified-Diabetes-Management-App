@@ -16,6 +16,7 @@ import androidx.appcompat.app.AlertDialog
 import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.R
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogDialog
+import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
 import com.b1097780.glucohub.ui.profile.ProfileViewModel
@@ -31,6 +32,7 @@ class HomeFragment : Fragment() {
     private lateinit var activityLogViewModel: ActivityLogViewModel
     private var lastEntryTime: Long = 0
 
+    // ✅ Load data only once in onCreateView()
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -40,18 +42,19 @@ class HomeFragment : Fragment() {
         graphViewModel = ViewModelProvider(requireActivity()).get(GraphViewModel::class.java)
         activityLogViewModel = ViewModelProvider(requireActivity()).get(ActivityLogViewModel::class.java)
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
         setupButtons()
         setupObservers()
 
-        // Load last entry time
-        lastEntryTime = (activity as? MainActivity)?.loadLastEntryTime() ?: 0L
-        activityLogViewModel.loadRecentBloodEntry(requireContext())
+        // ✅ Load recent blood glucose entry only ONCE
+        if (savedInstanceState == null) {
+            activityLogViewModel.loadRecentBloodEntry(requireContext())
+            activityLogViewModel.loadActivityEntries(requireContext()) // ✅ Load activities only once
+        }
 
-
-        return root
+        return binding.root
     }
+
 
     override fun onDestroyView() {
         super.onDestroyView()
@@ -183,7 +186,9 @@ class HomeFragment : Fragment() {
         // ✅ Notify Activity Log to refresh its data
         activityLogViewModel.loadRecentBloodEntry(requireContext())
 
-        val profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        val profileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
+
+        profileViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
         profileViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
             val coinsEarned = 1 * multiplier
             (activity as? MainActivity)?.addCoinsFromFragment(coinsEarned)
@@ -197,14 +202,23 @@ class HomeFragment : Fragment() {
     }
 
     private fun processActivityEntry(activity: String, startTime: String, endTime: String?, description: String) {
-        val timeFrame = if (endTime != null && endTime.isNotEmpty()) "$startTime - $endTime" else startTime
+        val entry = ActivityLogEntry(activity, startTime, endTime, description)
 
-        println("Activity: $activity")
-        println("Time: $timeFrame")
-        println("Description: ${description.ifEmpty { "No description provided" }}")
+        // ✅ Debug Log (Confirm it's being triggered)
 
-        // 🚀 Save this activity (to SharedPreferences or ViewModel)
+        requireActivity().let { mainActivity ->
+            activityLogViewModel.addActivityEntry(entry, mainActivity)
+        }
+
+
+        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+            .setTitle("Activity Logged")
+            .setMessage("You've successfully logged: $activity at $startTime.")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
+
+
 
 
 
