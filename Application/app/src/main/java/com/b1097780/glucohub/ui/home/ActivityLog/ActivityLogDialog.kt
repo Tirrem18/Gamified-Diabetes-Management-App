@@ -219,7 +219,7 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
         val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
 
         val textColorPrimary = getThemeColor(context, android.R.attr.textColorPrimary)
-        val primaryColor = getThemeColor(context, com.google.android.material.R.attr.colorPrimary)
+        val primaryColor = getThemeColor(context, android.R.attr.colorPrimary)
 
         cancelButton.setTextColor(textColorPrimary)
         cancelButton.setBackgroundColor(primaryColor)

@@ -9,6 +9,8 @@ import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.b1097780.glucohub.databinding.FragmentActivityLogBinding
+import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 class ActivityLogFragment : Fragment() {
 
@@ -21,18 +23,13 @@ class ActivityLogFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        // Initialize ViewModel
         activityLogViewModel = ViewModelProvider(requireActivity()).get(ActivityLogViewModel::class.java)
         _binding = FragmentActivityLogBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        // ✅ Load the most recent blood glucose entry (NO CHANGES HERE)
         activityLogViewModel.loadRecentBloodEntry(requireContext())
-
-        // ✅ Load today's activity logs from SharedPreferences
         activityLogViewModel.loadActivityEntries(requireContext())
 
-        // Setup LiveData observers
         setupObservers()
 
         return root
@@ -44,43 +41,72 @@ class ActivityLogFragment : Fragment() {
     }
 
     private fun setupObservers() {
-        activityLogViewModel.recentGlucoseTime.removeObservers(viewLifecycleOwner)
         activityLogViewModel.recentGlucoseTime.observe(viewLifecycleOwner) { time ->
             binding.recentTime.text = time
         }
 
-        activityLogViewModel.recentGlucoseValue.removeObservers(viewLifecycleOwner)
         activityLogViewModel.recentGlucoseValue.observe(viewLifecycleOwner) { value ->
             binding.recentGlucose.text = value
         }
 
-        activityLogViewModel.activityLogEntries.removeObservers(viewLifecycleOwner)
         activityLogViewModel.activityLogEntries.observe(viewLifecycleOwner) { activities ->
-            updateActivityTable(activities)
+            updateActivityTables(activities)
         }
     }
 
+    private fun updateActivityTables(activities: List<ActivityLogEntry>) {
+        val now = LocalTime.now()
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
 
-    private fun updateActivityTable(activities: List<ActivityLogEntry>) {
-        if (activities.isEmpty() && binding.activityLogTable.childCount > 0) {
-            return // ✅ No need to clear and re-add the same "No activities logged" message
-        }
-
-        binding.activityLogTable.removeAllViews()
+        // Clear previous content
+        binding.recentActivitiesTable.removeAllViews()
+        binding.upcomingActivitiesTable.removeAllViews()
 
         if (activities.isEmpty()) {
-            val noActivityText = TextView(requireContext()).apply {
-                text = "No activities logged for today"
-                textSize = 18f
-                setPadding(16, 16, 16, 16)
-            }
-            binding.activityLogTable.addView(noActivityText)
+            showNoActivityMessage()
             return
         }
 
-        val latestActivities = activities.takeLast(5).reversed()
+        // Sort activities into "Recent" and "Upcoming"
+        val recentActivities = mutableListOf<ActivityLogEntry>()
+        val upcomingActivities = mutableListOf<ActivityLogEntry>()
 
-        for (entry in latestActivities) {
+        for (entry in activities) {
+            val startTime = LocalTime.parse(entry.startTime, formatter)
+
+            when {
+                // Recent: The activity has started before or at the current time
+                startTime <= now -> recentActivities.add(entry)
+
+                // Upcoming: The activity starts in the future
+                startTime > now -> upcomingActivities.add(entry)
+            }
+        }
+
+        // Sort Recent by start time descending (most recent first) and take the closest 4
+        recentActivities.sortByDescending { LocalTime.parse(it.startTime, formatter) }
+        val displayedRecent = recentActivities.take(4)
+
+        // Sort Upcoming by start time ascending (soonest first)
+        upcomingActivities.sortBy { LocalTime.parse(it.startTime, formatter) }
+
+        // Populate tables
+        populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
+        populateTable(binding.upcomingActivitiesTable, upcomingActivities, "No upcoming activities")
+    }
+
+    private fun populateTable(table: ViewGroup, activities: List<ActivityLogEntry>, emptyMessage: String) {
+        if (activities.isEmpty()) {
+            val noActivityText = TextView(requireContext()).apply {
+                text = emptyMessage
+                textSize = 16f
+                setPadding(16, 16, 16, 16)
+            }
+            table.addView(noActivityText)
+            return
+        }
+
+        for (entry in activities) {
             val row = TableRow(requireContext())
 
             val activityText = TextView(requireContext()).apply {
@@ -104,8 +130,21 @@ class ActivityLogFragment : Fragment() {
             row.addView(activityText)
             row.addView(timeText)
             row.addView(detailsText)
-            binding.activityLogTable.addView(row)
+            table.addView(row)
         }
     }
 
+    private fun showNoActivityMessage() {
+        listOf(
+            binding.recentActivitiesTable to "No recent activities",
+            binding.upcomingActivitiesTable to "No upcoming activities"
+        ).forEach { (table, message) ->
+            val textView = TextView(requireContext()).apply {
+                text = message
+                textSize = 16f
+                setPadding(16, 16, 16, 16)
+            }
+            table.addView(textView)
+        }
+    }
 }

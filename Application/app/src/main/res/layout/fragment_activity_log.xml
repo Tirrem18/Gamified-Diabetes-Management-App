@@ -11,17 +11,17 @@
         android:layout_height="wrap_content"
         android:stretchColumns="*" >
 
-        <TableRow
-            android:padding="8dp">
-
+        <TableRow android:padding="0dp">
             <TextView
-                android:text="Recent Glucose"
+                android:textSize="16sp"
+                android:text="Last Glucose"
                 android:textStyle="bold"
                 android:textColor="?android:attr/textColorPrimary"
-                android:gravity="center"
+                android:gravity="start"
                 android:layout_weight="1" />
 
             <TextView
+                android:textSize="16sp"
                 android:id="@+id/recent_time"
                 android:text="--:--"
                 android:textColor="?android:attr/textColorPrimary"
@@ -29,10 +29,11 @@
                 android:layout_weight="1" />
 
             <TextView
+                android:textSize="16sp"
                 android:id="@+id/recent_glucose"
                 android:text="-- mmol/L"
                 android:textColor="?android:attr/textColorPrimary"
-                android:gravity="center"
+                android:gravity="end"
                 android:layout_weight="1" />
         </TableRow>
     </TableLayout>
@@ -40,14 +41,120 @@
     <!-- Divider -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:background="@android:color/darker_gray"
+        android:layout_height="2dp"
+        android:background="@android:color/black"
         android:layout_marginVertical="4dp"/>
 
-    <!-- Activity Log Table (Single Row Format) -->
-    <TableLayout
-        android:id="@+id/activity_log_table"
+    <!-- "Recent Activities" Section -->
+    <TextView
+        android:textColor="?android:attr/textColorPrimary"
+        android:id="@+id/recent_activities_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:stretchColumns="*" />
+        android:text="Recent Activities"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="4dp"/>
+
+    <TableLayout
+        android:id="@+id/recent_activities_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*">
+
+        <!-- Header Row -->
+        <TableRow>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Activity Name"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:layout_weight="2"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Start Time"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:gravity="center"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Details"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:layout_weight="3"/>
+        </TableRow>
+    </TableLayout>
+
+    <!-- Larger Space to Emphasize Recent -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10dp"
+        android:background="@android:color/transparent"/>
+
+    <!-- "Upcoming Activities" Section -->
+    <TextView
+        android:textColor="?android:attr/textColorPrimary"
+        android:id="@+id/upcoming_activities_label"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upcoming Activities"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:paddingTop="2dp"/>
+
+    <TableLayout
+        android:id="@+id/upcoming_activities_table"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*">
+
+        <!-- Header Row -->
+        <TableRow>
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Activity Name"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:layout_weight="2"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Start Time"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:gravity="center"
+                android:layout_weight="1"/>
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="Details"
+                android:textSize="16sp"
+                android:textColor="?android:attr/textColorPrimary"
+                android:textStyle="bold"
+                android:padding="8dp"
+                android:layout_weight="3"/>
+        </TableRow>
+    </TableLayout>
+
 </LinearLayout>

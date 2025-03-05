@@ -32,37 +32,17 @@
             <item name="android:textColorSecondary">@color/white</item>
         </style>
 
-    <style name="Theme.GlucoHub.purple" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+    <style name="Theme.GlucoHub.orange" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">@color/purple_200</item>
-        <item name="colorPrimaryVariant">@color/purple_700</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="android:windowBackground">@color/purple_500</item>
-        <item name="android:textColorPrimary">@color/white</item>
-        <item name="android:textColorSecondary">@color/black</item>
-    </style>
-
-    <style name="Theme.GlucoHub.grey" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">@color/darkgrey</item>
-        <item name="colorPrimaryVariant">@color/grey</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="android:windowBackground">@color/lightgrey</item>
-        <item name="android:textColorPrimary">@color/black</item>
-        <item name="android:textColorSecondary">@color/black</item>
-    </style>
-
-    <style name="Theme.GlucoHub.pink" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
-        <item name="windowActionBar">false</item>
-        <item name="windowNoTitle">true</item>
-        <item name="colorPrimary">@color/green</item>
-        <item name="colorPrimaryVariant">@color/darkpink</item>
-        <item name="colorPrimaryDark">@color/black</item>
-        <item name="android:windowBackground">@color/darkestpink</item>
+        <item name="colorPrimary">@color/orange</item>
+        <item name="colorPrimaryVariant">@color/darkorange</item>
+        <item name="colorPrimaryDark">@color/darkestorange</item>
+        <item name="android:windowBackground">@color/darkestorange</item>
         <item name="android:textColorPrimary">@color/white</item>
         <item name="android:textColorSecondary">@color/white</item>
     </style>
+
+
 
     </resources>

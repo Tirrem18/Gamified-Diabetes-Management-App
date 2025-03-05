@@ -53,9 +53,7 @@ class MainActivity : AppCompatActivity() {
     private fun applyUserTheme(selectedTheme: String) {
         when (selectedTheme) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
-            "purple" -> setTheme(R.style.Theme_GlucoHub_purple)
-            "grey" -> setTheme(R.style.Theme_GlucoHub_grey)
-            "pink" -> setTheme(R.style.Theme_GlucoHub_pink)
+            "orange" -> setTheme(R.style.Theme_GlucoHub_orange)
             else -> setTheme(R.style.Theme_GlucoHub_default) // Fallback to default
         }
     }
