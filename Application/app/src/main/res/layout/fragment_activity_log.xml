@@ -25,7 +25,6 @@
                 android:id="@+id/recent_time"
                 android:text="--:--"
                 android:textColor="?android:attr/textColorPrimary"
-                android:gravity="center"
                 android:layout_weight="1" />
 
             <TextView
@@ -52,10 +51,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Recent Activities"
-        android:textSize="18sp"
-        android:textStyle="bold"
         android:gravity="center"
-        android:paddingTop="4dp"/>
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:paddingTop="0dp"/>
 
     <TableLayout
         android:id="@+id/recent_activities_table"
@@ -83,7 +82,6 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:textStyle="bold"
                 android:padding="8dp"
-                android:gravity="center"
                 android:layout_weight="1"/>
 
             <TextView
@@ -101,7 +99,7 @@
     <!-- Larger Space to Emphasize Recent -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="10dp"
+        android:layout_height="3dp"
         android:background="@android:color/transparent"/>
 
     <!-- "Upcoming Activities" Section -->
@@ -111,10 +109,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Upcoming Activities"
-        android:textSize="18sp"
+        android:textSize="20sp"
         android:textStyle="bold"
         android:gravity="center"
-        android:paddingTop="2dp"/>
+        android:paddingTop="0dp"/>
 
     <TableLayout
         android:id="@+id/upcoming_activities_table"
@@ -142,7 +140,6 @@
                 android:textColor="?android:attr/textColorPrimary"
                 android:textStyle="bold"
                 android:padding="8dp"
-                android:gravity="center"
                 android:layout_weight="1"/>
 
             <TextView

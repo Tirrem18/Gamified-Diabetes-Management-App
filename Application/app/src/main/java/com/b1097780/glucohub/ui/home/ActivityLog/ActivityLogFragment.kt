@@ -1,5 +1,6 @@
 package com.b1097780.glucohub.ui.home.ActivityLog
 
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -58,7 +59,6 @@ class ActivityLogFragment : Fragment() {
         val now = LocalTime.now()
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
 
-        // Clear previous content
         binding.recentActivitiesTable.removeAllViews()
         binding.upcomingActivitiesTable.removeAllViews()
 
@@ -67,39 +67,71 @@ class ActivityLogFragment : Fragment() {
             return
         }
 
-        // Sort activities into "Recent" and "Upcoming"
         val recentActivities = mutableListOf<ActivityLogEntry>()
         val upcomingActivities = mutableListOf<ActivityLogEntry>()
 
         for (entry in activities) {
             val startTime = LocalTime.parse(entry.startTime, formatter)
-
-            when {
-                // Recent: The activity has started before or at the current time
-                startTime <= now -> recentActivities.add(entry)
-
-                // Upcoming: The activity starts in the future
-                startTime > now -> upcomingActivities.add(entry)
+            if (startTime <= now) {
+                recentActivities.add(entry)
+            } else {
+                upcomingActivities.add(entry)
             }
         }
 
-        // Sort Recent by start time descending (most recent first) and take the closest 4
         recentActivities.sortByDescending { LocalTime.parse(it.startTime, formatter) }
-        val displayedRecent = recentActivities.take(4)
-
-        // Sort Upcoming by start time ascending (soonest first)
         upcomingActivities.sortBy { LocalTime.parse(it.startTime, formatter) }
 
-        // Populate tables
-        populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
-        populateTable(binding.upcomingActivitiesTable, upcomingActivities, "No upcoming activities")
+        when {
+            upcomingActivities.isEmpty() -> {
+                // Show 7 recent activities, hide Upcoming Activities title and section
+                val displayedRecent = recentActivities.take(7)
+                binding.upcomingActivitiesLabel.visibility = View.GONE
+                binding.upcomingActivitiesTable.visibility = View.GONE
+                populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
+            }
+            upcomingActivities.size == 1 -> {
+                // Show 4 recent activities and 1 upcoming, display Upcoming Activities title
+                val displayedRecent = recentActivities.take(4)
+                binding.upcomingActivitiesLabel.visibility = View.VISIBLE
+                binding.upcomingActivitiesTable.visibility = View.VISIBLE
+                populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
+                populateTable(binding.upcomingActivitiesTable, listOf(upcomingActivities.first()), "No upcoming activities")
+            }
+            else -> {
+                // Determine if there are at least 2 upcoming activities within the next hour
+                val upcomingWithinHour = upcomingActivities.filter {
+                    val startTime = LocalTime.parse(it.startTime, formatter)
+                    startTime.isBefore(now.plusHours(1))
+                }
+
+                if (upcomingWithinHour.size >= 2) {
+                    // Show 3 recent activities and the 2 closest upcoming activities
+                    val displayedRecent = recentActivities.take(3)
+                    val displayedUpcoming = upcomingWithinHour.take(2)
+                    binding.upcomingActivitiesLabel.visibility = View.VISIBLE
+                    binding.upcomingActivitiesTable.visibility = View.VISIBLE
+                    populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
+                    populateTable(binding.upcomingActivitiesTable, displayedUpcoming, "No upcoming activities")
+                } else {
+                    // Show 4 recent activities and only the closest upcoming activity
+                    val displayedRecent = recentActivities.take(4)
+                    val closestUpcoming = listOf(upcomingActivities.first())
+                    binding.upcomingActivitiesLabel.visibility = View.VISIBLE
+                    binding.upcomingActivitiesTable.visibility = View.VISIBLE
+                    populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
+                    populateTable(binding.upcomingActivitiesTable, closestUpcoming, "No upcoming activities")
+                }
+            }
+        }
     }
 
     private fun populateTable(table: ViewGroup, activities: List<ActivityLogEntry>, emptyMessage: String) {
         if (activities.isEmpty()) {
             val noActivityText = TextView(requireContext()).apply {
                 text = emptyMessage
-                textSize = 16f
+                textSize = 18f // Increased size
+                setTypeface(null, Typeface.BOLD) // Force bold
                 setPadding(16, 16, 16, 16)
             }
             table.addView(noActivityText)
@@ -111,19 +143,22 @@ class ActivityLogFragment : Fragment() {
 
             val activityText = TextView(requireContext()).apply {
                 text = entry.name
-                textSize = 16f
-                setPadding(8, 8, 8, 8)
+                textSize = 16f // Increased size
+                setTypeface(null, Typeface.BOLD) // Force bold
+                setPadding(8, 1, 8, 1)
             }
 
             val timeText = TextView(requireContext()).apply {
                 text = if (entry.endTime != null) "${entry.startTime} - ${entry.endTime}" else entry.startTime
                 textSize = 16f
-                setPadding(8, 8, 8, 8)
+                setTypeface(null, Typeface.BOLD)
+                setPadding(8, 1, 8, 1)
             }
 
             val detailsText = TextView(requireContext()).apply {
                 text = entry.description ?: "No details"
-                textSize = 16f
+                textSize = 17f
+                setTypeface(null, Typeface.BOLD)
                 setPadding(8, 8, 8, 8)
             }
 
@@ -133,6 +168,7 @@ class ActivityLogFragment : Fragment() {
             table.addView(row)
         }
     }
+
 
     private fun showNoActivityMessage() {
         listOf(

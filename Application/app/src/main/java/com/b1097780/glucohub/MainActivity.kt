@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         //sharedPreferences.edit().clear().apply()
-        //populateTestData()//test
+        populateTestData()//test
 
         setupToolbar()
         setupNavController()
@@ -242,22 +242,56 @@ class MainActivity : AppCompatActivity() {
         val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", Locale.getDefault())
         val today = dateFormat.format(Date())
 
-        // Generate test data for the full 24-hour day (hour, glucose level)
+        // Expanded Glucose Test Data (Randomized Intervals)
         val testEntries = listOf(
-            "$today,0.0,8.0",  "$today,0.2,6.5",  "$today,0.5,10.0", "$today,1.0,5.9",
-            "$today,2.0,7.8",  "$today,3.0,12.4", "$today,4,9.2",  "$today,5.0,6.7",
-            "$today,6.0,7.1",  "$today,7.0,5.5",  "$today,8.0,9.0",  "$today,9.0,10.2",
-            "$today,10.0,6.9", "$today,11.0,5.8", "$today,12.0,8.5", "$today,13.0,7.0",
-            "$today,14.0,6.2", "$today,15.0,11.3", "$today,15.1,5.6", "$today,17.0,9.7",
-            "$today,18.0,7.5", "$today,19.0,10.8", "$today,20.0,6.4", "$today,21.0,8.9",
-            "$today,22.0,5.7", "$today,23.0,7.2"
+            "$today,0.0,8.0",  "$today,0.15,7.2", "$today,0.2,6.5",  "$today,0.35,9.1", "$today,0.5,10.0",
+            "$today,1.0,5.9", "$today,1.3,6.8", "$today,2.0,7.8", "$today,2.4,8.5", "$today,3.0,12.4",
+            "$today,3.6,10.3", "$today,4.0,9.2", "$today,4.3,7.9", "$today,5.0,6.7", "$today,5.4,8.1",
+            "$today,6.0,7.1", "$today,6.8,5.9", "$today,7.0,5.5", "$today,7.7,9.5", "$today,8.0,9.0",
+            "$today,8.6,10.7", "$today,9.0,10.2", "$today,9.5,6.3", "$today,10.0,6.9", "$today,10.7,8.2",
+            "$today,11.0,5.8", "$today,11.3,7.5", "$today,12.0,8.5", "$today,12.6,9.1", "$today,13.0,7.0",
+            "$today,13.4,6.5", "$today,14.0,6.2", "$today,14.7,8.3", "$today,15.0,11.3", "$today,15.1,5.6",
+            "$today,16.0,7.9", "$today,17.0,9.7", "$today,17.3,8.6", "$today,18.0,7.5", "$today,18.9,9.1",
+            "$today,19.0,10.8", "$today,19.5,6.8", "$today,20.0,6.4", "$today,20.8,7.9", "$today,21.0,8.9",
+            "$today,21.6,10.1", "$today,22.0,5.7", "$today,22.3,6.4", "$today,23.0,7.2", "$today,23.5,8.0"
+        )
+        editor.putString("glucoseEntries", testEntries.joinToString(";"))
+
+        // Expanded Activity Log Test Data (Random 10-30 min intervals from 00:30 to 11:30)
+        val testActivities = listOf(
+            "$today,Study,00:30,00:50,Reading notes",
+            "$today,Coding,01:10,01:35,Fixing bugs",
+            "$today,Email,02:00,02:15,Checking inbox",
+            "$today,Snack,02:30,02:45,Eating fruit",
+            "$today,Walk,03:20,03:50,Morning walk",
+            "$today,Music,04:15,04:35,Listening",
+            "$today,Game,05:00,05:30,Short break",
+            "$today,Plan,05:45,06:00,Daily plan",
+            "$today,Write,06:20,06:45,Writing blog",
+            "$today,Coffee,07:10,07:30,Espresso time",
+            "$today,News,08:00,08:20,Reading news",
+            "$today,Stretch,08:40,09:00,Morning yoga",
+            "$today,Work,09:30,10:00,Focus task",
+            "$today,Meet,10:15,10:45,Team meeting",
+            "$today,Call,11:10,11:30,Client call",
+            "$today,Lunch,12:30,13:00,Meal time",
+            "$today,Walk,13:30,14:00,Afternoon walk",
+            "$today,Gym,15:00,16:00,Strength train",
+            "$today,Dinner,20:00,20:30,Healthy meal",
+            "$today,Read,21:30,22:00,Reading book"
         )
 
-        // Convert list to a string and save in SharedPreferences
-        val entryString = testEntries.joinToString(";")
-        editor.putString("glucoseEntries", entryString)
-        editor.apply()
+        // Convert list to a correctly formatted string and save in SharedPreferences
+        val formattedActivities = testActivities.joinToString(";")
+        editor.putString("activityLogEntries", formattedActivities)
+
+        editor.apply() // Save data
     }
+
+
+
+
+
 
 
 }
