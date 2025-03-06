@@ -209,7 +209,23 @@ class HomeFragment : Fragment() {
             .setMessage("You've successfully logged: $activity at $startTime.")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
+
+        // ✅ Coin reward logic
+        val friendsViewModel = ViewModelProvider(requireActivity())[FriendsViewModel::class.java]
+        friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
+        friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
+            val coinsEarned = 1 * multiplier
+            (activity as? MainActivity)?.addCoinsFromFragment(coinsEarned)
+
+            AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+                .setTitle("Coins Earned!")
+                .setMessage("You've earned $coinsEarned coins!")
+                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+                .show()
+        }
+
     }
+
 
     // ✅ Function to show confirmation dialogs for extreme glucose levels
     private fun showWarningDialog(

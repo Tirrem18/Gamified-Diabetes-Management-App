@@ -26,13 +26,13 @@ class MainActivity : AppCompatActivity() {
     private var userCoins: Int = 10
 
     // CUSTOMISE
-    private var theme = "" // Change this to "default", "purple", or "plain"
+    private var theme = "orange" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
 
         PreferencesHelper.clearAllData(this)
-        //PreferencesHelper.populateTestData(this)
+        PreferencesHelper.populateTestData(this)
 
 
 
@@ -108,13 +108,6 @@ class MainActivity : AppCompatActivity() {
         PreferencesHelper.setUserCoins(this, userCoins) // Save new coin count
     }
 
-    fun saveLastEntryTime(time: Long) {
-        PreferencesHelper.setLastEntryTime(this, time)
-    }
-
-    fun loadLastEntryTime(): Long {
-        return PreferencesHelper.getLastEntryTime(this)
-    }
 
     override fun onSupportNavigateUp(): Boolean {
         val navController = findNavController(R.id.nav_host_fragment_activity_main)
