@@ -14,6 +14,7 @@ import android.view.animation.AnimationUtils
 import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.b1097780.glucohub.MainActivity
+import com.b1097780.glucohub.PreferencesHelper
 import com.b1097780.glucohub.R
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogDialog
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
@@ -32,7 +33,7 @@ class HomeFragment : Fragment() {
     private lateinit var activityLogViewModel: ActivityLogViewModel
     private var lastEntryTime: Long = 0
 
-    // ✅ Load data only once in onCreateView()
+    // ✅ Lifecycle Method: Create View & Initialize ViewModels
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -46,27 +47,31 @@ class HomeFragment : Fragment() {
         setupButtons()
         setupObservers()
 
-        // ✅ Load recent blood glucose entry only ONCE
+        // ✅ Load saved last entry time from SharedPreferences
+        lastEntryTime = PreferencesHelper.getLastEntryTime(requireContext())
+
+        // ✅ Load recent blood glucose entry & activity logs only once
         if (savedInstanceState == null) {
             activityLogViewModel.loadRecentBloodEntry(requireContext())
-            activityLogViewModel.loadActivityEntries(requireContext()) // ✅ Load activities only once
+            activityLogViewModel.loadActivityEntries(requireContext())
         }
 
         return binding.root
     }
+
+    // ✅ Lifecycle Method: Refresh data when the fragment resumes
     override fun onResume() {
         super.onResume()
-        activityLogViewModel.loadRecentBloodEntry(requireContext()) // Refresh glucose
-        activityLogViewModel.loadActivityEntries(requireContext())  // Refresh activities
+        activityLogViewModel.loadRecentBloodEntry(requireContext())
+        activityLogViewModel.loadActivityEntries(requireContext())
     }
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
+    // ✅ Set up UI observers to update text dynamically
     private fun setupObservers() {
         homeViewModel.glucoseText.observe(viewLifecycleOwner) {
             binding.textGlucose.text = it
@@ -75,18 +80,18 @@ class HomeFragment : Fragment() {
         homeViewModel.plannerText.observe(viewLifecycleOwner) {
             binding.textActivityLog.text = it
         }
-
     }
 
-
+    // ✅ Set up button click listeners with animations
     private fun setupButtons() {
         binding.button1.setOnClickListener {
             val currentTime = System.currentTimeMillis()
 
-            if ((currentTime - lastEntryTime) < 4.4 * 60 * 1000) { // 10 minutes in milliseconds
+            // ✅ Prevent duplicate glucose entries within 5 minutes
+            if ((currentTime - lastEntryTime) < 5 * 60 * 1000) {
                 AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
                     .setTitle("Wait before entering again")
-                    .setMessage("Please wait at least 5 minutes since entering your last blood glucose.")
+                    .setMessage("Please wait at least 5 minutes before entering another glucose level.")
                     .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
                     .show()
                 return@setOnClickListener
@@ -99,7 +104,6 @@ class HomeFragment : Fragment() {
         }
 
         binding.button2.setOnClickListener {
-
             it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button))
             Handler(Looper.getMainLooper()).postDelayed({
                 showActivityInputPopup()
@@ -107,6 +111,7 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // ✅ Show popup for glucose input
     private fun showNumberInputPopup() {
         val editText = EditText(requireContext()).apply {
             inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL or InputType.TYPE_CLASS_NUMBER
@@ -126,6 +131,7 @@ class HomeFragment : Fragment() {
                 val inputText = editText.text.toString()
                 val number = inputText.toFloatOrNull()
 
+                // ✅ Validate input range
                 if (number == null || number < 0f || number > 40f) {
                     editText.error = "Invalid value. Enter a number between 0 and 40."
                     return@setOnClickListener
@@ -133,29 +139,10 @@ class HomeFragment : Fragment() {
 
                 val currentTime = getCurrentTime()
 
+                // ✅ Confirm for extreme glucose levels
                 when {
-                    number > 25f -> {
-                        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-                            .setTitle("High Glucose Alert")
-                            .setMessage("A glucose level above 25 is dangerously high. Are you sure?")
-                            .setPositiveButton("Confirm") { _, _ ->
-                                processGlucoseEntry(currentTime, number)
-                                dialog.dismiss()
-                            }
-                            .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
-                            .show()
-                    }
-                    number < 2f -> {
-                        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-                            .setTitle("Low Glucose Warning")
-                            .setMessage("A glucose level below 2 is critically low. Are you sure?")
-                            .setPositiveButton("Confirm") { _, _ ->
-                                processGlucoseEntry(currentTime, number)
-                                dialog.dismiss()
-                            }
-                            .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
-                            .show()
-                    }
+                    number > 25f -> showWarningDialog("High Glucose Alert", "A glucose level above 25 is dangerously high. Are you sure? Please inject accordingly", currentTime, number, dialog)
+                    number < 2f -> showWarningDialog("Low Glucose Warning", "A glucose level below 2 is critically low. Are you sure? Please eat fats acting carbs accordingly", currentTime, number, dialog)
                     else -> {
                         processGlucoseEntry(currentTime, number)
                         dialog.dismiss()
@@ -166,34 +153,37 @@ class HomeFragment : Fragment() {
         dialog.show()
     }
 
+    // ✅ Show popup for activity input
     private fun showActivityInputPopup() {
         ActivityLogDialog(requireContext()) { activity, startTime, endTime, description ->
             if (startTime != null) {
                 processActivityEntry(activity, startTime, endTime, description)
-            } // ✅ `endTime` is nullable
+            }
         }.show()
     }
 
-
+    // ✅ Get current time in hours + minutes (decimal format)
     private fun getCurrentTime(): Float {
         val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toFloat()
         val currentMinute = Calendar.getInstance().get(Calendar.MINUTE) / 60f
         return currentHour + currentMinute
     }
 
+    // ✅ Process and save glucose entry
     private fun processGlucoseEntry(currentTime: Float, number: Float) {
         (activity as? MainActivity)?.let { mainActivity ->
-            graphViewModel.addGlucoseEntry(Entry(currentTime, number), mainActivity) // ✅ Save to SharedPreferences
+            graphViewModel.addGlucoseEntry(Entry(currentTime, number), mainActivity)
         }
 
-        lastEntryTime = System.currentTimeMillis() // ✅ Updates last entry time
-        (activity as? MainActivity)?.saveLastEntryTime(lastEntryTime)
+        // ✅ Save last entry time in SharedPreferences
+        lastEntryTime = System.currentTimeMillis()
+        PreferencesHelper.setLastEntryTime(requireContext(), lastEntryTime)
 
-        // ✅ Notify Activity Log to refresh its data
+        // ✅ Refresh recent blood glucose entry
         activityLogViewModel.loadRecentBloodEntry(requireContext())
 
+        // ✅ Coin reward logic
         val friendsViewModel = ViewModelProvider(requireActivity())[FriendsViewModel::class.java]
-
         friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
         friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
             val coinsEarned = 1 * multiplier
@@ -207,15 +197,12 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // ✅ Process and save activity entry
     private fun processActivityEntry(activity: String, startTime: String, endTime: String?, description: String) {
         val entry = ActivityLogEntry(activity, startTime, endTime, description)
-
-        // ✅ Debug Log (Confirm it's being triggered)
-
-        requireActivity().let { mainActivity ->
-            activityLogViewModel.addActivityEntry(entry, mainActivity)
+        requireActivity().let {
+            activityLogViewModel.addActivityEntry(entry, it)
         }
-
 
         AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
             .setTitle("Activity Logged")
@@ -224,8 +211,23 @@ class HomeFragment : Fragment() {
             .show()
     }
 
-
-
-
+    // ✅ Function to show confirmation dialogs for extreme glucose levels
+    private fun showWarningDialog(
+        title: String,
+        message: String,
+        currentTime: Float,
+        number: Float,
+        parentDialog: AlertDialog
+    ) {
+        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+            .setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Confirm") { _, _ ->
+                processGlucoseEntry(currentTime, number)
+                parentDialog.dismiss()
+            }
+            .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
+            .show()
+    }
 
 }

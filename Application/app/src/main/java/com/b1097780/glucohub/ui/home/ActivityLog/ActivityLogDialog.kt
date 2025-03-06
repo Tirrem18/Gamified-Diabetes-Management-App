@@ -5,10 +5,8 @@ import android.app.TimePickerDialog
 import android.content.Context
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
-import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -20,7 +18,7 @@ import java.util.*
 
 class ActivityLogDialog(private val context: Context, private val callback: (String, String?, String?, String) -> Unit) {
 
-    // Displays the main dialog to select an activity type
+    // ✅ Displays the main dialog to select an activity type
     fun show() {
         val activityTypes = listOf("Meal", "Insulin", "Activity", "Long-Acting Insulin", "Preset")
 
@@ -49,8 +47,7 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
         dialog.show()
     }
 
-
-    // Displays the input dialog for entering activity details
+    // ✅ Displays the input dialog for entering activity details
     private fun showActivityInputDialog() {
         val layout = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
@@ -60,7 +57,6 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
         val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         val currentTime = timeFormat.format(Date())
 
-        // Creates an underlined EditText for text input
         fun createUnderlinedEditText(hint: String, length: Int): EditText {
             return EditText(context).apply {
                 this.hint = hint
@@ -75,14 +71,12 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
             }
         }
 
-        // Creates an EditText for selecting time
         fun createTimeEditText(): EditText {
             return EditText(context).apply {
                 setText(currentTime)
                 maxLines = 1
                 isFocusable = false
                 inputType = InputType.TYPE_NULL
-                setOnClickListener { showTimePicker(this, null) }
                 background = null
                 setPadding(10, 10, 10, 20)
                 paintFlags = paintFlags or Paint.UNDERLINE_TEXT_FLAG
@@ -101,10 +95,11 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
         val endTimeEditText = createTimeEditText().apply {
             visibility = View.GONE
             isEnabled = false
-            setOnClickListener { showTimePicker(this, startTimeEditText) }
         }
 
-        // Creates a checkbox to enable/disable end time selection
+        startTimeEditText.setOnClickListener { showTimePicker(startTimeEditText, null, endTimeEditText) }
+        endTimeEditText.setOnClickListener { showTimePicker(endTimeEditText, startTimeEditText, null) }
+
         val enableEndTimeCheckbox = CheckBox(context).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.WRAP_CONTENT,
@@ -150,19 +145,23 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
             styleDialogButtons(dialog)
             val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
 
-            // Set click listener for OK button to validate name input
             okButton.setOnClickListener {
                 val name = activityEditText.text.toString().trim()
                 val startTime = startTimeEditText.text.toString()
                 val endTime = if (enableEndTimeCheckbox.isChecked) endTimeEditText.text.toString() else null
-                val details = detailsEditText.text.toString().trim().takeIf { it.isNotEmpty() } // Allows null if empty
+                val details = detailsEditText.text.toString().trim().takeIf { it.isNotEmpty() }
 
+                // ✅ Prevent dialog from closing on error
                 if (name.isEmpty()) {
                     showAlert("Error", "Activity name cannot be empty")
                     return@setOnClickListener
                 }
 
-                // Close dialog and return values if validation is passed
+                if (endTime != null && startTime >= endTime) {
+                    showAlert("Error", "Start time must be before end time.")
+                    return@setOnClickListener
+                }
+
                 dialog.dismiss()
                 callback(name, startTime, endTime, details ?: "")
             }
@@ -171,13 +170,38 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
         dialog.show()
     }
 
-    // Shows an alert dialog with a given title and message
+    // ✅ Shows an alert dialog without closing the main dialog
     private fun showAlert(title: String, message: String) {
         AlertDialog.Builder(context)
             .setTitle(title)
             .setMessage(message)
             .setPositiveButton("OK", null)
             .show()
+    }
+
+    private fun styleDialogButtons(dialog: AlertDialog) {
+        val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
+        val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+        val textColorPrimary = getThemeColor(context, android.R.attr.textColorPrimary)
+        cancelButton.setTextColor(textColorPrimary)
+        okButton.setTextColor(textColorPrimary)
+    }
+
+    private fun getThemeColor(context: Context, attr: Int): Int {
+        val typedValue = TypedValue()
+        context.theme.resolveAttribute(attr, typedValue, true)
+        return typedValue.data
+    }
+
+    private fun showTimePicker(editText: EditText, startTimeEditText: EditText?, endTimeEditText: EditText?) {
+        val calendar = Calendar.getInstance()
+        val hour = calendar.get(Calendar.HOUR_OF_DAY)
+        val minute = calendar.get(Calendar.MINUTE)
+
+        TimePickerDialog(context, { _, selectedHour, selectedMinute ->
+            val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+            editText.setText(formattedTime)
+        }, hour, minute, true).show()
     }
 
     // Creates a labeled row with text and input fields
@@ -194,45 +218,5 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
             })
             views.forEach { addView(it) }
         }
-    }
-
-    // Displays a TimePickerDialog and updates the corresponding EditText
-    private fun showTimePicker(editText: EditText, startTimeEditText: EditText?) {
-        val calendar = Calendar.getInstance()
-        val hour = calendar.get(Calendar.HOUR_OF_DAY)
-        val minute = calendar.get(Calendar.MINUTE)
-
-        TimePickerDialog(context, { _, selectedHour, selectedMinute ->
-            val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
-
-            if (startTimeEditText != null && formattedTime <= startTimeEditText.text.toString()) {
-                editText.error = "End time must be later than start time."
-                return@TimePickerDialog
-            }
-
-            editText.setText(formattedTime)
-        }, hour, minute, true).show()
-    }
-
-// Styles the dialog buttons to match the theme
-    private fun styleDialogButtons(dialog: AlertDialog) {
-        val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
-        val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-
-        val textColorPrimary = getThemeColor(context, android.R.attr.textColorPrimary)
-        val primaryColor = getThemeColor(context, android.R.attr.colorPrimary)
-
-        cancelButton.setTextColor(textColorPrimary)
-        cancelButton.setBackgroundColor(primaryColor)
-
-        okButton.setTextColor(textColorPrimary)
-        okButton.setBackgroundColor(primaryColor)
-    }
-
-    // Retrieves the primary theme color for text and UI elements
-    private fun getThemeColor(context: Context, attr: Int): Int {
-        val typedValue = TypedValue()
-        context.theme.resolveAttribute(attr, typedValue, true)
-        return typedValue.data
     }
 }

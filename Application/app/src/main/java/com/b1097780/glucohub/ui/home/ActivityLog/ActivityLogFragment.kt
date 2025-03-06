@@ -19,6 +19,7 @@ class ActivityLogFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var activityLogViewModel: ActivityLogViewModel
 
+    // ✅ Lifecycle Method: Create View & Initialize ViewModel
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -26,21 +27,23 @@ class ActivityLogFragment : Fragment() {
     ): View {
         activityLogViewModel = ViewModelProvider(requireActivity()).get(ActivityLogViewModel::class.java)
         _binding = FragmentActivityLogBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
+        // ✅ Load data into the Activity Log
         activityLogViewModel.loadRecentBloodEntry(requireContext())
         activityLogViewModel.loadActivityEntries(requireContext())
 
         setupObservers()
 
-        return root
+        return binding.root
     }
 
+    // ✅ Lifecycle Method: Cleanup on View Destroy
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
     }
 
+    // ✅ Observe LiveData and update UI accordingly
     private fun setupObservers() {
         activityLogViewModel.recentGlucoseTime.observe(viewLifecycleOwner) { time ->
             binding.recentTime.text = time
@@ -55,6 +58,7 @@ class ActivityLogFragment : Fragment() {
         }
     }
 
+    // ✅ Organizes activities into Recent & Upcoming sections
     private fun updateActivityTables(activities: List<ActivityLogEntry>) {
         val now = LocalTime.now()
         val formatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -70,6 +74,7 @@ class ActivityLogFragment : Fragment() {
         val recentActivities = mutableListOf<ActivityLogEntry>()
         val upcomingActivities = mutableListOf<ActivityLogEntry>()
 
+        // ✅ Sort activities into Recent or Upcoming
         for (entry in activities) {
             val startTime = LocalTime.parse(entry.startTime, formatter)
             if (startTime <= now) {
@@ -79,19 +84,18 @@ class ActivityLogFragment : Fragment() {
             }
         }
 
+        // ✅ Sort lists to display in order
         recentActivities.sortByDescending { LocalTime.parse(it.startTime, formatter) }
         upcomingActivities.sortBy { LocalTime.parse(it.startTime, formatter) }
 
         when {
             upcomingActivities.isEmpty() -> {
-                // Show 7 recent activities, hide Upcoming Activities title and section
                 val displayedRecent = recentActivities.take(7)
                 binding.upcomingActivitiesLabel.visibility = View.GONE
                 binding.upcomingActivitiesTable.visibility = View.GONE
                 populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
             }
             upcomingActivities.size == 1 -> {
-                // Show 4 recent activities and 1 upcoming, display Upcoming Activities title
                 val displayedRecent = recentActivities.take(4)
                 binding.upcomingActivitiesLabel.visibility = View.VISIBLE
                 binding.upcomingActivitiesTable.visibility = View.VISIBLE
@@ -99,14 +103,12 @@ class ActivityLogFragment : Fragment() {
                 populateTable(binding.upcomingActivitiesTable, listOf(upcomingActivities.first()), "No upcoming activities")
             }
             else -> {
-                // Determine if there are at least 2 upcoming activities within the next hour
                 val upcomingWithinHour = upcomingActivities.filter {
                     val startTime = LocalTime.parse(it.startTime, formatter)
                     startTime.isBefore(now.plusHours(1))
                 }
 
                 if (upcomingWithinHour.size >= 2) {
-                    // Show 3 recent activities and the 2 closest upcoming activities
                     val displayedRecent = recentActivities.take(3)
                     val displayedUpcoming = upcomingWithinHour.take(2)
                     binding.upcomingActivitiesLabel.visibility = View.VISIBLE
@@ -114,7 +116,6 @@ class ActivityLogFragment : Fragment() {
                     populateTable(binding.recentActivitiesTable, displayedRecent, "No recent activities")
                     populateTable(binding.upcomingActivitiesTable, displayedUpcoming, "No upcoming activities")
                 } else {
-                    // Show 4 recent activities and only the closest upcoming activity
                     val displayedRecent = recentActivities.take(4)
                     val closestUpcoming = listOf(upcomingActivities.first())
                     binding.upcomingActivitiesLabel.visibility = View.VISIBLE
@@ -126,12 +127,13 @@ class ActivityLogFragment : Fragment() {
         }
     }
 
+    // ✅ Populates tables with activity data
     private fun populateTable(table: ViewGroup, activities: List<ActivityLogEntry>, emptyMessage: String) {
         if (activities.isEmpty()) {
             val noActivityText = TextView(requireContext()).apply {
                 text = emptyMessage
-                textSize = 18f // Increased size
-                setTypeface(null, Typeface.BOLD) // Force bold
+                textSize = 18f
+                setTypeface(null, Typeface.BOLD)
                 setPadding(16, 16, 16, 16)
             }
             table.addView(noActivityText)
@@ -143,8 +145,8 @@ class ActivityLogFragment : Fragment() {
 
             val activityText = TextView(requireContext()).apply {
                 text = entry.name
-                textSize = 16f // Increased size
-                setTypeface(null, Typeface.BOLD) // Force bold
+                textSize = 16f
+                setTypeface(null, Typeface.BOLD)
                 setPadding(8, 1, 8, 1)
             }
 
@@ -169,7 +171,7 @@ class ActivityLogFragment : Fragment() {
         }
     }
 
-
+    // ✅ Displays a message when there are no activities to show
     private fun showNoActivityMessage() {
         listOf(
             binding.recentActivitiesTable to "No recent activities",

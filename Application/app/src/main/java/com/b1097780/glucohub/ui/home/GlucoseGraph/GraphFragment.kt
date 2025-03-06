@@ -26,9 +26,10 @@ class GraphFragment : Fragment() {
     private val binding get() = _binding!!
     private lateinit var graphViewModel: GraphViewModel
     private lateinit var lineChart: LineChart
-    private val handler = Handler(Looper.getMainLooper()) // Handler for periodic updates
-    private val updateInterval = 60 * 1000L // 60 seconds (1 minute)
+    private val handler = Handler(Looper.getMainLooper()) // ✅ Handler for periodic updates
+    private val updateInterval = 60 * 1000L // ✅ Auto-refresh every 60 seconds
 
+    // ✅ Runnable to periodically update graph time range
     private val updateGraphRunnable = object : Runnable {
         override fun run() {
             updateGraphTimeRange()
@@ -36,6 +37,7 @@ class GraphFragment : Fragment() {
         }
     }
 
+    // ✅ Lifecycle Method: Create View & Initialize ViewModels
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -49,55 +51,54 @@ class GraphFragment : Fragment() {
         setupGlucoseChart()
         setupObservers()
 
-        // Start auto-refresh every minute
+        // ✅ Start auto-refresh every minute
         handler.post(updateGraphRunnable)
 
         return root
     }
 
+    // ✅ Lifecycle Method: Stop updates when fragment is destroyed
     override fun onDestroyView() {
         super.onDestroyView()
-        handler.removeCallbacks(updateGraphRunnable) // Stop updates when fragment is destroyed
+        handler.removeCallbacks(updateGraphRunnable) // ✅ Stop auto-refresh
         _binding = null
     }
 
+    // ✅ Observe glucose data updates
     private fun setupObservers() {
         graphViewModel.glucoseEntries.observe(viewLifecycleOwner) { glucoseData ->
             loadChartData(glucoseData)
         }
     }
 
+    // ✅ Setup and update glucose chart dynamically
     private fun setupGlucoseChart() {
         updateGraphTimeRange()
     }
 
+    // ✅ Dynamically adjust graph range based on current time
     private fun updateGraphTimeRange() {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
         val currentMinute = calendar.get(Calendar.MINUTE)
 
-        val isEarlyMorning = currentHour < 5.01 // ✅ True if it's before 5 AM
-        val startHour = if (isEarlyMorning) {
-            0  // ✅ Always start at 00:00 before 5 AM
-        } else {
-            currentHour - 5 // ✅ After 5 AM, push forward dynamically
-        }
-
+        // ✅ Before 5 AM: Keep start time at 00:00, push forward dynamically after
+        val startHour = if (currentHour < 5) 0 else (currentHour - 4).coerceAtLeast(0)
         val roundedCurrentHour = if (currentMinute > 0) currentHour + 1 else currentHour
 
         configureLineChart(lineChart, startHour, roundedCurrentHour)
 
-        // 🔥 Load data from ViewModel (ensures updates)
+        // ✅ Reload glucose data with updated range
         (activity as? MainActivity)?.let { mainActivity ->
             graphViewModel.loadGlucoseEntries(mainActivity)
         }
 
-        lineChart.invalidate() // Refresh chart
+        lineChart.invalidate() // ✅ Refresh graph
     }
 
 
 
-
+    // ✅ Configure graph axis, labels, and scaling behavior
     private fun configureLineChart(lineChart: LineChart, startHour: Int, endHour: Int) {
         lineChart.description.isEnabled = false
         lineChart.setTouchEnabled(true)
@@ -115,10 +116,10 @@ class GraphFragment : Fragment() {
         // ✅ Ensure proper time display before and after 5 AM
         if (startHour == 0) {
             xAxis.axisMinimum = 0f
-            xAxis.axisMaximum = 5f // ✅ Display 00:00 - 05:00 before 5 AM
+            xAxis.axisMaximum = 5f
         } else {
             xAxis.axisMinimum = 0f
-            xAxis.axisMaximum = (endHour - startHour).toFloat() // ✅ Shift dynamically after 5 AM
+            xAxis.axisMaximum = (endHour - startHour).toFloat()
         }
 
         xAxis.valueFormatter = getTimeValueFormatter(startHour)
@@ -135,9 +136,7 @@ class GraphFragment : Fragment() {
         rightAxis.isEnabled = false
     }
 
-
-
-
+    // ✅ Formats x-axis time labels to display correct hour
     private fun getTimeValueFormatter(startHour: Int): ValueFormatter {
         return object : ValueFormatter() {
             override fun getFormattedValue(value: Float): String {
@@ -147,36 +146,34 @@ class GraphFragment : Fragment() {
         }
     }
 
+    // ✅ Load glucose data into chart
     private fun loadChartData(entries: List<Entry>) {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
-        val isEarlyMorning = currentHour < 5 // Before 5 AM
-        val startHour = if (isEarlyMorning) 0 else currentHour - 5
-        val endHour = currentHour + 1 // 🔥 Ensure next hour is included!
 
-        // Filtering logic: Include the next hour
-        val filteredEntries = if (isEarlyMorning) {
-            entries // ✅ Keep all values from 00:00 before 5 AM
-        } else {
-            entries.filter { it.x in startHour.toFloat()..endHour.toFloat() }
-        }
+        // ✅ Dynamic start time: 00:00 before 5 AM, pushes forward dynamically after
+        val startHour = if (currentHour < 5) 0 else (currentHour - 4).coerceAtLeast(0)
+        val endHour = currentHour + 1 // ✅ Always include the next hour
 
+        // ✅ Filter entries within the selected time range
+        val filteredEntries = entries.filter { it.x in startHour.toFloat()..endHour.toFloat() }
+
+        // ✅ Adjust x-values to align with shifted time range
         val adjustedEntries = filteredEntries.map {
-            val adjustedX = if (isEarlyMorning) it.x else it.x - startHour
+            val adjustedX = it.x - startHour
             Entry(adjustedX, it.y)
         }.toMutableList()
 
-
-        // Setup dataset
+        // ✅ Configure dataset
         val dataSet = LineDataSet(adjustedEntries, "Glucose Levels")
         dataSet.setDrawCircles(true)
         dataSet.circleRadius = 4.5f
         dataSet.setDrawValues(false)
         dataSet.lineWidth = 1.5f
         dataSet.color = Color.BLACK
-        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER // Smooth curves
+        dataSet.mode = LineDataSet.Mode.CUBIC_BEZIER
 
-        // Color-code data points based on glucose levels
+        // ✅ Color-code points based on glucose levels
         val circleColors = adjustedEntries.map {
             when {
                 it.y <= 3.9 -> Color.RED    // 🔴 Low Blood Sugar
@@ -186,14 +183,11 @@ class GraphFragment : Fragment() {
         }
         dataSet.circleColors = circleColors
 
-        // Set data and refresh chart
+        // ✅ Update chart
         val lineData = LineData(dataSet)
         lineChart.data = lineData
-        lineChart.invalidate() // Refresh chart
+        lineChart.invalidate() // ✅ Refresh graph
     }
-
-
-
 
 
 }
