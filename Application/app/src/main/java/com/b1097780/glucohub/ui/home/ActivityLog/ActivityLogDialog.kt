@@ -22,7 +22,7 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
 
     // Displays the main dialog to select an activity type
     fun show() {
-        val activityTypes = mutableListOf("Meal", "Insulin", "Activity", "Long-Acting Insulin", "Custom")
+        val activityTypes = listOf("Meal", "Insulin", "Activity", "Long-Acting Insulin", "Preset")
 
         val adapter = object : ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, activityTypes) {
             override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
@@ -48,6 +48,7 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
         dialog.setOnShowListener { styleDialogButtons(dialog) }
         dialog.show()
     }
+
 
     // Displays the input dialog for entering activity details
     private fun showActivityInputDialog() {

@@ -38,7 +38,7 @@
 
     <fragment
         android:id="@+id/navigation_data"
-        android:name="com.b1097780.glucohub.ui.data.DataFragment"
+        android:name="com.b1097780.glucohub.ui.profile.ProfileFragment"
         android:label="Data"
         tools:layout="@layout/fragment_data" />
 
@@ -51,7 +51,7 @@
 
     <fragment
         android:id="@+id/navigation_profile"
-        android:name="com.b1097780.glucohub.ui.profile.ProfileFragment"
+        android:name="com.b1097780.glucohub.ui.friends.FriendsFragment"
         android:label="Profile"
         tools:layout="@layout/fragment_profile" />
 </navigation>

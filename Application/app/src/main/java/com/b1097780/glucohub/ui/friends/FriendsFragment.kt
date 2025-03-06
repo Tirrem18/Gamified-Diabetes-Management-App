@@ -1,4 +1,4 @@
-package com.b1097780.glucohub.ui.data
+package com.b1097780.glucohub.ui.friends
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,11 +7,12 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
-import com.b1097780.glucohub.databinding.FragmentDataBinding
+import com.b1097780.glucohub.databinding.FragmentProfileBinding
 
-class DataFragment : Fragment() {
 
-    private var _binding: FragmentDataBinding? = null
+class FriendsFragment : Fragment() {
+
+    private var _binding: FragmentProfileBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -22,14 +23,14 @@ class DataFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val dataViewModel =
-            ViewModelProvider(this).get(DataViewModel::class.java)
+        val streaksViewModel =
+            ViewModelProvider(this).get(FriendsViewModel::class.java)
 
-        _binding = FragmentDataBinding.inflate(inflater, container, false)
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        val textView: TextView = binding.textData
-        dataViewModel.text.observe(viewLifecycleOwner) {
+        val textView: TextView = binding.textProfile
+        streaksViewModel.text.observe(viewLifecycleOwner) {
             textView.text = it
         }
         return root

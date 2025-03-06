@@ -19,7 +19,7 @@ import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogDialog
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
-import com.b1097780.glucohub.ui.profile.ProfileViewModel
+import com.b1097780.glucohub.ui.friends.FriendsViewModel
 import com.github.mikephil.charting.data.Entry
 import java.util.*
 
@@ -54,6 +54,12 @@ class HomeFragment : Fragment() {
 
         return binding.root
     }
+    override fun onResume() {
+        super.onResume()
+        activityLogViewModel.loadRecentBloodEntry(requireContext()) // Refresh glucose
+        activityLogViewModel.loadActivityEntries(requireContext())  // Refresh activities
+    }
+
 
 
     override fun onDestroyView() {
@@ -186,10 +192,10 @@ class HomeFragment : Fragment() {
         // ✅ Notify Activity Log to refresh its data
         activityLogViewModel.loadRecentBloodEntry(requireContext())
 
-        val profileViewModel = ViewModelProvider(requireActivity())[ProfileViewModel::class.java]
+        val friendsViewModel = ViewModelProvider(requireActivity())[FriendsViewModel::class.java]
 
-        profileViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
-        profileViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
+        friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
+        friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
             val coinsEarned = 1 * multiplier
             (activity as? MainActivity)?.addCoinsFromFragment(coinsEarned)
 
