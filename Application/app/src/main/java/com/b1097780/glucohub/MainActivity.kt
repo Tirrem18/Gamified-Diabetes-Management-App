@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
 
-        //PreferencesHelper.clearAllData(this)
-        PreferencesHelper.populateTestData(this)
+        PreferencesHelper.clearAllData(this)
+       PreferencesHelper.populateTestData(this)
 
 
 
@@ -85,16 +85,30 @@ class MainActivity : AppCompatActivity() {
     private fun setupDrawerNavigation() {
         binding.navViewDrawer.setNavigationItemSelectedListener { menuItem ->
             val navController = findNavController(R.id.nav_host_fragment_activity_main)
+
+            // Prevent duplicate fragment creation
+            if (navController.currentDestination?.id == menuItem.itemId) {
+                binding.drawerLayout.closeDrawer(binding.navViewDrawer)
+                return@setNavigationItemSelectedListener true
+            }
+
+            // Clear back stack before navigating
+            navController.popBackStack(R.id.navigation_home, false) // Keep Home in stack
+
             when (menuItem.itemId) {
                 R.id.nav_settings -> navController.navigate(R.id.navigation_settings)
                 R.id.nav_profile -> navController.navigate(R.id.navigation_profile)
                 R.id.nav_logout -> performLogout()
                 else -> menuItem.onNavDestinationSelected(navController)
             }
+
+            // Close the drawer immediately
             binding.drawerLayout.closeDrawer(binding.navViewDrawer)
+
             true
         }
     }
+
 
     fun updateCoinButton(value: Int) {
         val formattedValue = formatNumber(value, false)
@@ -135,6 +149,8 @@ class MainActivity : AppCompatActivity() {
         val shrinkAnimation = AnimationUtils.loadAnimation(this, R.anim.shrink_button)
 
         customMenuButton.setOnClickListener {
+            disableButtonTemporarily(it)
+
             it.startAnimation(shrinkAnimation)
             Handler(Looper.getMainLooper()).postDelayed(
                 { binding.drawerLayout.openDrawer(binding.navViewDrawer) }, 150
@@ -142,6 +158,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         customBackButton.setOnClickListener {
+            disableButtonTemporarily(it)
+
             it.startAnimation(shrinkAnimation)
             Handler(Looper.getMainLooper()).postDelayed(
                 { onBackPressedDispatcher.onBackPressed() }, 150
@@ -149,6 +167,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         customStreakButton.setOnClickListener {
+            disableButtonTemporarily(it)
+
             it.startAnimation(shrinkAnimation)
             Handler(Looper.getMainLooper()).postDelayed(
                 {
@@ -160,6 +180,8 @@ class MainActivity : AppCompatActivity() {
         }
 
         customCoinButton.setOnClickListener {
+            disableButtonTemporarily(it)
+
             it.startAnimation(shrinkAnimation)
             Handler(Looper.getMainLooper()).postDelayed(
                 {
@@ -170,6 +192,15 @@ class MainActivity : AppCompatActivity() {
             )
         }
     }
+
+    // ✅ Function to disable button for 0.5 seconds
+    private fun disableButtonTemporarily(button: View) {
+        button.isEnabled = false
+        Handler(Looper.getMainLooper()).postDelayed({
+            button.isEnabled = true
+        }, 500) // 0.5 seconds delay
+    }
+
 
 
     private fun observeNavDestinationChanges() {

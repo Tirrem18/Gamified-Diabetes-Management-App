@@ -21,6 +21,7 @@ import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
 import com.b1097780.glucohub.ui.friends.FriendsViewModel
+import com.b1097780.glucohub.ui.home.GraphDialog.GraphDialog
 import com.github.mikephil.charting.data.Entry
 import java.util.*
 
@@ -82,9 +83,10 @@ class HomeFragment : Fragment() {
         }
     }
 
-    // ✅ Set up button click listeners with animations
     private fun setupButtons() {
         binding.button1.setOnClickListener {
+            disableButtonTemporarily(it)
+
             val currentTime = System.currentTimeMillis()
 
             // ✅ Prevent duplicate glucose entries within 5 minutes
@@ -99,11 +101,13 @@ class HomeFragment : Fragment() {
 
             it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button))
             Handler(Looper.getMainLooper()).postDelayed({
-                showNumberInputPopup()
+                showGlucoseInputPopup()
             }, 200)
         }
 
         binding.button2.setOnClickListener {
+            disableButtonTemporarily(it)
+
             it.startAnimation(AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button))
             Handler(Looper.getMainLooper()).postDelayed({
                 showActivityInputPopup()
@@ -111,46 +115,20 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // ✅ Function to disable button for 0.5 seconds
+    private fun disableButtonTemporarily(button: View) {
+        button.isEnabled = false
+        Handler(Looper.getMainLooper()).postDelayed({
+            button.isEnabled = true
+        }, 500) // 0.5 seconds delay
+    }
+
+
     // ✅ Show popup for glucose input
-    private fun showNumberInputPopup() {
-        val editText = EditText(requireContext()).apply {
-            inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL or InputType.TYPE_CLASS_NUMBER
-        }
-
-        val dialog = AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-            .setTitle("Enter Glucose Level")
-            .setMessage("Please enter your current glucose level:")
-            .setView(editText)
-            .setPositiveButton("OK", null)
-            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
-            .create()
-
-        dialog.setOnShowListener {
-            val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
-            okButton.setOnClickListener {
-                val inputText = editText.text.toString()
-                val number = inputText.toFloatOrNull()
-
-                // ✅ Validate input range
-                if (number == null || number < 0f || number > 40f) {
-                    editText.error = "Invalid value. Enter a number between 0 and 40."
-                    return@setOnClickListener
-                }
-
-                val currentTime = getCurrentTime()
-
-                // ✅ Confirm for extreme glucose levels
-                when {
-                    number > 25f -> showWarningDialog("High Glucose Alert", "A glucose level above 25 is dangerously high. Are you sure? Please inject accordingly", currentTime, number, dialog)
-                    number < 2f -> showWarningDialog("Low Glucose Warning", "A glucose level below 2 is critically low. Are you sure? Please eat fats acting carbs accordingly", currentTime, number, dialog)
-                    else -> {
-                        processGlucoseEntry(currentTime, number)
-                        dialog.dismiss()
-                    }
-                }
-            }
-        }
-        dialog.show()
+    private fun showGlucoseInputPopup() {
+        GraphDialog(requireContext()) { time, glucoseLevel ->
+            processGlucoseEntry(time, glucoseLevel)
+        }.show()
     }
 
     // ✅ Show popup for activity input
