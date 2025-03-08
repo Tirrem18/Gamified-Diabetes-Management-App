@@ -43,6 +43,36 @@
         <item name="android:textColorSecondary">@color/white</item>
     </style>
 
+    <style name="Theme.GlucoHub.bubblegum" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/pink</item>
+        <item name="colorPrimaryVariant">@color/darkpink</item>
+        <item name="colorPrimaryDark">@color/darkestpink</item>
+        <item name="android:windowBackground">@color/darkestpink</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
 
+    <style name="Theme.GlucoHub.dragonfruit" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/fairypink</item>
+        <item name="colorPrimaryVariant">@color/fairydarkgreen</item>
+        <item name="colorPrimaryDark">@color/fairydarkestgreen</item>
+        <item name="android:windowBackground">@color/fairydarkestgreen</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
 
+    <style name="Theme.GlucoHub.peppermint" parent="Theme.MaterialComponents.DayNight.DarkActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="colorPrimary">@color/peppermint</item>
+        <item name="colorPrimaryVariant">@color/peppermintdark</item>
+        <item name="colorPrimaryDark">@color/peppermintdarkest</item>
+        <item name="android:windowBackground">@color/peppermintdarkest</item>
+        <item name="android:textColorPrimary">@color/white</item>
+        <item name="android:textColorSecondary">@color/white</item>
+    </style>
     </resources>

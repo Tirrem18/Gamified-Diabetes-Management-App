@@ -9,12 +9,12 @@
     <color name="white">#FFFFFFFF</color>
 
 
-    //My app colours
+    //Blue
     <color name="blue">#38aeee</color>
     <color name="darkblue">#0f6aa3</color>
     <color name="darkestblue">#1a2c39</color>
 
-    //My app colours
+    //Oranges
     <color name="orange">#ee7838</color>
     <color name="darkorange">#A3480F</color>
     <color name="darkestorange">#39271A</color>
@@ -23,9 +23,19 @@
     <color name="grey">#e8e8e8</color>
     <color name="darkgrey">#D3D3D3</color>
 
-    //My app colours
-    <color name="green">#f5f5f5</color>
-    <color name="darkpink">#f3adfc</color>
-    <color name="darkestpink">#f5bafc</color>
+    //Bubblegum
+    <color name="pink">#f3adfc</color>
+    <color name="darkpink">#e759f9</color>
+    <color name="darkestpink">#9306a5</color>
+
+    //dragonfruit
+    <color name="fairypink">#e944b1</color>
+    <color name="fairydarkgreen">#33b93c</color>
+    <color name="fairydarkestgreen">#3daa24</color>
+
+    //Fairytale
+    <color name="peppermint">#b8cfcb</color>
+    <color name="peppermintdark">#ce313f</color>
+    <color name="peppermintdarkest">#b71226</color>
 
 </resources>

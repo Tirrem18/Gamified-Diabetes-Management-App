@@ -149,7 +149,7 @@ object PreferencesHelper {
             "$today,06.15f,5.3f", "$today,06.40f,6.0f", "$today,07.05f,7.2f", "$today,07.30f,8.5f", "$today,07.55f,9.8f",
             "$today,08.20f,8.7f", "$today,08.45f,7.5f", "$today,09.10f,6.9f", "$today,09.35f,6.3f", "$today,09.55f,6.1f",
             "$today,10.20f,5.8f", "$today,10.45f,5.6f", "$today,11.05f,5.3f", "$today,11.30f,5.0f", "$today,11.50f,4.8f",
-            "$today,12.15f,4.6f", "$today,12.40f,4.4f", "$today,13.00f,5.2f", "$today,13.25f,6.3f", "$today,13.50f,7.8f",
+            "$today,12.15f,4.6f", "$today,12.40f,4.4f", "$today,13.00f,5.2f", "$today,13.25f,6.3f",
             "$today,14.15f,8.9f", "$today,14.40f,7.5f", "$today,15.05f,6.8f", "$today,15.30f,6.2f", "$today,15.55f,5.9f",
             "$today,16.20f,5.6f", "$today,16.45f,5.3f", "$today,17.10f,5.0f", "$today,17.35f,4.8f", "$today,18.00f,6.5f",
             "$today,18.25f,8.0f", "$today,18.50f,9.5f", "$today,19.15f,8.2f", "$today,19.40f,7.0f", "$today,20.05f,6.5f",

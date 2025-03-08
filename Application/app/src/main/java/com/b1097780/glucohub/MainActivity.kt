@@ -26,12 +26,12 @@ class MainActivity : AppCompatActivity() {
     private var userCoins: Int = 10
 
     // CUSTOMISE
-    private var theme = "orange" // Change this to "default", "purple", or "plain"
+    private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
 
-        PreferencesHelper.clearAllData(this)
+        //PreferencesHelper.clearAllData(this)
         PreferencesHelper.populateTestData(this)
 
 
@@ -53,6 +53,9 @@ class MainActivity : AppCompatActivity() {
         when (selectedTheme) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
             "orange" -> setTheme(R.style.Theme_GlucoHub_orange)
+            "bubblegum" -> setTheme(R.style.Theme_GlucoHub_bubblegum)
+            "dragonfruit" -> setTheme(R.style.Theme_GlucoHub_dragonfruit)
+            "peppermint" -> setTheme(R.style.Theme_GlucoHub_peppermint)
             else -> setTheme(R.style.Theme_GlucoHub_default) // Fallback to default
         }
     }
