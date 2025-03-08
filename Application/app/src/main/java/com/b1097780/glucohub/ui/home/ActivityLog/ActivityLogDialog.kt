@@ -1,5 +1,8 @@
 package com.b1097780.glucohub.ui.home.ActivityLog
 
+
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+
 import android.app.AlertDialog
 import android.app.TimePickerDialog
 import android.content.Context
@@ -182,10 +185,25 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
     private fun styleDialogButtons(dialog: AlertDialog) {
         val cancelButton = dialog.getButton(AlertDialog.BUTTON_NEGATIVE)
         val okButton = dialog.getButton(AlertDialog.BUTTON_POSITIVE)
+
         val textColorPrimary = getThemeColor(context, android.R.attr.textColorPrimary)
+        val backgroundColor = getThemeColor(context, android.R.attr.colorPrimary) // ✅ Get colorPrimary
+
+        // ✅ Set text color (Already correct)
         cancelButton.setTextColor(textColorPrimary)
         okButton.setTextColor(textColorPrimary)
+
+        // ✅ Explicitly set background color (Fix)
+        cancelButton.setBackgroundColor(backgroundColor)
+        okButton.setBackgroundColor(backgroundColor)
+
+        // ✅ Add padding to match Material styling
+        cancelButton.setPadding(20, 10, 20, 10)
+        okButton.setPadding(20, 10, 20, 10)
     }
+
+
+
 
     private fun getThemeColor(context: Context, attr: Int): Int {
         val typedValue = TypedValue()
