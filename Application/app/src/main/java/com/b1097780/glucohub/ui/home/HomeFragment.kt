@@ -173,11 +173,6 @@ class HomeFragment : Fragment() {
             activityLogViewModel.addActivityEntry(entry, it)
         }
 
-        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-            .setTitle("Activity Logged")
-            .setMessage("You've successfully logged: $activity at $startTime.")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-            .show()
 
         // ✅ Coin reward logic
         val friendsViewModel = ViewModelProvider(requireActivity())[FriendsViewModel::class.java]
