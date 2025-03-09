@@ -147,21 +147,23 @@ class GraphFragment : Fragment() {
     }
 
     // ✅ Load glucose data into chart
+    // ✅ Load glucose data into chart
     private fun loadChartData(entries: List<Entry>) {
         val calendar = Calendar.getInstance()
         val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
 
-        // ✅ Dynamic start time: 00:00 before 5 AM, pushes forward dynamically after
         val startHour = if (currentHour < 5) 0 else (currentHour - 4).coerceAtLeast(0)
-        val endHour = currentHour + 1 // ✅ Always include the next hour
+        val endHour = currentHour + 1
 
-        // ✅ Filter entries within the selected time range
+        // ✅ Filter and sort entries within the selected time range
         val filteredEntries = entries.filter { it.x in startHour.toFloat()..endHour.toFloat() }
+            .sortedBy { it.x } // Ensures entries are sorted by x-value (time)
 
-        // ✅ Adjust x-values to align with shifted time range
+        // ✅ Adjust x-values & cap glucose values at 20 for display
         val adjustedEntries = filteredEntries.map {
             val adjustedX = it.x - startHour
-            Entry(adjustedX, it.y)
+            val adjustedY = if (it.y > 20) 20f else it.y // ✅ Cap display value at 20
+            Entry(adjustedX, adjustedY)
         }.toMutableList()
 
         // ✅ Configure dataset
@@ -188,6 +190,7 @@ class GraphFragment : Fragment() {
         lineChart.data = lineData
         lineChart.invalidate() // ✅ Refresh graph
     }
+
 
 
 }

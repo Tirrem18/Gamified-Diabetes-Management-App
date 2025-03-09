@@ -32,7 +32,7 @@ class MainActivity : AppCompatActivity() {
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
 
         PreferencesHelper.clearAllData(this)
-       PreferencesHelper.populateTestData(this)
+        PreferencesHelper.populateTestData(this)
 
 
 

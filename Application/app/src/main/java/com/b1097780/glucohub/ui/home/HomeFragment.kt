@@ -9,9 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.b1097780.glucohub.databinding.FragmentHomeBinding
 import android.os.Handler
 import android.os.Looper
-import android.text.InputType
 import android.view.animation.AnimationUtils
-import android.widget.EditText
 import androidx.appcompat.app.AlertDialog
 import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.PreferencesHelper
@@ -23,7 +21,6 @@ import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
 import com.b1097780.glucohub.ui.friends.FriendsViewModel
 import com.b1097780.glucohub.ui.home.GraphDialog.GraphDialog
 import com.github.mikephil.charting.data.Entry
-import java.util.*
 
 class HomeFragment : Fragment() {
 
@@ -140,13 +137,6 @@ class HomeFragment : Fragment() {
         }.show()
     }
 
-    // ✅ Get current time in hours + minutes (decimal format)
-    private fun getCurrentTime(): Float {
-        val currentHour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY).toFloat()
-        val currentMinute = Calendar.getInstance().get(Calendar.MINUTE) / 60f
-        return currentHour + currentMinute
-    }
-
     // ✅ Process and save glucose entry
     private fun processGlucoseEntry(currentTime: Float, number: Float) {
         (activity as? MainActivity)?.let { mainActivity ->
@@ -165,7 +155,8 @@ class HomeFragment : Fragment() {
         friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
         friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
             val coinsEarned = 1 * multiplier
-            (activity as? MainActivity)?.addCoinsFromFragment(coinsEarned)
+            (requireActivity() as? MainActivity)?.addCoinsFromFragment(coinsEarned)
+
 
             AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
                 .setTitle("Coins Earned!")
@@ -193,7 +184,8 @@ class HomeFragment : Fragment() {
         friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
         friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
             val coinsEarned = 1 * multiplier
-            (activity as? MainActivity)?.addCoinsFromFragment(coinsEarned)
+            (requireActivity() as? MainActivity)?.addCoinsFromFragment(coinsEarned)
+
 
             AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
                 .setTitle("Coins Earned!")
@@ -202,26 +194,6 @@ class HomeFragment : Fragment() {
                 .show()
         }
 
-    }
-
-
-    // ✅ Function to show confirmation dialogs for extreme glucose levels
-    private fun showWarningDialog(
-        title: String,
-        message: String,
-        currentTime: Float,
-        number: Float,
-        parentDialog: AlertDialog
-    ) {
-        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-            .setTitle(title)
-            .setMessage(message)
-            .setPositiveButton("Confirm") { _, _ ->
-                processGlucoseEntry(currentTime, number)
-                parentDialog.dismiss()
-            }
-            .setNegativeButton("Cancel") { warnDialog, _ -> warnDialog.dismiss() }
-            .show()
     }
 
 }

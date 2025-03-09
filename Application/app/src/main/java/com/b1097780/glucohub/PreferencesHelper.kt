@@ -3,18 +3,21 @@ package com.b1097780.glucohub
 import android.content.Context
 import android.content.SharedPreferences
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
+import org.json.JSONArray
+import org.json.JSONObject
+import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.zip.GZIPInputStream
+import java.util.zip.GZIPOutputStream
 import kotlin.random.Random
 
 object PreferencesHelper {
     private const val PREFS_NAME = "GlucoHubPrefs"
 
-    // Keys for different stored values
+    // Keys for stored values
     private const val KEY_CARB_RATIO = "carb_ratio"
     private const val KEY_NIGHT_UNITS = "night_time_units"
-    private const val KEY_ACTIVITY_LOG = "activity_log_entries"
-    private const val KEY_GLUCOSE_ENTRIES = "glucose_entries"
     private const val KEY_USER_COINS = "userCoins"
     private const val KEY_LAST_ENTRY_TIME = "lastEntryTime"
 
@@ -24,7 +27,7 @@ object PreferencesHelper {
     }
 
     // -------------------------
-    // ✅ CLEAR ALL DATA (Reset SharedPreferences)
+    // ✅ CLEAR ALL DATA
     // -------------------------
     fun clearAllData(context: Context) {
         getPrefs(context).edit().clear().apply()
@@ -61,63 +64,12 @@ object PreferencesHelper {
 
     fun addCoins(context: Context, amount: Int) {
         val sharedPrefs = getPrefs(context)
-        val currentCoins = sharedPrefs.getInt("userCoins", 0)
-        sharedPrefs.edit().putInt("userCoins", currentCoins + amount).apply()
+        val currentCoins = sharedPrefs.getInt(KEY_USER_COINS, 0)
+        sharedPrefs.edit().putInt(KEY_USER_COINS, currentCoins + amount).apply()
     }
-
-
 
     fun setUserCoins(context: Context, value: Int) {
         getPrefs(context).edit().putInt(KEY_USER_COINS, value).apply()
-    }
-
-    // -------------------------
-    // ✅ ACTIVITY LOG ENTRIES
-    // -------------------------
-    fun getActivityLogEntries(context: Context): List<ActivityLogEntry> {
-        val sharedPrefs = getPrefs(context)
-        val entryString = sharedPrefs.getString(KEY_ACTIVITY_LOG, "") ?: ""
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-
-        return entryString.split(";").mapNotNull {
-            val parts = it.split(",")
-            if (parts.size >= 4 && parts[0] == today) {
-                ActivityLogEntry(
-                    name = parts[1],
-                    startTime = parts[2],
-                    endTime = parts[3].takeIf { it != "null" },
-                    description = parts.getOrNull(4)?.takeIf { it != "null" }
-                )
-            } else {
-                null
-            }
-        }
-    }
-
-    fun setActivityLogEntries(context: Context, entries: List<ActivityLogEntry>) {
-        val sharedPrefs = getPrefs(context)
-        val editor = sharedPrefs.edit()
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-
-        val entryString = entries.joinToString(";") { entry ->
-            "$today,${entry.name},${entry.startTime},${entry.endTime ?: "null"},${entry.description ?: "null"}"
-        }
-
-        editor.putString(KEY_ACTIVITY_LOG, entryString)
-        editor.apply()
-    }
-
-    // -------------------------
-    // ✅ RECENT GLUCOSE ENTRIES
-    // -------------------------
-    fun getRecentGlucoseEntries(context: Context): String {
-        return getPrefs(context).getString(KEY_GLUCOSE_ENTRIES, "") ?: ""
-    }
-
-    fun setRecentGlucoseEntries(context: Context, value: String) {
-        getPrefs(context).edit().putString(KEY_GLUCOSE_ENTRIES, value).apply()
     }
 
     // -------------------------
@@ -132,11 +84,160 @@ object PreferencesHelper {
     }
 
     // -------------------------
-    // ✅ POPULATE TEST DATA
+    // ✅ SAVE GLUCOSE & ACTIVITY LOG DATA (WITH COMPRESSION)
+    // -------------------------
+
+    fun saveGlucoseEntries(context: Context, date: String, glucoseEntries: List<Pair<String, Float>>) {
+        val sharedPrefs = getPrefs(context)
+        val editor = sharedPrefs.edit()
+
+        val glucoseArray = JSONArray()
+        for ((time, level) in glucoseEntries) {
+            val entryObject = JSONObject().apply {
+                put("time", time)
+                put("glucose_level", level)
+            }
+            glucoseArray.put(entryObject)
+        }
+
+        editor.putString("${date}_glucose", compressJson(glucoseArray.toString()))
+        editor.apply()
+    }
+
+    fun saveActivityEntries(context: Context, date: String, activityEntries: List<ActivityLogEntry>) {
+        val sharedPrefs = getPrefs(context)
+        val editor = sharedPrefs.edit()
+
+        val activityArray = JSONArray()
+        for (entry in activityEntries) {
+            val entryObject = JSONObject().apply {
+                put("name", entry.name)
+                put("start_time", entry.startTime)
+                put("end_time", entry.endTime ?: "null")
+                put("description", entry.description ?: "null")
+            }
+            activityArray.put(entryObject)
+        }
+
+        editor.putString("${date}_activities", compressJson(activityArray.toString()))
+        editor.apply()
+    }
+
+    // -------------------------
+    // ✅ GET GLUCOSE & ACTIVITY ENTRIES (WITH DECOMPRESSION)
+    // -------------------------
+
+    fun getGlucoseEntriesForDate(context: Context, date: String): List<Pair<String, Float>> {
+        val sharedPrefs = getPrefs(context)
+        val jsonString = decompressJson(sharedPrefs.getString("${date}_glucose", "[]") ?: "[]")
+
+        val resultGlucose = mutableListOf<Pair<String, Float>>()
+        val jsonArray = JSONArray(jsonString)
+
+        for (i in 0 until jsonArray.length()) {
+            val entryObject = jsonArray.getJSONObject(i)
+            val time = entryObject.getString("time")
+            val level = entryObject.getDouble("glucose_level").toFloat()
+            resultGlucose.add(Pair(time, level))
+        }
+
+        return resultGlucose
+    }
+
+    fun getActivityEntriesForDate(context: Context, date: String): List<ActivityLogEntry> {
+        val sharedPrefs = getPrefs(context)
+        val jsonString = decompressJson(sharedPrefs.getString("${date}_activities", "[]") ?: "[]")
+
+        val resultActivities = mutableListOf<ActivityLogEntry>()
+        val jsonArray = JSONArray(jsonString)
+
+        for (i in 0 until jsonArray.length()) {
+            val entryObject = jsonArray.getJSONObject(i)
+            resultActivities.add(
+                ActivityLogEntry(
+                    name = entryObject.getString("name"),
+                    startTime = entryObject.getString("start_time"),
+                    endTime = entryObject.optString("end_time").takeIf { it != "null" },
+                    description = entryObject.optString("description").takeIf { it != "null" }
+                )
+            )
+        }
+
+        return resultActivities
+    }
+
+    // -------------------------
+    // ✅ JSON COMPRESSION & DECOMPRESSION
+    // -------------------------
+
+    private fun compressJson(json: String): String {
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        GZIPOutputStream(byteArrayOutputStream).use { gzipOutput ->
+            gzipOutput.write(json.toByteArray(Charsets.UTF_8))
+        }
+        return Base64.getEncoder().encodeToString(byteArrayOutputStream.toByteArray())
+    }
+
+    private fun decompressJson(compressed: String): String {
+        return try {
+            val bytes = Base64.getDecoder().decode(compressed)
+            GZIPInputStream(ByteArrayInputStream(bytes)).bufferedReader(Charsets.UTF_8).use { it.readText() }
+        } catch (e: Exception) {
+            "[]" // Return empty JSON array if decompression fails
+        }
+    }
+
+    // -------------------------
+    // ✅ GET GLUCOSE ENTRIES IN A DATE RANGE
+    // -------------------------
+
+    fun getGlucoseEntriesBetweenDates(context: Context, startDate: String, endDate: String): Map<String, List<Pair<String, Float>>> {
+        val result = mutableMapOf<String, List<Pair<String, Float>>>()
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+
+        val start = dateFormat.parse(startDate) ?: return result
+        val end = dateFormat.parse(endDate) ?: return result
+
+        calendar.time = start
+        while (!calendar.time.after(end)) {
+            val dateKey = dateFormat.format(calendar.time)
+            val entries = getGlucoseEntriesForDate(context, dateKey)
+            if (entries.isNotEmpty()) result[dateKey] = entries
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        return result
+    }
+
+    // -------------------------
+    // ✅ GET ACTIVITY ENTRIES IN A DATE RANGE
+    // -------------------------
+
+    fun getActivityEntriesBetweenDates(context: Context, startDate: String, endDate: String): Map<String, List<ActivityLogEntry>> {
+        val result = mutableMapOf<String, List<ActivityLogEntry>>()
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+
+        val start = dateFormat.parse(startDate) ?: return result
+        val end = dateFormat.parse(endDate) ?: return result
+
+        calendar.time = start
+        while (!calendar.time.after(end)) {
+            val dateKey = dateFormat.format(calendar.time)
+            val entries = getActivityEntriesForDate(context, dateKey)
+            if (entries.isNotEmpty()) result[dateKey] = entries
+            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        }
+
+        return result
+    }
+
+    // -------------------------
+    // ✅ POPULATE TEST DATA (WITH COMPRESSION)
     // -------------------------
 
     fun populateTestData(context: Context) {
-        val editor = getPrefs(context).edit()
         val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
         val calendar = Calendar.getInstance()
 
@@ -144,54 +245,54 @@ object PreferencesHelper {
         val currentMonth = calendar.get(Calendar.MONTH)  // Current month (0-based index)
         val currentYear = calendar.get(Calendar.YEAR)  // Current year
 
-        val glucoseEntries = mutableListOf<String>()
-        val activityLog = mutableListOf<String>()
-
-        // --- Step 1: Get Last Month's Data ---
-        calendar.set(currentYear, currentMonth - 1, 1) // Move to the first day of last month
-        val lastMonth = calendar.get(Calendar.MONTH)
-        val lastYear = calendar.get(Calendar.YEAR)
+        // --- Step 1: Generate Last Month's Data ---
+        calendar.set(currentYear, currentMonth - 1, 1) // Move to first day of last month
         val lastMonthMaxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) // Get last month's total days
 
-        // Loop through last month's entire range (1st to last day)
         for (day in 1..lastMonthMaxDay) {
-            calendar.set(lastYear, lastMonth, day) // Set calendar to specific day
-            val date = dateFormat.format(calendar.time) // Format as yyyyMMdd
+            calendar.set(currentYear, currentMonth - 1, day)
+            val date = dateFormat.format(calendar.time)
 
-            // Get a random glucose dataset for the day
-            val glucoseDataSet = getRandomGlucoseDataSet(date)
-            glucoseEntries.addAll(glucoseDataSet)
+            // Generate test data
+            val glucoseEntries = getRandomGlucoseDataSet(date).map {
+                val parts = it.split(",")
+                Pair(parts[1], parts[2].toFloat()) // Extract time & glucose level
+            }
 
-            // Add activity logs
-            val testActivities = generateActivityLog(date)
-            activityLog.addAll(testActivities)
+            val activityEntries = generateActivityLog(date).map { entry ->
+                val parts = entry.split(",")
+                ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
+            }
+
+            // ✅ Save separately in SharedPreferences (WITH COMPRESSION)
+            saveGlucoseEntries(context, date, glucoseEntries)
+            saveActivityEntries(context, date, activityEntries)
         }
 
-        // --- Step 2: Get This Month's Data (1st to Today) ---
-        calendar.set(currentYear, currentMonth, 1) // Move to the first day of this month
+        // --- Step 2: Generate Data for Current Month Until Today ---
+        calendar.set(currentYear, currentMonth, 1)
 
-        // Loop from the 1st of this month up to today
         for (day in 1..today) {
-            calendar.set(currentYear, currentMonth, day) // Set calendar to specific day
-            val date = dateFormat.format(calendar.time) // Format as yyyyMMdd
+            calendar.set(currentYear, currentMonth, day)
+            val date = dateFormat.format(calendar.time)
 
-            // Get a random glucose dataset for the day
-            val glucoseDataSet = getRandomGlucoseDataSet(date)
-            glucoseEntries.addAll(glucoseDataSet)
+            // Generate test data
+            val glucoseEntries = getRandomGlucoseDataSet(date).map {
+                val parts = it.split(",")
+                Pair(parts[1], parts[2].toFloat()) // Extract time & glucose level
+            }
 
-            // Add activity logs
-            val testActivities = generateActivityLog(date)
-            activityLog.addAll(testActivities)
+            val activityEntries = generateActivityLog(date).map { entry ->
+                val parts = entry.split(",")
+                ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
+            }
+
+            // ✅ Save separately in SharedPreferences (WITH COMPRESSION)
+            saveGlucoseEntries(context, date, glucoseEntries)
+            saveActivityEntries(context, date, activityEntries)
         }
-
-        // Store data in shared preferences
-        editor.putString(KEY_GLUCOSE_ENTRIES, glucoseEntries.joinToString(";"))
-        editor.putString(KEY_ACTIVITY_LOG, activityLog.joinToString(";"))
-        editor.apply()
     }
 
-
-    // Function to randomly select one of 2 datasets with proper fluctuations
     fun getRandomGlucoseDataSet(date: String): List<String> {
         val goodDay = listOf(
             "$date,00.05f,${randomGlucose(3.9, 6.4)}f", "$date,00.45f,${randomGlucose(4.1, 6.6)}f",
@@ -242,10 +343,6 @@ object PreferencesHelper {
     }
 
 
-
-}
-
-    // Function to generate an activity log
     fun generateActivityLog(date: String): List<String> {
         return listOf(
             "$date,Read,00:05,00:30,Magazine", "$date,Coding,00:40,01:25,Fixing bugs",
@@ -259,5 +356,5 @@ object PreferencesHelper {
         )
     }
 
-
+}
 

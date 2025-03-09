@@ -4,9 +4,7 @@ import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.b1097780.glucohub.MainActivity
 import com.b1097780.glucohub.PreferencesHelper
-import com.github.mikephil.charting.data.Entry
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -25,9 +23,12 @@ class ActivityLogViewModel : ViewModel() {
     private val _activityLogEntries = MutableLiveData<List<ActivityLogEntry>>(emptyList())
     val activityLogEntries: LiveData<List<ActivityLogEntry>> = _activityLogEntries
 
-    // ✅ Load the most recent glucose entry from SharedPreferences
+    // ✅ Load the most recent glucose entry from JSON storage
     fun loadRecentBloodEntry(context: Context) {
-        val glucoseEntries = PreferencesHelper.getRecentGlucoseEntries(context)
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
+        val glucoseEntries = PreferencesHelper.getGlucoseEntriesForDate(context, today)
 
         // ✅ Ensure there is valid data
         if (glucoseEntries.isEmpty()) {
@@ -36,47 +37,33 @@ class ActivityLogViewModel : ViewModel() {
             return
         }
 
-        // ✅ Avoid index errors when splitting
-        val lastEntryParts = glucoseEntries.split(";").lastOrNull()?.split(",") ?: return
+        // ✅ Get the most recent entry (last item in the list)
+        val (entryTime, glucoseLevel) = glucoseEntries.last()
 
-        if (lastEntryParts.size < 3) {
-            _recentGlucoseTime.value = "--:--"
-            _recentGlucoseValue.value = "-- mmol/L"
-            return
-        }
-
-        val entryDate = lastEntryParts[0]
-        val entryTime = lastEntryParts[1].toFloatOrNull()
-        val glucoseLevel = lastEntryParts[2].toFloatOrNull()?.toString() ?: "--"
-
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val today = dateFormat.format(Date())
-
-        if (entryDate == today && entryTime != null) {
-            _recentGlucoseTime.value = formatTime(entryTime)
-            _recentGlucoseValue.value = "$glucoseLevel mmol/L"
-        } else {
-            _recentGlucoseTime.value = "--:--"
-            _recentGlucoseValue.value = "-- mmol/L"
-        }
+        _recentGlucoseTime.value = formatTime(entryTime.toFloat())
+        _recentGlucoseValue.value = "$glucoseLevel mmol/L"
     }
 
     // ✅ Add a new activity entry and save it
     fun addActivityEntry(entry: ActivityLogEntry, context: Context) {
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
         val updatedEntries = _activityLogEntries.value.orEmpty().toMutableList()
         updatedEntries.add(entry)
         _activityLogEntries.value = updatedEntries
 
-        // ✅ Save updated activities
-        PreferencesHelper.setActivityLogEntries(context, updatedEntries)
+        // ✅ Save updated activities alongside glucose data
+        PreferencesHelper.saveActivityEntries(context, today, updatedEntries)
 
     }
 
-
-
-    // ✅ Load today's activities from SharedPreferences
+    // ✅ Load today's activities from JSON storage
     fun loadActivityEntries(context: Context) {
-        val loadedEntries = PreferencesHelper.getActivityLogEntries(context)
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val today = dateFormat.format(Date())
+
+        val loadedEntries = PreferencesHelper.getActivityEntriesForDate(context, today)
         _activityLogEntries.value = loadedEntries // ✅ Notify UI to update
     }
 

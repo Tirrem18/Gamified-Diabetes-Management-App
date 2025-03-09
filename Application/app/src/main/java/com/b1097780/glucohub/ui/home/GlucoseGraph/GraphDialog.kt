@@ -9,8 +9,8 @@ import android.view.Gravity
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.LinearLayout
+import android.widget.TextView
 import com.b1097780.glucohub.R
-
 import java.util.*
 
 class GraphDialog(
@@ -24,8 +24,8 @@ class GraphDialog(
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(50, 30, 50, 30)
-            addView(editText, LinearLayout.LayoutParams(400, ViewGroup.LayoutParams.WRAP_CONTENT))
+            setPadding(100, 60, 100, 60) // Doubled padding
+            addView(editText, LinearLayout.LayoutParams(550, ViewGroup.LayoutParams.WRAP_CONTENT)) // Doubled width
         }
 
         val dialog = AlertDialog.Builder(context, R.style.CustomAlertDialogTheme)
@@ -58,9 +58,9 @@ class GraphDialog(
                         number, currentTime, dialog
                     )
 
-                    number < 2f -> showWarningDialog(
+                    number < 2.5f -> showWarningDialog(
                         "Low Glucose Warning",
-                        "A glucose level below 2 is critically low. Are you sure? Please eat fast-acting carbs accordingly",
+                        "A glucose level below 2.5 is critically low. Are you sure? Please eat fast-acting carbs accordingly",
                         number, currentTime, dialog
                     )
 
@@ -78,19 +78,19 @@ class GraphDialog(
         return EditText(context).apply {
             inputType = InputType.TYPE_NUMBER_FLAG_DECIMAL or InputType.TYPE_CLASS_NUMBER
             hint = "Enter Glucose"
-            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-            setPadding(30, 20, 30, 20)
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f) // Larger text size
+            setPadding(60, 40, 60, 40) // Increased padding
             gravity = Gravity.CENTER
-            background = createEditTextBackground() // ✅ Apply the proper background styling
+            background = createEditTextBackground()
             setTextColor(getThemeColor(context, android.R.attr.textColorPrimary))
         }
     }
 
     private fun createEditTextBackground(): GradientDrawable {
         return GradientDrawable().apply {
-            setColor(getThemeColor(context, android.R.attr.colorPrimary)) // ✅ Matches ActivityLogDialog background
-            setStroke(3, getThemeColor(context, android.R.attr.colorPrimaryDark)) // ✅ Adds a border
-            cornerRadius = 16f // ✅ Rounded corners for consistency
+            setColor(getThemeColor(context, android.R.attr.colorPrimary))
+            setStroke(4, getThemeColor(context, android.R.attr.colorPrimaryDark)) // Thicker border
+            cornerRadius = 24f // More rounded edges
         }
     }
 
@@ -107,20 +107,39 @@ class GraphDialog(
         cancelButton.setBackgroundColor(backgroundColor)
         okButton.setBackgroundColor(backgroundColor)
 
-        cancelButton.setPadding(20, 10, 20, 10)
-        okButton.setPadding(20, 10, 20, 10)
+        cancelButton.setPadding(30, 15, 30, 15) // Increased button padding
+        okButton.setPadding(30, 15, 30, 15)
     }
 
     private fun showWarningDialog(title: String, message: String, value: Float, time: Float, parentDialog: AlertDialog) {
-        AlertDialog.Builder(context, R.style.CustomAlertDialogTheme)
+        val warningText = TextView(context).apply {
+            text = message
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
+            setPadding(50, 30, 50, 30) // Spacious padding
+            setTextColor(getThemeColor(context, android.R.attr.textColorPrimary))
+        }
+
+        val warningContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(100, 60, 100, 60) // Match primary dialog
+            addView(warningText)
+        }
+
+        val warningDialog = AlertDialog.Builder(context, R.style.CustomAlertDialogTheme)
             .setTitle(title)
-            .setMessage(message)
+            .setView(warningContainer)
             .setPositiveButton("Confirm") { _, _ ->
                 callback(time, value)
                 parentDialog.dismiss()
             }
             .setNegativeButton("Cancel", null)
-            .show()
+            .create()
+
+        warningDialog.setOnShowListener {
+            styleDialogButtons(warningDialog) // Apply same button styles
+        }
+
+        warningDialog.show()
     }
 
     private fun getCurrentTimeAsFloat(): Float {
