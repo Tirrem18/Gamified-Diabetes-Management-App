@@ -3,7 +3,6 @@ package com.b1097780.glucohub.ui.home
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.github.mikephil.charting.data.Entry
 
 class HomeViewModel : ViewModel() {
 
