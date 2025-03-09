@@ -2,6 +2,7 @@ package com.b1097780.glucohub
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import org.json.JSONArray
 import org.json.JSONObject
@@ -20,11 +21,136 @@ object PreferencesHelper {
     private const val KEY_NIGHT_UNITS = "night_time_units"
     private const val KEY_USER_COINS = "userCoins"
     private const val KEY_LAST_ENTRY_TIME = "lastEntryTime"
+    private const val KEY_USER_STREAK = "userStreak"
+    private const val KEY_LAST_STREAK_DATE = "lastStreakDate"
+    private const val KEY_HIGHEST_STREAK = "highestStreak"
+    private const val KEY_COIN_MULTIPLIER = "coinMultiplier"
+    private const val KEY_MILESTONE_PREFIX = "milestone_"
 
     // Get SharedPreferences instance
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
+        // Get the current streak (default 0)
+        fun getUserStreak(context: Context): Int {
+            return getPrefs(context).getInt(KEY_USER_STREAK, 0)
+        }
+
+        // Set the new streak count
+        fun setUserStreak(context: Context, value: Int) {
+            getPrefs(context).edit().putInt(KEY_USER_STREAK, value).apply()
+        }
+
+        // Get the last streak date (default to empty if not set)
+        fun getLastStreakDate(context: Context): String {
+            return getPrefs(context).getString(KEY_LAST_STREAK_DATE, "") ?: ""
+        }
+
+        // Set the last streak date
+        fun setLastStreakDate(context: Context, date: String) {
+            getPrefs(context).edit().putString(KEY_LAST_STREAK_DATE, date).apply()
+        }
+
+        // Get today's date in "yyyyMMdd" format
+        fun getCurrentDate(): String {
+            val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+            return sdf.format(Date())
+        }
+
+    fun checkAndResetStreak(context: Context) {
+        val lastStreakDate = getLastStreakDate(context)
+        val todayDate = getCurrentDate()
+
+        if (lastStreakDate.isEmpty()) return // Don't set anything if never used before
+
+        val lastDate = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(lastStreakDate)
+        val today = SimpleDateFormat("yyyyMMdd", Locale.getDefault()).parse(todayDate)
+
+        if (lastDate == null || today == null) return
+
+        val diff = ((today.time - lastDate.time) / (1000 * 60 * 60 * 24)).toInt()
+
+        if (diff >= 2) {
+            setUserStreak(context, 0) // Reset streak if 2+ days have passed
+        }
+
+    }
+
+    fun updateStreakOnEntry(context: Context) {
+        val lastStreakDate = getLastStreakDate(context)
+        val todayDate = getCurrentDate()
+
+        if (lastStreakDate != todayDate) {
+            val newStreak = getUserStreak(context) + 1
+            setUserStreak(context, newStreak)
+            setLastStreakDate(context, todayDate)
+
+            // ✅ Update the UI in MainActivity
+            (context as? MainActivity)?.updateStreakButton(newStreak)
+        }
+    }
+
+    fun getHighestStreak(context: Context): Int {
+        return getPrefs(context).getInt(KEY_HIGHEST_STREAK, 0)
+    }
+
+    // Set Highest Streak
+    fun setHighestStreak(context: Context, value: Int) {
+        getPrefs(context).edit().putInt(KEY_HIGHEST_STREAK, value).apply()
+    }
+
+    // Update Highest Streak if Needed
+    fun updateHighestStreak(context: Context) {
+        val currentStreak = getUserStreak(context)
+        val highestStreak = getHighestStreak(context)
+
+        if (currentStreak > highestStreak) {
+            setHighestStreak(context, currentStreak)
+        }
+    }
+
+    // Get Coin Multiplier
+    fun getCoinMultiplier(context: Context): Int {
+        return getPrefs(context).getInt(KEY_COIN_MULTIPLIER, 1) // Default to x1
+    }
+
+    // Update Coin Multiplier Based on Streak
+    fun updateCoinMultiplier(context: Context) {
+        val currentStreak = getUserStreak(context)
+        val multiplier = when {
+            currentStreak >= 100 -> 3
+            currentStreak >= 50 -> 2
+            else -> 1
+        }
+        getPrefs(context).edit().putInt(KEY_COIN_MULTIPLIER, multiplier).apply()
+    }
+
+    // Add Coins with Multiplier Applied
+    fun addCoins(context: Context, amount: Int) {
+        val sharedPrefs = getPrefs(context)
+        val currentCoins = sharedPrefs.getInt(KEY_USER_COINS, 0)
+        val multiplier = getCoinMultiplier(context)
+
+        val newCoins = amount * multiplier // Apply multiplier
+        sharedPrefs.edit().putInt(KEY_USER_COINS, currentCoins + newCoins).apply()
+    }
+
+
+    // Check if Milestone is Claimed
+    fun isMilestoneClaimed(context: Context, days: Int): Boolean {
+        return getPrefs(context).getBoolean("$KEY_MILESTONE_PREFIX$days", false)
+    }
+
+    // Mark Milestone as Claimed
+    fun setMilestoneClaimed(context: Context, days: Int) {
+        getPrefs(context).edit().putBoolean("$KEY_MILESTONE_PREFIX$days", true).apply()
+    }
+
+
+
+
+
+
 
     // -------------------------
     // ✅ CLEAR ALL DATA
@@ -62,12 +188,6 @@ object PreferencesHelper {
         return getPrefs(context).getInt(KEY_USER_COINS, 10) // Default to 10 coins
     }
 
-    fun addCoins(context: Context, amount: Int) {
-        val sharedPrefs = getPrefs(context)
-        val currentCoins = sharedPrefs.getInt(KEY_USER_COINS, 0)
-        sharedPrefs.edit().putInt(KEY_USER_COINS, currentCoins + amount).apply()
-    }
-
     fun setUserCoins(context: Context, value: Int) {
         getPrefs(context).edit().putInt(KEY_USER_COINS, value).apply()
     }
@@ -82,6 +202,7 @@ object PreferencesHelper {
     fun setLastEntryTime(context: Context, time: Long) {
         getPrefs(context).edit().putLong(KEY_LAST_ENTRY_TIME, time).apply()
     }
+
 
     // -------------------------
     // ✅ SAVE GLUCOSE & ACTIVITY LOG DATA (WITH COMPRESSION)

@@ -147,6 +147,8 @@ class HomeFragment : Fragment() {
         lastEntryTime = System.currentTimeMillis()
         PreferencesHelper.setLastEntryTime(requireContext(), lastEntryTime)
 
+        PreferencesHelper.updateStreakOnEntry(requireContext())
+
         // ✅ Refresh recent blood glucose entry
         activityLogViewModel.loadRecentBloodEntry(requireContext())
 
@@ -172,6 +174,8 @@ class HomeFragment : Fragment() {
         requireActivity().let {
             activityLogViewModel.addActivityEntry(entry, it)
         }
+
+        PreferencesHelper.updateStreakOnEntry(requireContext())
 
 
         // ✅ Coin reward logic

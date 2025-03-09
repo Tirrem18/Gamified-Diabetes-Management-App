@@ -24,18 +24,34 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private var userCoins: Int = 10
+    private var userStreak: Int = 0 // Variable to store the streak
 
     // CUSTOMISE
     private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        //PreferencesHelper.clearAllData(this) // Reset all stored values
+        //PreferencesHelper.populateTestData(this) // Fill with test data
+
+        //PreferencesHelper.setLastStreakDate(this, "20250307") // Set last streak to 3 days ago (break streak)
+        //PreferencesHelper.setLastStreakDate(this, getCurrentDate()) // Set last streak to today (no streak change)
+
+        //PreferencesHelper.setUserStreak(this, 100) // Manually set current streak
+        //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
+
+        //PreferencesHelper.setMilestoneClaimed(this, 7) // Mark 7-day milestone as claimed
+        //PreferencesHelper.setMilestoneClaimed(this, 30) // Mark 30-day milestone as claimed
+
+        //PreferencesHelper.setCoinMultiplier(this, 2) // Manually set multiplier to x2
+        //PreferencesHelper.addCoins(this, 100) // Add 100 coins
+
+
+
+
+        PreferencesHelper.checkAndResetStreak(this)
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
-
-        PreferencesHelper.clearAllData(this)
-        PreferencesHelper.populateTestData(this)
-
-
-
+        userStreak = PreferencesHelper.getUserStreak(this) // Load streak
         applyUserTheme(theme)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
@@ -47,6 +63,7 @@ class MainActivity : AppCompatActivity() {
         setupCustomButtons()
         observeNavDestinationChanges()
         updateCoinButton(userCoins) // Update UI with loaded coins
+        updateStreakButton(userStreak)
     }
 
     private fun applyUserTheme(selectedTheme: String) {
@@ -115,9 +132,17 @@ class MainActivity : AppCompatActivity() {
         binding.customCoinButton.text = formattedValue
     }
 
+    // Function to update streak button text
+    fun updateStreakButton(value: Int) {
+        val formattedValue = formatNumber(value, true)
+        binding.customStreakButton.text = formattedValue
+    }
+
+
     fun addCoinsFromFragment(amount: Int) {
         addCoins(amount)
     }
+
 
     private fun addCoins(amount: Int) {
         userCoins += amount
