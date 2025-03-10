@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
     private var userStreak: Int = 0 // Variable to store the streak
 
     // CUSTOMISE
-    private var theme = "" // Change this to "default", "purple", or "plain"
+    private var theme = "bubblegum" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
 

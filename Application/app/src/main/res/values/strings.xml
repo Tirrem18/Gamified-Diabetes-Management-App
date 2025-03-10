@@ -18,4 +18,12 @@
     <string name="glucose">Glucose</string>
     <string name="glucose_data_here">Glucose Data Here</string>
     <string name="most_recent_blood_mmol_l_at">Most Recent Blood: -- mmol/L at --</string>
+    <string-array name="date_options">
+        <item>Today</item>
+        <item>Another Day...</item>
+        <item>This Month</item>
+        <item>Another Month...</item>
+        <item>This Year</item>
+    </string-array>
+
 </resources>

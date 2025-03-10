@@ -599,7 +599,7 @@ class ActivityLogDialog(private val context: Context, private val callback: (Str
 
     private fun setSelectedStyle(button: Button, isSelected: Boolean) {
         if (isSelected) {
-            button.setBackgroundColor(getThemeColor(context, android.R.attr.colorPrimaryDark))
+            button.setBackgroundColor(getThemeColor(context, R.attr.colorPrimaryVariant))
         } else {
             button.setBackgroundColor(getThemeColor(context, android.R.attr.colorPrimary))
         }
