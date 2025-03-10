@@ -423,20 +423,20 @@ object PreferencesHelper {
 
     fun getRandomGlucoseDataSet(date: String): List<String> {
         val goodDay = listOf(
-            "$date,00.05f,${randomGlucose(3.9, 6.4)}f", "$date,00.45f,${randomGlucose(4.1, 6.6)}f",
-            "$date,01.20f,${randomGlucose(3.8, 6.3)}f", "$date,01.55f,${randomGlucose(4.0, 6.5)}f",
-            "$date,02.30f,${randomGlucose(3.6, 6.1)}f", "$date,03.15f,${randomGlucose(3.9, 6.4)}f",
-            "$date,04.00f,${randomGlucose(3.5, 6.0)}f", "$date,04.45f,${randomGlucose(4.2, 6.7)}f",
-            "$date,05.20f,${randomGlucose(3.9, 6.4)}f", "$date,06.10f,${randomGlucose(4.3, 6.7)}f", // Pre-exercise
+            "$date,00.05f,${randomGlucose(1.9, 4.4)}f", "$date,00.45f,${randomGlucose(1.1, 6.6)}f",
+            "$date,01.20f,${randomGlucose(2.8, 6.3)}f", "$date,01.55f,${randomGlucose(4.0, 6.5)}f",
+            "$date,02.30f,${randomGlucose(2.6, 6.1)}f", "$date,03.15f,${randomGlucose(3.9, 6.4)}f",
+            "$date,04.00f,${randomGlucose(2.5, 6.0)}f", "$date,04.45f,${randomGlucose(4.2, 6.7)}f",
+            "$date,05.20f,${randomGlucose(2.9, 6.4)}f", "$date,06.10f,${randomGlucose(4.3, 6.7)}f", // Pre-exercise
             "$date,06.40f,${randomGlucose(3.5, 6.0)}f", "$date,07.10f,${randomGlucose(3.8, 6.3)}f", // Post-exercise drop
-            "$date,07.45f,${randomGlucose(3.9, 6.4)}f", "$date,08.15f,${randomGlucose(5.0, 7.5)}f", // Breakfast spike
-            "$date,08.50f,${randomGlucose(5.2, 7.7)}f", "$date,09.30f,${randomGlucose(5.0, 7.5)}f",
-            "$date,10.05f,${randomGlucose(4.5, 7.0)}f", "$date,10.45f,${randomGlucose(4.2, 6.7)}f",
-            "$date,11.20f,${randomGlucose(4.0, 6.5)}f", "$date,12.00f,${randomGlucose(5.5, 8.0)}f", // Lunch spike
-            "$date,12.40f,${randomGlucose(5.2, 7.7)}f", "$date,13.15f,${randomGlucose(4.8, 7.3)}f",
-            "$date,14.00f,${randomGlucose(4.2, 6.7)}f", "$date,14.45f,${randomGlucose(4.0, 6.5)}f",
-            "$date,15.30f,${randomGlucose(3.9, 6.4)}f", "$date,16.10f,${randomGlucose(4.2, 6.7)}f",
-            "$date,17.00f,${randomGlucose(3.5, 6.0)}f", "$date,17.45f,${randomGlucose(3.8, 6.3)}f",
+            "$date,07.45f,${randomGlucose(1.9, 6.4)}f", "$date,08.15f,${randomGlucose(5.0, 7.5)}f", // Breakfast spike
+            "$date,08.50f,${randomGlucose(3.2, 7.7)}f", "$date,09.30f,${randomGlucose(5.0, 7.5)}f",
+            "$date,10.05f,${randomGlucose(1.5, 7.0)}f", "$date,10.45f,${randomGlucose(4.2, 6.7)}f",
+            "$date,11.20f,${randomGlucose(1.0, 6.5)}f", "$date,12.00f,${randomGlucose(5.5, 8.0)}f", // Lunch spike
+            "$date,12.40f,${randomGlucose(1.2, 7.7)}f", "$date,13.15f,${randomGlucose(4.8, 7.3)}f",
+            "$date,14.00f,${randomGlucose(1.2, 6.7)}f", "$date,14.45f,${randomGlucose(4.0, 6.5)}f",
+            "$date,15.30f,${randomGlucose(1.9, 6.4)}f", "$date,16.10f,${randomGlucose(4.2, 6.7)}f",
+            "$date,17.00f,${randomGlucose(1.5, 6.0)}f", "$date,17.45f,${randomGlucose(3.8, 6.3)}f",
             "$date,18.30f,${randomGlucose(5.0, 7.5)}f", "$date,19.10f,${randomGlucose(5.8, 8.3)}f", // Dinner spike
             "$date,19.55f,${randomGlucose(5.2, 7.7)}f", "$date,20.30f,${randomGlucose(4.8, 7.3)}f",
             "$date,21.15f,${randomGlucose(4.3, 6.8)}f", "$date,22.00f,${randomGlucose(3.9, 6.4)}f",
@@ -454,12 +454,12 @@ object PreferencesHelper {
             "$date,10.25f,${randomGlucose(8.8, 11.3)}f", "$date,11.10f,${randomGlucose(8.5, 11.0)}f",
             "$date,12.00f,${randomGlucose(9.5, 12.0)}f", "$date,12.50f,${randomGlucose(9.8, 12.3)}f",
             "$date,13.35f,${randomGlucose(9.2, 11.7)}f", "$date,14.20f,${randomGlucose(8.5, 11.0)}f",
-            "$date,15.05f,${randomGlucose(8.0, 10.5)}f", "$date,15.50f,${randomGlucose(7.8, 10.3)}f",
-            "$date,16.35f,${randomGlucose(7.5, 10.0)}f", "$date,17.20f,${randomGlucose(6.8, 9.3)}f", // Exercise drop
-            "$date,18.10f,${randomGlucose(9.5, 12.0)}f", "$date,18.55f,${randomGlucose(10.2, 12.7)}f",
-            "$date,19.40f,${randomGlucose(9.8, 12.3)}f", "$date,20.25f,${randomGlucose(9.2, 11.7)}f",
-            "$date,21.10f,${randomGlucose(8.5, 11.0)}f", "$date,22.00f,${randomGlucose(7.8, 10.3)}f",
-            "$date,22.45f,${randomGlucose(7.2, 9.7)}f", "$date,23.30f,${randomGlucose(6.8, 9.3)}f"
+            "$date,15.05f,${randomGlucose(8.0, 10.5)}f", "$date,15.50f,${randomGlucose(7.8, 33.3)}f",
+            "$date,16.35f,${randomGlucose(7.5, 10.0)}f", "$date,17.20f,${randomGlucose(6.8, 24.3)}f", // Exercise drop
+            "$date,18.10f,${randomGlucose(9.5, 22.0)}f", "$date,18.55f,${randomGlucose(10.2, 12.7)}f",
+            "$date,19.40f,${randomGlucose(9.8, 22.3)}f", "$date,20.25f,${randomGlucose(9.2, 21.7)}f",
+            "$date,21.10f,${randomGlucose(8.5, 21.0)}f", "$date,22.00f,${randomGlucose(7.8, 10.3)}f",
+            "$date,22.45f,${randomGlucose(7.2, 22.7)}f", "$date,23.30f,${randomGlucose(6.8, 9.3)}f"
         )
 
         return if (Random.nextBoolean()) goodDay else badDay

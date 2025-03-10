@@ -14,7 +14,7 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:text="Glucose Overview"
-    android:textSize="30sp"
+    android:textSize="40sp"
     android:textStyle="bold"
     android:textColor="?attr/android:textColorPrimary"
     android:layout_gravity="center_horizontal"
@@ -36,7 +36,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center"
-    android:paddingBottom="16dp">
+    android:paddingBottom="0dp">
 
     <Button
         android:id="@+id/btn_day"
@@ -84,16 +84,147 @@
     android:textStyle="bold"
     android:textColor="?attr/android:textColorPrimary"
     android:layout_gravity="center_horizontal"
-    android:paddingBottom="16dp"/>
+    android:paddingBottom="45dp"/>
 
         <!-- Placeholder for Average Glucose -->
+    <!-- Enlarge Average Glucose Text -->
     <TextView
-    android:id="@+id/text_average_glucose"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Average Glucose: -- mg/dL"
-    android:textSize="18sp"
-    android:textStyle="bold"
-    android:textColor="?attr/android:textColorPrimary"
-    android:layout_gravity="center_horizontal"/>
+        android:id="@+id/text_average_glucose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Average Glucose: -- mg/dL"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="?attr/android:textColorPrimary"
+        android:layout_gravity="center_horizontal"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="start"
+        android:layout_marginTop="16dp">
+
+        <!-- Left Side: Bar Chart -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/bar_chart_time_in_range"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="300dp"
+            android:layout_gravity="start"/>
+
+        <!-- Right Side: Labels & Percentages -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:paddingLeft="8dp">
+
+            <TextView
+                android:id="@+id/text_time_very_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Very High:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_very_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_time_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time High:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_time_in_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time In Range:"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="6dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_in_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="6dp"/>
+
+            <TextView
+                android:id="@+id/text_time_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Low:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_time_very_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Very Low:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"/>
+
+            <TextView
+                android:id="@+id/text_percent_very_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"/>
         </LinearLayout>
+    </LinearLayout>
+
+    <!-- Total Entries -->
+    <TextView
+        android:id="@+id/text_total_entries"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total Entries: --"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="?attr/android:textColorPrimary"
+        android:layout_gravity="center_horizontal"/>
+
+
+
+</LinearLayout>

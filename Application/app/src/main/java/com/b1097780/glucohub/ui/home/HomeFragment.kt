@@ -31,6 +31,8 @@ class HomeFragment : Fragment() {
     private lateinit var activityLogViewModel: ActivityLogViewModel
     private var lastEntryTime: Long = 0
 
+
+
     // ✅ Lifecycle Method: Create View & Initialize ViewModels
     override fun onCreateView(
         inflater: LayoutInflater,
