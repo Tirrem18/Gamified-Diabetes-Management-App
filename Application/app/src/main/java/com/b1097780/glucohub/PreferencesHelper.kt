@@ -125,15 +125,22 @@ object PreferencesHelper {
         getPrefs(context).edit().putInt(KEY_COIN_MULTIPLIER, multiplier).apply()
     }
 
-    // Add Coins with Multiplier Applied
-    fun addCoins(context: Context, amount: Int) {
+    fun addCoins(context: Context, baseAmount: Int) {
         val sharedPrefs = getPrefs(context)
-        val currentCoins = sharedPrefs.getInt(KEY_USER_COINS, 0)
-        val multiplier = getCoinMultiplier(context)
+        val currentCoins = sharedPrefs.getInt(KEY_USER_COINS, 0) // Get current coins
+        val multiplier = getCoinMultiplier(context) // Get stored multiplier
+        val finalCoins = baseAmount * multiplier // Apply multiplier
 
-        val newCoins = amount * multiplier // Apply multiplier
-        sharedPrefs.edit().putInt(KEY_USER_COINS, currentCoins + newCoins).apply()
+        Log.d("DEBUG", "Adding $baseAmount coins with multiplier x$multiplier. Total added: $finalCoins")
+
+        // ✅ Save new coin total
+        sharedPrefs.edit().putInt(KEY_USER_COINS, currentCoins + finalCoins).apply()
+
+        // ✅ Update UI in MainActivity
+        (context as? MainActivity)?.updateCoinButton(currentCoins + finalCoins)
     }
+
+
 
 
     // Check if Milestone is Claimed
@@ -185,7 +192,7 @@ object PreferencesHelper {
     // ✅ USER COINS
     // -------------------------
     fun getUserCoins(context: Context): Int {
-        return getPrefs(context).getInt(KEY_USER_COINS, 10) // Default to 10 coins
+        return getPrefs(context).getInt(KEY_USER_COINS, 0) // Default to 10 coins
     }
 
     fun setUserCoins(context: Context, value: Int) {
