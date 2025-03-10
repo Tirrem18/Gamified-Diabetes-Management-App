@@ -31,7 +31,6 @@
         android:textColor="?attr/android:textColorPrimary"
         android:paddingBottom="40dp"/>
 
-
     <!-- Coin Multiplier Progress -->
     <TextView
         android:id="@+id/text_multiplier_progress"
@@ -62,8 +61,7 @@
         android:text="(The higher your streak, the higher your coin multiplier)"
         android:textSize="14sp"
         android:textColor="?attr/android:textColorSecondary"
-        android:paddingBottom="55dp"/>
-
+        android:paddingBottom="30dp"/>
 
     <!-- Milestone Rewards -->
     <TextView
@@ -76,10 +74,32 @@
         android:paddingBottom="12dp"/>
 
     <Button
+        android:id="@+id/btn_claim_3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Claim 15 Coins - 3 Days"
+        android:textColor="?attr/colorOnPrimary"
+        android:backgroundTint="?attr/colorPrimary"
+        android:enabled="false"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
         android:id="@+id/btn_claim_7"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Claim 50 Coins - 7 Days"
+        android:textColor="?attr/colorOnPrimary"
+        android:backgroundTint="?attr/colorPrimary"
+        android:enabled="false"
+        android:padding="8dp"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/btn_claim_14"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Claim 50 Coins - 14 Days"
         android:textColor="?attr/colorOnPrimary"
         android:backgroundTint="?attr/colorPrimary"
         android:enabled="false"
@@ -116,6 +136,18 @@
         android:textColor="?attr/colorOnPrimary"
         android:backgroundTint="?attr/colorPrimary"
         android:enabled="false"
-        android:padding="8dp"/>
+        android:padding="8dp"
+        android:layout_marginBottom="40dp"/>
 
+    <!-- Streak Tip at the Bottom -->
+    <TextView
+        android:id="@+id/text_streak_tip"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Tip: Stay consistent! Small habits lead to big changes."
+        android:textSize="14sp"
+        android:textStyle="italic"
+        android:textColor="?attr/android:textColorSecondary"
+        android:gravity="center"
+        android:paddingTop="20dp"/>
 </LinearLayout>

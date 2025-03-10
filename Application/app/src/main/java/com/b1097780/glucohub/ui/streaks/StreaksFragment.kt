@@ -20,9 +20,12 @@ class StreaksFragment : Fragment() {
     private lateinit var textHighestStreak: TextView
     private lateinit var textMultiplier: TextView
     private lateinit var textMultiplierInfo: TextView
+    private lateinit var textStreakTip: TextView
     private lateinit var progressMultiplier: ProgressBar
 
+    private lateinit var btnClaim3: Button
     private lateinit var btnClaim7: Button
+    private lateinit var btnClaim14: Button
     private lateinit var btnClaim30: Button
     private lateinit var btnClaim90: Button
     private lateinit var btnClaim365: Button
@@ -41,9 +44,12 @@ class StreaksFragment : Fragment() {
         textHighestStreak = root.findViewById(R.id.text_highest_streak)
         textMultiplier = root.findViewById(R.id.text_multiplier_progress)
         textMultiplierInfo = root.findViewById(R.id.text_multiplier_info)
+        textStreakTip = root.findViewById(R.id.text_streak_tip)
         progressMultiplier = root.findViewById(R.id.progress_multiplier)
 
+        btnClaim3 = root.findViewById(R.id.btn_claim_3)
         btnClaim7 = root.findViewById(R.id.btn_claim_7)
+        btnClaim14 = root.findViewById(R.id.btn_claim_14)
         btnClaim30 = root.findViewById(R.id.btn_claim_30)
         btnClaim90 = root.findViewById(R.id.btn_claim_90)
         btnClaim365 = root.findViewById(R.id.btn_claim_365)
@@ -52,6 +58,7 @@ class StreaksFragment : Fragment() {
         viewModel.currentStreak.observe(viewLifecycleOwner) { textCurrentStreak.text = it }
         viewModel.highestStreak.observe(viewLifecycleOwner) { textHighestStreak.text = it }
         viewModel.multiplierText.observe(viewLifecycleOwner) { textMultiplier.text = it }
+        viewModel.streakTip.observe(viewLifecycleOwner) { textStreakTip.text = it }
 
         updateUI()
 
@@ -76,8 +83,10 @@ class StreaksFragment : Fragment() {
         textMultiplierInfo.text = "(The higher your streak, the higher your coin multiplier)"
 
         // Enable claim buttons if conditions are met, otherwise mark as claimed
-        updateClaimButton(btnClaim7, 7, 25)
-        updateClaimButton(btnClaim30, 30, 100)
+        updateClaimButton(btnClaim3, 3, 15)
+        updateClaimButton(btnClaim7, 7, 50)
+        updateClaimButton(btnClaim14, 14, 100)
+        updateClaimButton(btnClaim30, 30, 200)
         updateClaimButton(btnClaim90, 90, 500)
         updateClaimButton(btnClaim365, 365, 1000)
     }

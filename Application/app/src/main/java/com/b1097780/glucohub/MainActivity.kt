@@ -31,13 +31,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        //PreferencesHelper.clearAllData(this) // Reset all stored values
-        //PreferencesHelper.populateTestData(this) // Fill with test data
+        PreferencesHelper.clearAllData(this) // Reset all stored values
+        PreferencesHelper.populateTestData(this) // Fill with test data
 
         //PreferencesHelper.setLastStreakDate(this, "20250307") // Set last streak to 3 days ago (break streak)
         //PreferencesHelper.setLastStreakDate(this, getCurrentDate()) // Set last streak to today (no streak change)
 
-        //PreferencesHelper.setUserStreak(this, 100) // Manually set current streak
+        PreferencesHelper.setUserStreak(this, 100) // Manually set current streak
         //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
 
         //PreferencesHelper.setMilestoneClaimed(this, 7) // Mark 7-day milestone as claimed
