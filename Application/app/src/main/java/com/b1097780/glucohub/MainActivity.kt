@@ -31,8 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
-        PreferencesHelper.clearAllData(this) // Reset all stored values
-        PreferencesHelper.populateTestData(this) // Fill with test data
+        //PreferencesHelper.clearAllData(this) // Reset all stored values
+        //PreferencesHelper.populateTestData(this) // Fill with test data
 
         //PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
 
@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                 setOf(
                     R.id.navigation_home,
                     R.id.navigation_glucose,
-                    R.id.navigation_planner,
+                    R.id.navigation_logs,
                     R.id.navigation_data
                 ),
                 binding.drawerLayout

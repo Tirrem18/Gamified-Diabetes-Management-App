@@ -31,10 +31,11 @@
         tools:layout="@layout/fragment_glucose" />
 
     <fragment
-        android:id="@+id/navigation_planner"
-        android:name="com.b1097780.glucohub.ui.planner.PlannerFragment"
-        android:label="Notifications"
-        tools:layout="@layout/fragment_planner" />
+        android:id="@+id/navigation_logs"
+        android:name="com.b1097780.glucohub.ui.dailylogs.DailyLogsFragment"
+        android:label="Daily Logs"
+        tools:layout="@layout/fragment_daily_logs" />
+
 
     <fragment
         android:id="@+id/navigation_data"

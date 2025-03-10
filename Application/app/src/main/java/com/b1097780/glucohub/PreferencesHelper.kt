@@ -364,62 +364,60 @@ object PreferencesHelper {
     // -------------------------
     // ✅ POPULATE TEST DATA (WITH COMPRESSION)
     // -------------------------
-
     fun populateTestData(context: Context) {
         val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val timeFormat = SimpleDateFormat("HH:mm", Locale.getDefault())
         val calendar = Calendar.getInstance()
 
-        val today = calendar.get(Calendar.DAY_OF_MONTH)  // Current day of the month
-        val currentMonth = calendar.get(Calendar.MONTH)  // Current month (0-based index)
-        val currentYear = calendar.get(Calendar.YEAR)  // Current year
+        val today = calendar.get(Calendar.DAY_OF_MONTH)
+        val currentMonth = calendar.get(Calendar.MONTH)
+        val currentYear = calendar.get(Calendar.YEAR)
 
-        // --- Step 1: Generate Last Month's Data ---
-        calendar.set(currentYear, currentMonth - 1, 1) // Move to first day of last month
-        val lastMonthMaxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH) // Get last month's total days
+        calendar.add(Calendar.MINUTE, -20) // Move back 20 minutes from current time
+        val currentTimeMinus20 = timeFormat.format(calendar.time)
 
-        for (day in 1..lastMonthMaxDay) {
-            calendar.set(currentYear, currentMonth - 1, day)
-            val date = dateFormat.format(calendar.time)
+        val random = Random(System.currentTimeMillis())
 
-            // Generate test data
-            val glucoseEntries = getRandomGlucoseDataSet(date).map {
-                val parts = it.split(",")
-                Pair(parts[1], parts[2].toFloat()) // Extract time & glucose level
+        // --- Generate Data for the Last 12 Months, Including Today ---
+        for (monthOffset in 0 until 12) {
+            calendar.set(currentYear, currentMonth - monthOffset, 1) // Move to start of each month
+            val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+            for (day in 1..maxDay) {
+                // Randomly decide whether to skip this day (but never skip today)
+                if (day != today && random.nextBoolean()) continue
+
+                calendar.set(currentYear, currentMonth - monthOffset, day)
+                val date = dateFormat.format(calendar.time)
+
+                val isToday = (day == today && monthOffset == 0) // Check if processing today's data
+
+                // Generate test data
+                val glucoseEntries = getRandomGlucoseDataSet(date)
+                    .map { entry ->
+                        val parts = entry.split(",")
+                        Pair(parts[1], parts[2].toFloat()) // Extract time & glucose level
+                    }
+                    .filter { !isToday || it.first <= currentTimeMinus20 } // Exclude future times today
+
+                val activityEntries = generateActivityLog(date)
+                    .map { entry ->
+                        val parts = entry.split(",")
+                        ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
+                    }
+                    .filter { !isToday || it.startTime <= currentTimeMinus20 } // Exclude future times today
+
+                // ✅ Save separately in SharedPreferences (WITH COMPRESSION)
+                saveGlucoseEntries(context, date, glucoseEntries)
+                saveActivityEntries(context, date, activityEntries)
             }
-
-            val activityEntries = generateActivityLog(date).map { entry ->
-                val parts = entry.split(",")
-                ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
-            }
-
-            // ✅ Save separately in SharedPreferences (WITH COMPRESSION)
-            saveGlucoseEntries(context, date, glucoseEntries)
-            saveActivityEntries(context, date, activityEntries)
-        }
-
-        // --- Step 2: Generate Data for Current Month Until Today ---
-        calendar.set(currentYear, currentMonth, 1)
-
-        for (day in 1..today) {
-            calendar.set(currentYear, currentMonth, day)
-            val date = dateFormat.format(calendar.time)
-
-            // Generate test data
-            val glucoseEntries = getRandomGlucoseDataSet(date).map {
-                val parts = it.split(",")
-                Pair(parts[1], parts[2].toFloat()) // Extract time & glucose level
-            }
-
-            val activityEntries = generateActivityLog(date).map { entry ->
-                val parts = entry.split(",")
-                ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
-            }
-
-            // ✅ Save separately in SharedPreferences (WITH COMPRESSION)
-            saveGlucoseEntries(context, date, glucoseEntries)
-            saveActivityEntries(context, date, activityEntries)
         }
     }
+
+
+
+
+
 
     fun getRandomGlucoseDataSet(date: String): List<String> {
         val goodDay = listOf(
@@ -471,18 +469,137 @@ object PreferencesHelper {
     }
 
 
+    // Generates Activity Data with Meals, Insulin, and General Activities
+    // Generates Activity Data with More Variety
     fun generateActivityLog(date: String): List<String> {
-        return listOf(
-            "$date,Read,00:05,00:30,Magazine", "$date,Coding,00:40,01:25,Fixing bugs",
-            "$date,Snack,01:50,02:10,Midnight snack", "$date,Study,02:35,03:15,Exam prep",
-            "$date,Gym,06:10,07:00,Weightlifting", "$date,Breakfast,07:20,07:45,Oats and eggs",
-            "$date,Walk,08:10,08:38,Morning stroll", "$date,Coding,09:25,10:00,New feature",
-            "$date,Snack,10:30,10:50,Coffee and fruit", "$date,Work,11:10,12:15,Writing docs",
-            "$date,Lunch,13:15,13:55,Healthy meal", "$date,Study,14:22,14:58,Math exercises",
-            "$date,Gym,16:10,17:00,Cardio session", "$date,Dinner,19:40,20:10,Steak and veggies",
-            "$date,TV,21:40,22:15,Favourite show", "$date,Sleep,23:40,null,Going to bed"
+        val random = Random(System.currentTimeMillis())
+
+        // Define time slots every 2 hours
+        val timeSlots = listOf(
+            "00:00", "02:00", "04:00", "06:00", "08:00", "10:00",
+            "12:00", "14:00", "16:00", "18:00", "20:00", "22:00"
         )
+
+        val meals = listOf(
+            "$date,Breakfst,07:15,07:35,Egg Toast - 35g",
+            "$date,Breakfst,07:45,08:00,Pancakes - 50g",
+            "$date,Lunch,12:00,12:30,Grilled Chicken - 45g",
+            "$date,Lunch,12:10,12:40,Salmon Salad - 30g",
+            "$date,Dinner,18:45,19:15,Steak & Rice - 55g",
+            "$date,Dinner,19:30,20:00,Spaghetti - 60g",
+            "$date,Snack,10:30,null,Granola Bar - 22g",
+            "$date,Snack,15:00,null,Yogurt & Berries - 18g",
+            "$date,Snack,22:00,null,Protein Shake - 30g"
+        )
+
+        val insulin = listOf(
+            // Morning Fast-Acting (After Breakfast)
+            "$date,Insulin,07:20,null,Fast-Acting: 5u",
+            "$date,Insulin,07:40,null,Fast-Acting: 6u",
+            "$date,Insulin,08:00,null,Fast-Acting: 7u",
+            "$date,Insulin,08:15,null,Fast-Acting: 8u",
+
+            // Mid-Morning Corrections (Random)
+            "$date,Insulin,09:30,null,Fast-Acting: 3u",
+            "$date,Insulin,10:15,null,Fast-Acting: 4u",
+
+            // Lunch Fast-Acting
+            "$date,Insulin,12:30,null,Fast-Acting: 6u",
+            "$date,Insulin,12:45,null,Fast-Acting: 7u",
+            "$date,Insulin,13:00,null,Fast-Acting: 8u",
+            "$date,Insulin,13:15,null,Fast-Acting: 9u",
+
+            // Afternoon Corrections (Random)
+            "$date,Insulin,14:30,null,Fast-Acting: 4u",
+            "$date,Insulin,15:45,null,Fast-Acting: 5u",
+
+            // Evening Fast-Acting (After Dinner)
+            "$date,Insulin,18:50,null,Fast-Acting: 7u",
+            "$date,Insulin,19:10,null,Fast-Acting: 8u",
+            "$date,Insulin,19:30,null,Fast-Acting: 9u",
+            "$date,Insulin,19:45,null,Fast-Acting: 10u",
+
+            // Nighttime Corrections (Random)
+            "$date,Insulin,20:30,null,Fast-Acting: 6u",
+            "$date,Insulin,21:15,null,Fast-Acting: 5u",
+
+            // Pre-Snack Insulin (Sometimes before late-night snacks)
+            "$date,Insulin,21:45,null,Fast-Acting: 4u",
+            "$date,Insulin,22:00,null,Fast-Acting: 5u",
+
+            // Bedtime Long-Acting (ALWAYS)
+            "$date,Insulin,22:30,null,Long-Acting: 35u",
+            "$date,Insulin,22:45,null,Long-Acting: 35u",
+            "$date,Insulin,23:00,null,Long-Acting: 35u"
+        )
+
+
+        val activities = listOf(
+            // Gym & Sports
+            "$date,Gym,06:15,07:00,Strength Training",
+            "$date,Gym,18:30,19:20,Cardio & Weights",
+            "$date,Run,07:00,07:40,Morning Jog",
+            "$date,Cycling,16:00,16:45,Outdoor Ride",
+            "$date,Yoga,08:00,08:45,Morning Stretch",
+            "$date,Swim,17:00,17:50,Laps at Pool",
+
+            // Work & Study
+            "$date,Work,09:00,12:00,Coding Session",
+            "$date,Work,13:00,17:00,Meetings & Reports",
+            "$date,Study,14:30,15:45,Math Exercises",
+            "$date,Study,16:00,17:30,Exam Prep",
+
+            // Leisure & Relaxation
+            "$date,Read,21:15,21:45,Science Fiction",
+            "$date,TV,20:00,21:00,New Series",
+            "$date,Music,19:30,null,Guitar Practice",
+            "$date,Game,22:15,null,Online Chess",
+            "$date,Meditate,06:00,06:20,Morning Calm",
+
+            // Chores & Miscellaneous
+            "$date,Shop,11:00,11:45,Grocery Run",
+            "$date,Cook,18:00,18:45,Meal Prep",
+            "$date,Walk,08:20,08:40,Park Walk",
+            "$date,Call,17:15,17:45,Family Chat",
+            "$date,Clean,10:00,10:30,House Cleaning",
+
+            // One-Time Events
+            "$date,Doctor,10:45,null,Check-up Visit",
+            "$date,Friend,15:30,null,Coffee Meetup",
+            "$date,Repair,11:20,null,Fix Bicycle",
+            "$date,Haircut,16:10,null,New Style",
+            "$date,Concert,19:00,22:00,Live Music",
+            "$date,Trip,08:00,18:00,City Day Trip"
+        )
+
+        val allEvents = (meals + insulin + activities).shuffled()
+        val eventMap = mutableMapOf<String, String>()
+        val usedEvents = mutableSetOf<String>() // Track already assigned events
+
+        for (slot in timeSlots) {
+            // Filter available events that match the time slot and have NOT been used
+            val availableEvents = allEvents.filter {
+                it.contains(slot.substring(0, 2)) && it !in usedEvents
+            }
+
+            if (availableEvents.isNotEmpty()) {
+                val chosenEvent = availableEvents.random()
+                eventMap[slot] = chosenEvent
+                usedEvents.add(chosenEvent) // Mark as used
+            } else {
+                // If no direct match, pick a random event that hasn't been used yet
+                val fallbackEvents = allEvents.filter { it !in usedEvents }
+                if (fallbackEvents.isNotEmpty()) {
+                    val chosenFallback = fallbackEvents.random()
+                    eventMap[slot] = chosenFallback
+                    usedEvents.add(chosenFallback) // Mark as used
+                }
+            }
+        }
+
+        return eventMap.values.toList()
     }
 
-}
+
+    }
 
