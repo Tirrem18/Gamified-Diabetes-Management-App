@@ -23,8 +23,79 @@
     <FrameLayout
         android:id="@+id/calendar_fragment_container"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <!-- Selected Date -->
+    <TextView
+        android:id="@+id/selected_date_text"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:text="Loading..."
+        android:textSize="25sp"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:padding="12dp"
         android:layout_marginBottom="16dp"/>
 
-</LinearLayout>
+    <!-- Data Display (Initially Hidden) -->
+    <LinearLayout
+        android:id="@+id/data_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="8dp">
 
+        <TextView
+            android:id="@+id/text_total_activitys"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Total Activity: 0"
+            android:textSize="20sp"
+            android:textColor="?attr/android:textColorPrimary"/>
+
+
+        <TextView
+            android:id="@+id/text_total_glucose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Glucose Entries: 0"
+            android:textSize="20sp"
+            android:textColor="?attr/android:textColorPrimary"/>
+
+        <TextView
+            android:id="@+id/text_avg_glucose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Average Glucose: 0 mg/dL"
+            android:textSize="20sp"
+            android:textColor="?attr/android:textColorPrimary"/>
+
+        <TextView
+            android:id="@+id/text_time_in_range"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Time in Range: 0%"
+            android:textSize="20sp"
+            android:textColor="?attr/android:textColorPrimary"/>
+
+        <TextView
+            android:id="@+id/text_highest_glucose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Highest Glucose: 0 mg/dL"
+            android:textSize="20sp"
+            android:textColor="?attr/android:textColorPrimary"/>
+
+        <TextView
+            android:id="@+id/text_lowest_glucose"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Lowest Glucose: 0 mg/dL"
+            android:textSize="20sp"
+            android:textColor="?attr/android:textColorPrimary"/>
+
+    </LinearLayout>
+
+</LinearLayout>

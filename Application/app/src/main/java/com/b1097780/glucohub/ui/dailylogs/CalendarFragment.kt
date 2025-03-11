@@ -2,12 +2,15 @@ import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.LinearLayout
@@ -16,17 +19,23 @@ import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.activityViewModels
 import com.b1097780.glucohub.PreferencesHelper
 import com.b1097780.glucohub.R
+import com.b1097780.glucohub.ui.dailylogs.DailyLogsViewModel
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
 
 class CalendarFragment : Fragment() {
 
     private lateinit var calendarContainer: LinearLayout
     private lateinit var calendar: Calendar
     private lateinit var monthYearTextView: TextView
+    private var selectedButton: Button? = null // Track the selected button
+    private val viewModel: DailyLogsViewModel by activityViewModels()
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -195,12 +204,6 @@ class CalendarFragment : Fragment() {
             setBackgroundColor(Color.TRANSPARENT) // Border around the entire grid
         }
 
-        // **Simulated event data (Replace with Firebase later)**
-        val storedEvents = mapOf(
-            "2025-03-10" to "Doctor Appointment",
-            "2025-03-12" to "Gym Workout",
-            "2025-03-18" to "Meeting at Work"
-        )
 
         // Add weekday headers (Sun, Mon, Tue, ...)
         val daysOfWeek = arrayOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
@@ -266,16 +269,28 @@ class CalendarFragment : Fragment() {
                     setMargins(1, 1, 1, 1)
                 }
 
-                // Click functionality
+                // On click, update ViewModel with selected date
                 setOnClickListener {
-                    if (hasData) {
+                    Log.d("CalendarFragment", "Clicked on date: $day/${calendar.get(Calendar.MONTH) + 1}/${calendar.get(Calendar.YEAR)}")
 
-                        Toast.makeText(context, "Data exists for $dateKey!", Toast.LENGTH_SHORT).show()
-                    } else {
+                    // Start the shrink animation
+                    val shrinkAnimation = AnimationUtils.loadAnimation(requireContext(), R.anim.shrink_button)
+                    it.startAnimation(shrinkAnimation)
 
-                        Toast.makeText(context, "No Data Available", Toast.LENGTH_SHORT).show()
-                    }
+                    // Slight delay to allow animation to play before updating ViewModel
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        viewModel.updateSelectedDate(
+                            calendar.get(Calendar.YEAR),
+                            calendar.get(Calendar.MONTH),
+                            day,
+                            hasData
+                        )
+                    }, 150) // Matches animation duration
                 }
+
+
+
+
             }
             gridLayout.addView(dayButton)
         }

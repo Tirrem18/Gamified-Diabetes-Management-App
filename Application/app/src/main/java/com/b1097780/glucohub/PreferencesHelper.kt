@@ -338,28 +338,43 @@ object PreferencesHelper {
         return result
     }
 
-    // -------------------------
-    // ✅ GET ACTIVITY ENTRIES IN A DATE RANGE
-    // -------------------------
+    fun getGlucoseStatsForDate(context: Context, date: String): Map<String, Any> {
+        val glucoseEntries = getGlucoseEntriesForDate(context, date)
 
-    fun getActivityEntriesBetweenDates(context: Context, startDate: String, endDate: String): Map<String, List<ActivityLogEntry>> {
-        val result = mutableMapOf<String, List<ActivityLogEntry>>()
-        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-        val calendar = Calendar.getInstance()
-
-        val start = dateFormat.parse(startDate) ?: return result
-        val end = dateFormat.parse(endDate) ?: return result
-
-        calendar.time = start
-        while (!calendar.time.after(end)) {
-            val dateKey = dateFormat.format(calendar.time)
-            val entries = getActivityEntriesForDate(context, dateKey)
-            if (entries.isNotEmpty()) result[dateKey] = entries
-            calendar.add(Calendar.DAY_OF_MONTH, 1)
+        if (glucoseEntries.isEmpty()) {
+            return mapOf(
+                "totalEntries" to 0,
+                "averageGlucose" to 0.0,
+                "timeInRange" to "0%",
+                "highestGlucose" to 0.0,
+                "lowestGlucose" to 0.0
+            )
         }
 
-        return result
+        val totalEntries = glucoseEntries.size
+        val glucoseValues = glucoseEntries.map { it.second }
+
+        val avgGlucose = glucoseValues.average()
+        val highestGlucose = glucoseValues.maxOrNull() ?: 0.0
+        val lowestGlucose = glucoseValues.minOrNull() ?: 0.0
+
+        // Calculate Time in Range (Assuming 4-10 mmol/L as the target range)
+        val inRangeCount = glucoseValues.count { it in 4.0..10.0 }
+        val timeInRangePercentage = if (totalEntries > 0) {
+            (inRangeCount.toDouble() / totalEntries * 100).toInt()
+        } else {
+            0
+        }
+
+        return mapOf(
+            "totalEntries" to totalEntries,
+            "averageGlucose" to String.format("%.1f", avgGlucose),
+            "timeInRange" to "$timeInRangePercentage%",
+            "highestGlucose" to String.format("%.1f", highestGlucose),
+            "lowestGlucose" to String.format("%.1f", lowestGlucose)
+        )
     }
+
 
     // -------------------------
     // ✅ POPULATE TEST DATA (WITH COMPRESSION)
