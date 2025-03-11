@@ -1,4 +1,4 @@
-package com.b1097780.glucohub.ui.planner
+package com.b1097780.glucohub.ui.dailylogs
 
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

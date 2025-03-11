@@ -30,7 +30,6 @@ class MainActivity : AppCompatActivity() {
     private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-
         //PreferencesHelper.clearAllData(this) // Reset all stored values
         //PreferencesHelper.populateTestData(this) // Fill with test data
 

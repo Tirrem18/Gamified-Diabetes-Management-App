@@ -380,38 +380,51 @@ object PreferencesHelper {
 
         // --- Generate Data for the Last 12 Months, Including Today ---
         for (monthOffset in 0 until 12) {
-            calendar.set(currentYear, currentMonth - monthOffset, 1) // Move to start of each month
-            val maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val tempCalendar = Calendar.getInstance()
+            tempCalendar.add(Calendar.MONTH, -monthOffset) // Move backwards by monthOffset months
 
-            for (day in 1..maxDay) {
-                // Randomly decide whether to skip this day (but never skip today)
-                if (day != today && random.nextBoolean()) continue
+            val adjustedYear = tempCalendar.get(Calendar.YEAR)
+            val adjustedMonth = tempCalendar.get(Calendar.MONTH)
 
-                calendar.set(currentYear, currentMonth - monthOffset, day)
-                val date = dateFormat.format(calendar.time)
+            tempCalendar.set(adjustedYear, adjustedMonth, 1) // Set to first day of the adjusted month
 
-                val isToday = (day == today && monthOffset == 0) // Check if processing today's data
+            val maxDay = tempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
+            val lastDay = if (monthOffset == 0) today else maxDay
 
-                // Generate test data
+            // 🔹 Pick at least one guaranteed random day per month
+            val guaranteedDay = if (monthOffset == 0) today else (1..maxDay).random()
+
+            for (day in 1..lastDay) {
+                // 🔹 Lower skip rate (e.g., skip only 20% instead of 50%)
+                if (day != today && day != guaranteedDay && random.nextInt(100) < 20) continue
+
+                tempCalendar.set(adjustedYear, adjustedMonth, day)
+                val date = dateFormat.format(tempCalendar.time)
+
+                val isToday = (day == today && adjustedMonth == currentMonth && adjustedYear == currentYear)
+
                 val glucoseEntries = getRandomGlucoseDataSet(date)
                     .map { entry ->
                         val parts = entry.split(",")
-                        Pair(parts[1], parts[2].toFloat()) // Extract time & glucose level
+                        Pair(parts[1], parts[2].toFloat())
                     }
-                    .filter { !isToday || it.first <= currentTimeMinus20 } // Exclude future times today
+                    .filter { !isToday || it.first <= currentTimeMinus20 }
 
                 val activityEntries = generateActivityLog(date)
                     .map { entry ->
                         val parts = entry.split(",")
                         ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
                     }
-                    .filter { !isToday || it.startTime <= currentTimeMinus20 } // Exclude future times today
+                    .filter { !isToday || it.startTime <= currentTimeMinus20 }
 
-                // ✅ Save separately in SharedPreferences (WITH COMPRESSION)
                 saveGlucoseEntries(context, date, glucoseEntries)
                 saveActivityEntries(context, date, activityEntries)
             }
         }
+
+
+
+
     }
 
 
