@@ -31,7 +31,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Loading..."
-        android:textSize="25sp"
+        android:textSize="23sp"
         android:textStyle="bold"
         android:textAlignment="center"
         android:gravity="center"
@@ -51,10 +51,9 @@
             android:id="@+id/text_total_activitys"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Total Activity: 0"
+            android:text="Activity Entries: 0"
             android:textSize="20sp"
             android:textColor="?attr/android:textColorPrimary"/>
-
 
         <TextView
             android:id="@+id/text_total_glucose"
@@ -95,6 +94,40 @@
             android:text="Lowest Glucose: 0 mg/dL"
             android:textSize="20sp"
             android:textColor="?attr/android:textColorPrimary"/>
+
+        <!-- Buttons Container -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <!-- View All Entries Button (Smaller Width) -->
+            <Button
+                android:id="@+id/button_view_all_entries"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="2"
+                android:text="Review Entries"
+                android:textSize="18sp"
+                android:padding="12dp"
+                android:backgroundTint="?attr/colorPrimary"
+                android:textColor="@android:color/white"/>
+
+            <!-- Delete Entry Button (Same Height as Button) -->
+            <Button
+                android:id="@+id/button_delete_entry"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Edit"
+                android:textSize="18sp"
+                android:padding="12dp"
+                android:backgroundTint="?attr/colorAccent"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="8dp"/>
+        </LinearLayout>
 
     </LinearLayout>
 

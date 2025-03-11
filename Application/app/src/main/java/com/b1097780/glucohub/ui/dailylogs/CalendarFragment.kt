@@ -283,7 +283,8 @@ class CalendarFragment : Fragment() {
                             calendar.get(Calendar.YEAR),
                             calendar.get(Calendar.MONTH),
                             day,
-                            hasData
+                            hasData,
+                            requireContext()
                         )
                     }, 150) // Matches animation duration
                 }

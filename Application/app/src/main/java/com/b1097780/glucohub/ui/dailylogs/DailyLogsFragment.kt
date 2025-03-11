@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
@@ -22,27 +23,53 @@ class DailyLogsFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-
         val root = inflater.inflate(R.layout.fragment_daily_logs, container, false)
 
-        // Find the selected date TextView
+        // Find UI elements
         val selectedDateTextView: TextView = root.findViewById(R.id.selected_date_text)
+        val textTotalEntries: TextView = root.findViewById(R.id.text_total_glucose)
+        val textAverageGlucose: TextView = root.findViewById(R.id.text_avg_glucose)
+        val textTimeInRange: TextView = root.findViewById(R.id.text_time_in_range)
+        val textTotalActivities: TextView = root.findViewById(R.id.text_total_activitys)
+        val textHighestGlucose: TextView = root.findViewById(R.id.text_highest_glucose)
+        val textLowestGlucose: TextView = root.findViewById(R.id.text_lowest_glucose)
+
+        val buttonViewAllEntries: Button = root.findViewById(R.id.button_view_all_entries)
+        val buttonDeleteEntry: Button = root.findViewById(R.id.button_delete_entry)
 
         // Apply theme color
         selectedDateTextView.setTextColor(getThemeColor(requireContext(), android.R.attr.textColorPrimary))
 
-        // Observe the formatted date from the ViewModel
+        // ✅ Observe formatted date and update UI
         viewModel.formattedDate.observe(viewLifecycleOwner) { formattedDate ->
-            Log.d("DailyLogsFragment", "Formatted date changed: $formattedDate")
-            // Update the UI with the formatted date
             selectedDateTextView.text = formattedDate
+            requireContext().let { context ->
+                viewModel.fetchGlucoseAndActivityData(context, viewModel.selectedDate.value ?: "")
+            }
         }
 
-        // Observe hasData status from the ViewModel
+        // ✅ Observe hasData status
         viewModel.hasData.observe(viewLifecycleOwner) { hasData ->
-            Log.d("DailyLogsFragment", "Has Data changed: $hasData")
-            // Update the UI based on whether there is data or not
             updateSelectedDateUI(viewModel.formattedDate.value, hasData)
+        }
+
+        // ✅ Observe glucose and activity data
+        viewModel.averageGlucose.observe(viewLifecycleOwner) { textAverageGlucose.text = it }
+        viewModel.totalEntries.observe(viewLifecycleOwner) { textTotalEntries.text = it }
+        viewModel.timeInRange.observe(viewLifecycleOwner) { textTimeInRange.text = it }
+        viewModel.totalActivityEntries.observe(viewLifecycleOwner) { textTotalActivities.text = it }
+        viewModel.highestGlucose.observe(viewLifecycleOwner) { textHighestGlucose.text = it }
+        viewModel.lowestGlucose.observe(viewLifecycleOwner) { textLowestGlucose.text = it }
+
+        // ✅ Handle button clicks
+        buttonViewAllEntries.setOnClickListener {
+            Log.d("DailyLogsFragment", "View All Entries clicked")
+            // TODO: Implement logic to show all glucose entries
+        }
+
+        buttonDeleteEntry.setOnClickListener {
+            Log.d("DailyLogsFragment", "Delete Entry clicked")
+            // TODO: Implement logic to delete last entry
         }
 
         // Load CalendarFragment dynamically
@@ -57,31 +84,30 @@ class DailyLogsFragment : Fragment() {
         val selectedDateTextView: TextView? = view?.findViewById(R.id.selected_date_text)
         val dataContainer: LinearLayout? = view?.findViewById(R.id.data_container)
 
+        Log.d("DailyLogsFragment", "Checking hasData: $hasData for date: $date")
+
         if (date != null && selectedDateTextView != null) {
-            selectedDateTextView.text = date  // Display the formatted date
+            selectedDateTextView.text = date
 
             if (hasData == true) {
-                // Show data section
+                Log.d("DailyLogsFragment", "Data found, showing UI elements")
                 dataContainer?.visibility = View.VISIBLE
-                selectedDateTextView.text = date // Keep the date above the stats
-                selectedDateTextView.gravity = Gravity.START // Left align
-
-                // Set placeholders (replace with real values later)
-                view?.findViewById<TextView>(R.id.text_total_activitys)?.text = "Activity Entries: 0"
-                view?.findViewById<TextView>(R.id.text_total_glucose)?.text = "Glucose Entries: 0"
-                view?.findViewById<TextView>(R.id.text_avg_glucose)?.text = "Average Glucose: 0 mg/dL"
-                view?.findViewById<TextView>(R.id.text_time_in_range)?.text = "Time in Range: 0%"
-                view?.findViewById<TextView>(R.id.text_highest_glucose)?.text = "Highest Glucose: 0 mg/dL"
-                view?.findViewById<TextView>(R.id.text_lowest_glucose)?.text = "Lowest Glucose: 0 mg/dL"
-
+                selectedDateTextView.gravity = Gravity.START
             } else {
-                // Hide data section and show centered "No data available"
+                Log.d("DailyLogsFragment", "No data available, updating UI")
                 dataContainer?.visibility = View.GONE
                 selectedDateTextView.text = "$date\n\nNo data available"
                 selectedDateTextView.gravity = Gravity.CENTER
+
+                // ✅ Ensure UI update persists
+                selectedDateTextView.postDelayed({
+                    if (hasData == false) { // Double-check after delay
+                        selectedDateTextView.text = "$date\n\nNo data available"
+                        Log.d("DailyLogsFragment", "Final UI confirmation: No data available shown")
+                    }
+                }, 500)
             }
 
-            // Apply theme color
             selectedDateTextView.setTextColor(getThemeColor(requireContext(), android.R.attr.textColorPrimary))
         }
     }

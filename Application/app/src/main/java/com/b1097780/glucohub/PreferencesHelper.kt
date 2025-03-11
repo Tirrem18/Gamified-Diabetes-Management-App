@@ -347,16 +347,24 @@ object PreferencesHelper {
                 "averageGlucose" to 0.0,
                 "timeInRange" to "0%",
                 "highestGlucose" to 0.0,
-                "lowestGlucose" to 0.0
+                "lowestGlucose" to 0.0,
+                "highestTime" to "--.--", // ✅ Added placeholder
+                "lowestTime" to "--.--"  // ✅ Added placeholder
             )
         }
 
         val totalEntries = glucoseEntries.size
         val glucoseValues = glucoseEntries.map { it.second }
-
         val avgGlucose = glucoseValues.average()
-        val highestGlucose = glucoseValues.maxOrNull() ?: 0.0
-        val lowestGlucose = glucoseValues.minOrNull() ?: 0.0
+
+        val highestEntry = glucoseEntries.maxByOrNull { it.second }
+        val lowestEntry = glucoseEntries.minByOrNull { it.second }
+
+        val highestGlucose = highestEntry?.second ?: 0.0
+        val lowestGlucose = lowestEntry?.second ?: 0.0
+
+        val highestTime = highestEntry?.first ?: "--.--"
+        val lowestTime = lowestEntry?.first ?: "--.--"
 
         // Calculate Time in Range (Assuming 4-10 mmol/L as the target range)
         val inRangeCount = glucoseValues.count { it in 4.0..10.0 }
@@ -366,14 +374,20 @@ object PreferencesHelper {
             0
         }
 
+        Log.d("PreferencesHelper", "Highest Glucose: $highestGlucose at $highestTime")
+        Log.d("PreferencesHelper", "Lowest Glucose: $lowestGlucose at $lowestTime")
+
         return mapOf(
             "totalEntries" to totalEntries,
             "averageGlucose" to String.format("%.1f", avgGlucose),
             "timeInRange" to "$timeInRangePercentage%",
             "highestGlucose" to String.format("%.1f", highestGlucose),
-            "lowestGlucose" to String.format("%.1f", lowestGlucose)
+            "lowestGlucose" to String.format("%.1f", lowestGlucose),
+            "highestTime" to highestTime, // ✅ Now returning actual time
+            "lowestTime" to lowestTime    // ✅ Now returning actual time
         )
     }
+
 
 
     // -------------------------
