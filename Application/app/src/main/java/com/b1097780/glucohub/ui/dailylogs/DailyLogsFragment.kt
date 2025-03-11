@@ -18,7 +18,6 @@ class DailyLogsFragment : Fragment() {
 
     private val viewModel: DailyLogsViewModel by activityViewModels()
 
-
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -32,16 +31,19 @@ class DailyLogsFragment : Fragment() {
         // Apply theme color
         selectedDateTextView.setTextColor(getThemeColor(requireContext(), android.R.attr.textColorPrimary))
 
-        viewModel.selectedDate.observe(viewLifecycleOwner) { date ->
-            Log.d("DailyLogsFragment", "Selected date changed: $date")
-            updateSelectedDateUI(date, viewModel.hasData.value)
+        // Observe the formatted date from the ViewModel
+        viewModel.formattedDate.observe(viewLifecycleOwner) { formattedDate ->
+            Log.d("DailyLogsFragment", "Formatted date changed: $formattedDate")
+            // Update the UI with the formatted date
+            selectedDateTextView.text = formattedDate
         }
 
+        // Observe hasData status from the ViewModel
         viewModel.hasData.observe(viewLifecycleOwner) { hasData ->
             Log.d("DailyLogsFragment", "Has Data changed: $hasData")
-            updateSelectedDateUI(viewModel.selectedDate.value, hasData)
+            // Update the UI based on whether there is data or not
+            updateSelectedDateUI(viewModel.formattedDate.value, hasData)
         }
-
 
         // Load CalendarFragment dynamically
         childFragmentManager.beginTransaction()
@@ -50,12 +52,13 @@ class DailyLogsFragment : Fragment() {
 
         return root
     }
+
     private fun updateSelectedDateUI(date: String?, hasData: Boolean?) {
         val selectedDateTextView: TextView? = view?.findViewById(R.id.selected_date_text)
         val dataContainer: LinearLayout? = view?.findViewById(R.id.data_container)
 
         if (date != null && selectedDateTextView != null) {
-            selectedDateTextView.text = date
+            selectedDateTextView.text = date  // Display the formatted date
 
             if (hasData == true) {
                 // Show data section
@@ -82,10 +85,6 @@ class DailyLogsFragment : Fragment() {
             selectedDateTextView.setTextColor(getThemeColor(requireContext(), android.R.attr.textColorPrimary))
         }
     }
-
-
-
-
 
     private fun getThemeColor(context: android.content.Context, attr: Int): Int {
         val typedValue = TypedValue()
