@@ -89,7 +89,7 @@ class MainActivity : AppCompatActivity() {
                     R.id.navigation_home,
                     R.id.navigation_glucose,
                     R.id.navigation_logs,
-                    R.id.navigation_data
+                    R.id.navigation_profile
                 ),
                 binding.drawerLayout
             )
@@ -112,7 +112,7 @@ class MainActivity : AppCompatActivity() {
 
             when (menuItem.itemId) {
                 R.id.nav_settings -> navController.navigate(R.id.navigation_settings)
-                R.id.nav_profile -> navController.navigate(R.id.navigation_profile)
+                R.id.nav_find_users -> navController.navigate(R.id.navigation_find_users)
                 R.id.nav_logout -> performLogout()
                 else -> menuItem.onNavDestinationSelected(navController)
             }
@@ -239,7 +239,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_logout,
                 R.id.navigation_streaks,
                 R.id.navigation_coins,
-                R.id.navigation_profile -> {
+                R.id.navigation_find_users -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     binding.navView.visibility = View.GONE
                     customMenuButton.visibility = View.GONE

@@ -38,10 +38,10 @@
 
 
     <fragment
-        android:id="@+id/navigation_data"
+        android:id="@+id/navigation_profile"
         android:name="com.b1097780.glucohub.ui.profile.ProfileFragment"
         android:label="Data"
-        tools:layout="@layout/fragment_data" />
+        tools:layout="@layout/fragment_profile" />
 
     <!-- Drawer Item (Settings) -->
     <fragment
@@ -51,8 +51,8 @@
         tools:layout="@layout/fragment_settings" />
 
     <fragment
-        android:id="@+id/navigation_profile"
-        android:name="com.b1097780.glucohub.ui.friends.FriendsFragment"
-        android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+        android:id="@+id/navigation_find_users"
+        android:name="com.b1097780.glucohub.ui.findusers.FindUsersFragment"
+        android:label="Find Users"
+        tools:layout="@layout/fragment_find_users" />
 </navigation>

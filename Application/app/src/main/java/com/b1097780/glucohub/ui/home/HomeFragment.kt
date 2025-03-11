@@ -18,7 +18,6 @@ import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogDialog
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
-import com.b1097780.glucohub.ui.friends.FriendsViewModel
 import com.b1097780.glucohub.ui.home.GraphDialog.GraphDialog
 import com.github.mikephil.charting.data.Entry
 
