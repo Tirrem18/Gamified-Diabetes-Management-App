@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import com.b1097780.glucohub.databinding.FragmentProfileBinding
@@ -12,27 +11,33 @@ import com.b1097780.glucohub.databinding.FragmentProfileBinding
 class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
-
-    // This property is only valid between onCreateView and
-    // onDestroyView.
     private val binding get() = _binding!!
 
+    private lateinit var profileViewModel: ProfileViewModel
+
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): View {
-        val profileViewModel =
-            ViewModelProvider(this).get(ProfileViewModel::class.java)
-
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
-        val root: View = binding.root
 
-        val textView: TextView = binding.textData
-        profileViewModel.text.observe(viewLifecycleOwner) {
-            textView.text = it
+        // Initialize ViewModel
+        profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+
+        // Observe LiveData and set values to UI
+        profileViewModel.profileTitle.observe(viewLifecycleOwner) {
+            binding.username.text = it
         }
-        return root
+        profileViewModel.sampleText.observe(viewLifecycleOwner) {
+            binding.sampleText.text = it
+        }
+        profileViewModel.glucoseEntries.observe(viewLifecycleOwner) {
+            binding.glucoseEntries.text = it
+        }
+        profileViewModel.activityEntries.observe(viewLifecycleOwner) {
+            binding.activityEntries.text = it
+        }
+
+        return binding.root
     }
 
     override fun onDestroyView() {

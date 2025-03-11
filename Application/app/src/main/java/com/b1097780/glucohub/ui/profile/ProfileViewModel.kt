@@ -6,8 +6,15 @@ import androidx.lifecycle.ViewModel
 
 class ProfileViewModel : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is Profile Fragment"
-    }
-    val text: LiveData<String> = _text
+    private val _profileTitle = MutableLiveData("Jacob's Profile")
+    val profileTitle: LiveData<String> = _profileTitle
+
+    private val _sampleText = MutableLiveData("Sample Text")
+    val sampleText: LiveData<String> = _sampleText
+
+    private val _glucoseEntries = MutableLiveData("Glucose Entries")
+    val glucoseEntries: LiveData<String> = _glucoseEntries
+
+    private val _activityEntries = MutableLiveData("Activity Entries")
+    val activityEntries: LiveData<String> = _activityEntries
 }
