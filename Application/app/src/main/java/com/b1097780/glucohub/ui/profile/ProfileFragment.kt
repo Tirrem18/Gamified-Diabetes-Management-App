@@ -27,8 +27,8 @@ class ProfileFragment : Fragment() {
         profileViewModel.profileTitle.observe(viewLifecycleOwner) {
             binding.username.text = it
         }
-        profileViewModel.sampleText.observe(viewLifecycleOwner) {
-            binding.sampleText.text = it
+        profileViewModel.userMotto.observe(viewLifecycleOwner) {
+            binding.userMotto.text = it
         }
         profileViewModel.glucoseEntries.observe(viewLifecycleOwner) {
             binding.glucoseEntries.text = it

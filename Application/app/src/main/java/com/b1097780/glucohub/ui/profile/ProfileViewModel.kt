@@ -9,8 +9,8 @@ class ProfileViewModel : ViewModel() {
     private val _profileTitle = MutableLiveData("Jacob's Profile")
     val profileTitle: LiveData<String> = _profileTitle
 
-    private val _sampleText = MutableLiveData("Sample Text")
-    val sampleText: LiveData<String> = _sampleText
+    private val _userMotto = MutableLiveData("New User")
+    val userMotto: LiveData<String> = _userMotto
 
     private val _glucoseEntries = MutableLiveData("Glucose Entries")
     val glucoseEntries: LiveData<String> = _glucoseEntries
