@@ -8,6 +8,9 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
+    <color name="profile_box_color">#38aeee</color> <!-- Default color -->
+
+
 
     //Blue
     <color name="blue">#38aeee</color>

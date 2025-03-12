@@ -17,6 +17,22 @@ object PreferencesHelper {
     private const val PREFS_NAME = "GlucoHubPrefs"
 
     // Keys for stored values
+    private const val KEY_USERNAME = "username"
+    private const val KEY_USER_MOTTO = "user_motto"
+    private const val KEY_PROFILE_PIC = "profile_picture"
+    private const val KEY_BACKGROUND_PIC = "background_picture"
+    private const val KEY_BOX_COLOR = "box_color"
+    private const val KEY_GLUCOSE_ENTRIES = "glucose_entries"
+    private const val KEY_ACTIVITY_ENTRIES = "activity_entries"
+    private const val KEY_JOINING_DATE = "joining_date"
+    private const val KEY_LAST_ACTIVITY_TOTAL = "last_activity_total"
+    private const val KEY_LAST_GLUCOSE_TOTAL = "last_glucose_total"
+    private const val KEY_LAST_UPDATE_DATE = "last_update_date"
+    private const val KEY_TODAY_GLUCOSE_COUNT = "today_glucose_count"
+    private const val KEY_TODAY_ACTIVITY_COUNT = "today_activity_count"
+
+
+
     private const val KEY_CARB_RATIO = "carb_ratio"
     private const val KEY_NIGHT_UNITS = "night_time_units"
     private const val KEY_USER_COINS = "userCoins"
@@ -26,22 +42,231 @@ object PreferencesHelper {
     private const val KEY_HIGHEST_STREAK = "highestStreak"
     private const val KEY_COIN_MULTIPLIER = "coinMultiplier"
     private const val KEY_MILESTONE_PREFIX = "milestone_"
+    private const val KEY_USER_THEME = "userTheme"
+
+
 
     // Get SharedPreferences instance
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
-        // Get the current streak (default 0)
+    // Get User Theme
+    fun getUserTheme(context: Context): String {
+        return getPrefs(context).getString(KEY_USER_THEME, "default") ?: "default"
+    }
+
+    // Set User Theme
+    fun setUserTheme(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_USER_THEME, value).apply()
+    }
+
+    // Username
+    fun getUsername(context: Context): String {
+        return getPrefs(context).getString(KEY_USERNAME, "User Profile") ?: "User Profile"
+    }
+
+    fun setUsername(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_USERNAME, value).apply()
+    }
+
+    fun getTotalActivityEntries(context: Context): Int {
+        val sharedPrefs = getPrefs(context)
+        var finalizedTotal = sharedPrefs.getInt(KEY_LAST_ACTIVITY_TOTAL, -1) // -1 means uninitialized
+        var lastUpdateDate = sharedPrefs.getString(KEY_LAST_UPDATE_DATE, "") ?: ""
+        val todayDate = getCurrentDate()
+
+        Log.d("DEBUG", "Checking activity entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate")
+
+        // ✅ If the finalized total has never been set, process ALL past data ONCE
+        if (finalizedTotal == -1) {
+            Log.d("DEBUG", "🚨 First-time run: Processing ALL past activity data!")
+
+            finalizedTotal = sharedPrefs.all.entries
+                .asSequence()
+                .filter { it.key.endsWith("_activities") }
+                .mapNotNull { entry ->
+                    val decompressedJson = decompressJson(entry.value as? String ?: "[]")
+                    Log.d("DEBUG", "Processing Key: ${entry.key}, Data: $decompressedJson") // ✅ Log decompressed data
+                    decompressedJson
+                }
+                .sumOf { JSONArray(it).length() }
+
+            // ✅ Save the first-time computed total
+            sharedPrefs.edit().putInt(KEY_LAST_ACTIVITY_TOTAL, finalizedTotal).apply()
+        }
+
+        // ✅ If it's a new day, finalize yesterday’s data
+        if (lastUpdateDate != todayDate) {
+            val yesterdayCount = sharedPrefs.getInt(KEY_TODAY_ACTIVITY_COUNT, 0)
+
+            sharedPrefs.edit()
+                .putInt(KEY_LAST_ACTIVITY_TOTAL, finalizedTotal + yesterdayCount) // ✅ Store permanent total
+                .putString(KEY_LAST_UPDATE_DATE, todayDate) // ✅ Mark today as processed
+                .putInt(KEY_TODAY_ACTIVITY_COUNT, 0) // ✅ Reset today's count
+                .apply()
+
+            finalizedTotal += yesterdayCount
+        }
+
+        // ✅ Use cached today's count to avoid lag
+        var todayCount = sharedPrefs.getInt(KEY_TODAY_ACTIVITY_COUNT, -1)
+
+        if (todayCount == -1) {
+            Log.d("DEBUG", "🚀 Recalculating today's activity entries!")
+
+            todayCount = sharedPrefs.all.entries
+                .asSequence()
+                .filter { it.key.endsWith("_activities") && it.key.startsWith(todayDate) } // ✅ Only process today's entries
+                .mapNotNull { entry -> decompressJson(entry.value as? String ?: "[]") }
+                .sumOf { JSONArray(it).length() }
+
+            sharedPrefs.edit().putInt(KEY_TODAY_ACTIVITY_COUNT, todayCount).apply()
+        }
+
+        Log.d("DEBUG", "Returning Total Activity Entries: ${finalizedTotal + todayCount}")
+
+        return finalizedTotal + todayCount
+    }
+
+
+    fun getTotalGlucoseEntries(context: Context): Int {
+        val sharedPrefs = getPrefs(context)
+        var finalizedTotal = sharedPrefs.getInt(KEY_LAST_GLUCOSE_TOTAL, -1) // -1 means uninitialized
+        var lastUpdateDate = sharedPrefs.getString(KEY_LAST_UPDATE_DATE, "") ?: ""
+        val todayDate = getCurrentDate()
+
+        Log.d("DEBUG", "Checking glucose entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate")
+
+        // ✅ If the finalized total has never been set, process ALL past data ONCE
+        if (finalizedTotal == -1) {
+            Log.d("DEBUG", "🚨 First-time run: Processing ALL past glucose data!")
+
+            finalizedTotal = sharedPrefs.all.entries
+                .asSequence()
+                .filter { it.key.endsWith("_glucose") }
+                .mapNotNull { entry ->
+                    val decompressedJson = decompressJson(entry.value as? String ?: "[]")
+                    Log.d("DEBUG", "Processing Key: ${entry.key}, Data: $decompressedJson") // ✅ Log decompressed data
+                    decompressedJson
+                }
+                .sumOf { JSONArray(it).length() }
+
+            // ✅ Save the first-time computed total
+            sharedPrefs.edit().putInt(KEY_LAST_GLUCOSE_TOTAL, finalizedTotal).apply()
+        }
+
+        // ✅ If it's a new day, finalize yesterday’s data
+        if (lastUpdateDate != todayDate) {
+            val yesterdayCount = sharedPrefs.getInt(KEY_TODAY_GLUCOSE_COUNT, 0)
+
+            sharedPrefs.edit()
+                .putInt(KEY_LAST_GLUCOSE_TOTAL, finalizedTotal + yesterdayCount) // ✅ Store permanent total
+                .putString(KEY_LAST_UPDATE_DATE, todayDate) // ✅ Mark today as processed
+                .putInt(KEY_TODAY_GLUCOSE_COUNT, 0) // ✅ Reset today's count
+                .apply()
+
+            finalizedTotal += yesterdayCount
+        }
+
+        // ✅ Use cached today's count to avoid lag
+        var todayCount = sharedPrefs.getInt(KEY_TODAY_GLUCOSE_COUNT, -1)
+
+        if (todayCount == -1) {
+            Log.d("DEBUG", "🚀 Recalculating today's glucose entries!")
+
+            todayCount = sharedPrefs.all.entries
+                .asSequence()
+                .filter { it.key.endsWith("_glucose") && it.key.startsWith(todayDate) } // ✅ Only process today's entries
+                .mapNotNull { entry -> decompressJson(entry.value as? String ?: "[]") }
+                .sumOf { JSONArray(it).length() }
+
+            sharedPrefs.edit().putInt(KEY_TODAY_GLUCOSE_COUNT, todayCount).apply()
+        }
+
+        Log.d("DEBUG", "Returning Total Glucose Entries: ${finalizedTotal + todayCount}")
+
+        return finalizedTotal + todayCount
+    }
+
+
+
+
+
+    // User Motto
+    fun getUserMotto(context: Context): String {
+        return getPrefs(context).getString(KEY_USER_MOTTO, "New User") ?: "New User"
+    }
+
+    fun setUserMotto(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_USER_MOTTO, value).apply()
+    }
+
+    // Profile Picture Path
+    fun getProfilePicture(context: Context): String {
+        return getPrefs(context).getString(KEY_PROFILE_PIC, "") ?: ""
+    }
+
+    fun setProfilePicture(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_PROFILE_PIC, value).apply()
+    }
+
+    // Background Picture Path
+    fun getBackgroundPicture(context: Context): String {
+        return getPrefs(context).getString(KEY_BACKGROUND_PIC, "") ?: ""
+    }
+
+    fun setBackgroundPicture(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_BACKGROUND_PIC, value).apply()
+    }
+
+    // Box Background Color
+    fun getBoxColor(context: Context): String {
+        return getPrefs(context).getString(KEY_BOX_COLOR, "#FFCDD2") ?: "#FFCDD2" // Default red
+    }
+
+    fun setBoxColor(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_BOX_COLOR, value).apply()
+    }
+
+    // Glucose Entries Count
+    fun getGlucoseEntries(context: Context): Int {
+        return getPrefs(context).getInt(KEY_GLUCOSE_ENTRIES, 0)
+    }
+
+    fun setGlucoseEntries(context: Context, value: Int) {
+        getPrefs(context).edit().putInt(KEY_GLUCOSE_ENTRIES, value).apply()
+    }
+
+    // Activity Entries Count
+    fun getActivityEntries(context: Context): Int {
+        return getPrefs(context).getInt(KEY_ACTIVITY_ENTRIES, 0)
+    }
+
+
+
+    // Joining Date
+    fun getJoiningDate(context: Context): String {
+        return getPrefs(context).getString(KEY_JOINING_DATE, "01/01/2024") ?: "01/01/2024"
+    }
+
+    fun setJoiningDate(context: Context, value: String) {
+        getPrefs(context).edit().putString(KEY_JOINING_DATE, value).apply()
+    }
+
+
+
+    // Get the current streak (default 0)
         fun getUserStreak(context: Context): Int {
             return getPrefs(context).getInt(KEY_USER_STREAK, 0)
         }
 
         // Set the new streak count
         fun setUserStreak(context: Context, value: Int) {
-            getPrefs(context).edit().putInt(KEY_USER_STREAK, value).apply()
+            getPrefs(context).edit().putInt(KEY_USER_STREAK, value).apply() // Update streak achievement when streak changes
         }
 
-        // Get the last streak date (default to empty if not set)
+
+    // Get the last streak date (default to empty if not set)
         fun getLastStreakDate(context: Context): String {
             return getPrefs(context).getString(KEY_LAST_STREAK_DATE, "") ?: ""
         }
@@ -75,6 +300,35 @@ object PreferencesHelper {
         }
 
     }
+
+    fun deleteGlucoseEntry(context: Context, date: String, time: String) {
+        val sharedPrefs = getPrefs(context)
+        val glucoseEntries = getGlucoseEntriesForDate(context, date).toMutableList()
+
+        // Find and remove the entry
+        val updatedEntries = glucoseEntries.filterNot { it.first == time }
+
+        // Save the updated list
+        saveGlucoseEntries(context, date, updatedEntries)
+
+        Log.d("PreferencesHelper", "Deleted glucose entry at $time on $date")
+    }
+
+    fun deleteActivityEntry(context: Context, date: String, time: String) {
+        val sharedPrefs = getPrefs(context)
+        val activityEntries = getActivityEntriesForDate(context, date).toMutableList()
+
+        // Find and remove the entry
+        val updatedEntries = activityEntries.filterNot { it.startTime == time }
+
+        // Save the updated list
+        saveActivityEntries(context, date, updatedEntries)
+
+        Log.d("PreferencesHelper", "Deleted activity entry at $time on $date")
+    }
+
+
+
 
     fun updateStreakOnEntry(context: Context) {
         val lastStreakDate = getLastStreakDate(context)
@@ -408,7 +662,7 @@ object PreferencesHelper {
         val random = Random(System.currentTimeMillis())
 
         // --- Generate Data for the Last 12 Months, Including Today ---
-        for (monthOffset in 0 until 12) {
+        for (monthOffset in 0 until 22) {
             val tempCalendar = Calendar.getInstance()
             tempCalendar.add(Calendar.MONTH, -monthOffset) // Move backwards by monthOffset months
 

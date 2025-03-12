@@ -1,5 +1,6 @@
 package com.b1097780.glucohub
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -30,12 +31,12 @@ class MainActivity : AppCompatActivity() {
     private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        //PreferencesHelper.clearAllData(this) // Reset all stored values
+        PreferencesHelper.clearAllData(this) // Reset all stored values
         //PreferencesHelper.populateTestData(this) // Fill with test data
 
         //PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
 
-        //PreferencesHelper.setUserStreak(this, 149) // Manually set current streak
+        //PreferencesHelper.setUserStreak(this, 49) // Manually set current streak
         //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
 
         //PreferencesHelper.setMilestoneClaimed(this, 7) // Mark 7-day milestone as claimed
@@ -44,12 +45,16 @@ class MainActivity : AppCompatActivity() {
         //PreferencesHelper.setCoinMultiplier(this, 2) // Manually set multiplier to x2
         //PreferencesHelper.addCoins(this, 100) // Add 100 coins
 
+        PreferencesHelper.setUserTheme(this, "") // Add 100 coins
+
 
 
 
         PreferencesHelper.checkAndResetStreak(this)
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
         userStreak = PreferencesHelper.getUserStreak(this) // Load streak
+        theme = PreferencesHelper.getUserTheme(this) // Load theme
+
         applyUserTheme(theme)
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)

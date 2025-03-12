@@ -73,7 +73,7 @@ class DailyLogsViewModel : ViewModel() {
         Log.d("DailyLogsViewModel", "Formatted highestTime: $highestTime")
         Log.d("DailyLogsViewModel", "Formatted lowestTime: $lowestTime")
 
-        _totalEntries.postValue("Total Entries: ${glucoseStats["totalEntries"]}")
+        _totalEntries.postValue("Glucose Entries: ${glucoseStats["totalEntries"]}")
         _averageGlucose.postValue("Avg Glucose: ${glucoseStats["averageGlucose"]} mmol/L")
         _timeInRange.postValue("Time in Range: ${glucoseStats["timeInRange"]}")
         _highestGlucose.postValue("Highest: $highestGlucose mmol/L at $highestTime")

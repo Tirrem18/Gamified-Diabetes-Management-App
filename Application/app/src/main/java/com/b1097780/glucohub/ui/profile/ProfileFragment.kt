@@ -1,11 +1,12 @@
 package com.b1097780.glucohub.ui.profile
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
+import com.b1097780.glucohub.PreferencesHelper
 import com.b1097780.glucohub.databinding.FragmentProfileBinding
 
 class ProfileFragment : Fragment() {
@@ -20,10 +21,9 @@ class ProfileFragment : Fragment() {
     ): View {
         _binding = FragmentProfileBinding.inflate(inflater, container, false)
 
-        // Initialize ViewModel
-        profileViewModel = ViewModelProvider(this).get(ProfileViewModel::class.java)
+        val context = requireContext()
+        profileViewModel = ProfileViewModel(context)
 
-        // Observe LiveData and set values to UI
         profileViewModel.profileTitle.observe(viewLifecycleOwner) {
             binding.username.text = it
         }
@@ -36,9 +36,38 @@ class ProfileFragment : Fragment() {
         profileViewModel.activityEntries.observe(viewLifecycleOwner) {
             binding.activityEntries.text = it
         }
+        // ✅ Ensure streak updates before observing
+        PreferencesHelper.updateHighestStreak(requireContext())
+
+        profileViewModel.highestStreak.observe(viewLifecycleOwner) {
+            binding.highestStreak.text = it
+        }
+
+        profileViewModel.joiningDate.observe(viewLifecycleOwner) {
+            binding.joiningDate.text = it
+        }
+
+        // ✅ Observe dynamically calculated achievements and descriptions
+        profileViewModel.activityAchievement.observe(viewLifecycleOwner) {
+            binding.achievement1.text = it.first
+            binding.achievement1Desc.text = it.second
+        }
+        profileViewModel.glucoseAchievement.observe(viewLifecycleOwner) {
+            binding.achievement2.text = it.first
+            binding.achievement2Desc.text = it.second
+        }
+        profileViewModel.streakAchievement.observe(viewLifecycleOwner) {
+            binding.achievement3.text = it.first
+            binding.achievement3Desc.text = it.second
+        }
 
         return binding.root
     }
+
+
+
+
+
 
     override fun onDestroyView() {
         super.onDestroyView()

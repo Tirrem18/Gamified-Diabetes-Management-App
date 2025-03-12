@@ -62,15 +62,29 @@ class DailyLogsFragment : Fragment() {
         viewModel.lowestGlucose.observe(viewLifecycleOwner) { textLowestGlucose.text = it }
 
         // ✅ Handle button clicks
+        // ✅ Handle button clicks
         buttonViewAllEntries.setOnClickListener {
-            Log.d("DailyLogsFragment", "View All Entries clicked")
-            // TODO: Implement logic to show all glucose entries
+            DailyLogsReviewDialog(requireContext(), viewModel.selectedDate.value ?: "").show()
         }
 
-        buttonDeleteEntry.setOnClickListener {
-            Log.d("DailyLogsFragment", "Delete Entry clicked")
-            // TODO: Implement logic to delete last entry
+
+        // ✅ Get today's date in "yyyyMMdd" format
+        val todayDate = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault()).format(java.util.Date())
+
+// ✅ Observe the selected date and hide delete button if it's not today
+        viewModel.selectedDate.observe(viewLifecycleOwner) { selectedDate ->
+            buttonDeleteEntry.visibility = if (selectedDate == todayDate) View.VISIBLE else View.GONE
         }
+
+// ✅ Handle delete button click (only shows when today)
+        buttonDeleteEntry.setOnClickListener {
+            DailyLogsDeleteDialog(requireContext(), viewModel.selectedDate.value ?: "") {
+                viewModel.fetchGlucoseAndActivityData(requireContext(), viewModel.selectedDate.value ?: "")
+            }.show()
+        }
+
+
+
 
         // Load CalendarFragment dynamically
         childFragmentManager.beginTransaction()
@@ -99,13 +113,6 @@ class DailyLogsFragment : Fragment() {
                 selectedDateTextView.text = "$date\n\nNo data available"
                 selectedDateTextView.gravity = Gravity.CENTER
 
-                // ✅ Ensure UI update persists
-                selectedDateTextView.postDelayed({
-                    if (hasData == false) { // Double-check after delay
-                        selectedDateTextView.text = "$date\n\nNo data available"
-                        Log.d("DailyLogsFragment", "Final UI confirmation: No data available shown")
-                    }
-                }, 500)
             }
 
             selectedDateTextView.setTextColor(getThemeColor(requireContext(), android.R.attr.textColorPrimary))
