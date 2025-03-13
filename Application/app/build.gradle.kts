@@ -53,6 +53,7 @@ dependencies {
     implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
     implementation(libs.firebase.crashlytics.buildtools)
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.firebaseui:firebase-ui-auth:8.0.2") // 🔥 FirebaseUI Auth
 
     // 🔥 Firebase BOM (Manages Firebase versioning automatically)
     implementation(platform("com.google.firebase:firebase-bom:32.2.2"))

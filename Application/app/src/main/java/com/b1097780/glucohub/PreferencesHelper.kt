@@ -4,6 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayInputStream
@@ -20,14 +22,15 @@ import kotlin.random.Random
 object PreferencesHelper {
     private const val PREFS_NAME = "GlucoHubPrefs"
 
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val db: FirebaseFirestore = FirebaseFirestore.getInstance()
+
     // Keys for stored values
     private const val KEY_USERNAME = "username"
     private const val KEY_USER_MOTTO = "user_motto"
     private const val KEY_PROFILE_PIC = "profile_picture"
     private const val KEY_BACKGROUND_PIC = "background_picture"
     private const val KEY_BOX_COLOR = "box_color"
-    private const val KEY_GLUCOSE_ENTRIES = "glucose_entries"
-    private const val KEY_ACTIVITY_ENTRIES = "activity_entries"
     private const val KEY_JOINING_DATE = "joining_date"
     private const val KEY_LAST_ACTIVITY_TOTAL = "last_activity_total"
     private const val KEY_LAST_GLUCOSE_TOTAL = "last_glucose_total"
@@ -53,6 +56,37 @@ object PreferencesHelper {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
 
+    fun getUsername(context: Context): String {
+        return getPrefs(context).getString(KEY_USERNAME, "Unknown User") ?: "Unknown User"
+    }
+
+    fun setUsername(context: Context, username: String) {
+        getPrefs(context).edit().putString(KEY_USERNAME, username).apply()
+    }
+
+    // ✅ Function to sync username from Firebase Firestore
+    fun syncUsernameFromFirebase(context: Context, onComplete: () -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId != null) {
+            val db = FirebaseFirestore.getInstance()
+            db.collection("users").document(userId).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val username = document.getString("username") ?: "Unknown User"
+                        setUsername(context, username) // Save to SharedPreferences
+                    }
+                    onComplete() // Notify when done
+                }
+                .addOnFailureListener {
+                    onComplete() // Continue even if Firebase fails
+                }
+        } else {
+            onComplete()
+        }
+    }
+
+
+
     // Get User Theme
     fun getUserTheme(context: Context): String {
         return getPrefs(context).getString(KEY_USER_THEME, "default") ?: "default"
@@ -63,14 +97,6 @@ object PreferencesHelper {
         getPrefs(context).edit().putString(KEY_USER_THEME, value).apply()
     }
 
-    // Username
-    fun getUsername(context: Context): String {
-        return getPrefs(context).getString(KEY_USERNAME, "User Profile") ?: "User Profile"
-    }
-
-    fun setUsername(context: Context, value: String) {
-        getPrefs(context).edit().putString(KEY_USERNAME, value).apply()
-    }
 
     fun getTotalActivityEntries(context: Context): Int {
         val sharedPrefs = getPrefs(context)
@@ -93,10 +119,7 @@ object PreferencesHelper {
                 .filter { it.key.endsWith("_activities") }
                 .mapNotNull { entry ->
                     val decompressedJson = decompressJson(entry.value as? String ?: "[]")
-                    Log.d(
-                        "DEBUG",
-                        "Processing Key: ${entry.key}, Data: $decompressedJson"
-                    ) // ✅ Log decompressed data
+
                     decompressedJson
                 }
                 .sumOf { JSONArray(it).length() }

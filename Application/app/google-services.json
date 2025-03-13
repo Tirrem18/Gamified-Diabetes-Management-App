@@ -12,7 +12,12 @@
           "package_name": "com.b1097780.glucohub"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "235498835239-rqgad3gdnkn73d230s93n2joqv0hli5f.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAGLMpr3rn_DWvWXYTFWwR45V0UC6eCsIQ"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "235498835239-lmpsjcts8f6v3ine32imgntva0jm36fn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

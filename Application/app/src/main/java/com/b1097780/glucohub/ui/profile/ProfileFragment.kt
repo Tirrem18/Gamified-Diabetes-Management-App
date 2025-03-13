@@ -26,9 +26,17 @@ class ProfileFragment : Fragment() {
         val context = requireContext()
         profileViewModel = ProfileViewModel(context)
 
+        // ✅ Fetch username from Firebase first, then update UI
+        PreferencesHelper.syncUsernameFromFirebase(context) {
+            Log.d("ProfileFragment", "Firebase username sync completed.")
+            profileViewModel.updateProfileData(context) // Update LiveData after syncing
+        }
+
+        // ✅ Observe username from SharedPreferences (updated after Firebase sync)
         profileViewModel.profileTitle.observe(viewLifecycleOwner) {
             binding.username.text = it
         }
+
         profileViewModel.userMotto.observe(viewLifecycleOwner) {
             binding.userMotto.text = it
         }
@@ -63,14 +71,13 @@ class ProfileFragment : Fragment() {
             binding.achievement3.text = it.first
             binding.achievement3Desc.text = it.second
         }
+
         // ✅ Observe Profile Picture
         profileViewModel.profilePicture.observe(viewLifecycleOwner) { path ->
             if (path.isNotEmpty()) {
                 if (path.startsWith("content://")) {
-                    // ✅ If it's a custom image (URI), load it normally
                     binding.profileImage.setImageURI(Uri.parse(path))
                 } else {
-                    // ✅ If it's a drawable name, convert it to a resource ID
                     val resId = requireContext().resources.getIdentifier(path, "drawable", requireContext().packageName)
                     if (resId != 0) {
                         binding.profileImage.setImageResource(resId)
@@ -79,7 +86,7 @@ class ProfileFragment : Fragment() {
                     }
                 }
             } else {
-                binding.profileImage.setImageResource(R.drawable.profile_placeholder) // Default profile image
+                binding.profileImage.setImageResource(R.drawable.profile_placeholder)
             }
         }
 
@@ -91,35 +98,19 @@ class ProfileFragment : Fragment() {
             binding.statsBox.setCardBackgroundColor(colorInt)
             binding.achievementsBox.setCardBackgroundColor(colorInt)
 
-
-// ✅ Extract the current profile picture border drawable
+            // ✅ Extract the current profile picture border drawable
             val drawable = binding.profileImage.background.mutate() as android.graphics.drawable.GradientDrawable
-
-// ✅ Change only the fill color
             drawable.setColor(colorInt) // Keeps the stroke (outline) intact
 
-
-            binding.backgroundImage.setImageDrawable(null) // Remove existing image
-            binding.backgroundImage.setBackgroundColor(colorInt) // Apply new solid color
+            binding.backgroundImage.setImageDrawable(null)
+            binding.backgroundImage.setBackgroundColor(colorInt)
             binding.backgroundImage.post {
                 binding.backgroundImage.setImageResource(R.drawable.pattern_overlay) // Reapply pattern
             }
-
         }
-
-
-
-
-
-
 
         return binding.root
     }
-
-
-
-
-
 
     override fun onDestroyView() {
         super.onDestroyView()

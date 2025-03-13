@@ -1,6 +1,7 @@
 package com.b1097780.glucohub
 
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -20,6 +21,7 @@ import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.b1097780.glucohub.databinding.ActivityMainBinding
 import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
 
 
 class MainActivity : AppCompatActivity() {
@@ -76,24 +78,16 @@ class MainActivity : AppCompatActivity() {
 
 
 
-        try {
-            // ✅ Make sure Firebase is initialized BEFORE using FirebaseHelper
-            if (FirebaseApp.getApps(this).isEmpty()) {
-                FirebaseApp.initializeApp(this)
-                Log.d("MainActivity", "✅ FirebaseApp manually initialized in MainActivity")
-            }
-
-            // Now we initialize FirebaseHelper
-            firebaseHelper = FirebaseHelper(this)
-            Log.d("MainActivity", "✅ FirebaseHelper Initialized in MainActivity")
-
-        } catch (e: Exception) {
-            Log.e("MainActivity", "❌ FirebaseHelper Initialization Failed: ${e.message}")
-        }
-
-        firebaseHelper.signInAnonymously()
-
     }
+    override fun onStart() {
+        super.onStart()
+        val auth = FirebaseAuth.getInstance()
+        if (auth.currentUser == null) {
+            startActivity(Intent(this, LoginActivity::class.java))
+            finish() // Prevent back navigation to main activity
+        }
+    }
+
 
     fun applyUserTheme(selectedTheme: String) {
         when (selectedTheme) {
@@ -196,11 +190,18 @@ class MainActivity : AppCompatActivity() {
         val builder = AlertDialog.Builder(this, R.style.CustomAlertDialogTheme)
         builder
             .setTitle("Logout")
-            .setMessage("This would log you out when implemented.")
-            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .setMessage("Are you sure you want to log out?")
+            .setPositiveButton("OK") { _, _ ->
+                FirebaseAuth.getInstance().signOut() // Log the user out
+                val intent = Intent(this, LoginActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK // Prevent going back
+                startActivity(intent)
+                finish() // Close MainActivity
+            }
             .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }
         builder.create().show()
     }
+
 
     private fun setupCustomButtons() {
         val customMenuButton = findViewById<ImageButton>(R.id.custom_menu_button)
