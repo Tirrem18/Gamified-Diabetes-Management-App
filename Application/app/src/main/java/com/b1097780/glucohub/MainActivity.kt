@@ -31,7 +31,7 @@ class MainActivity : AppCompatActivity() {
     private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        PreferencesHelper.clearAllData(this) // Reset all stored values
+        //PreferencesHelper.clearAllData(this) // Reset all stored values
         //PreferencesHelper.populateTestData(this) // Fill with test data
 
         //PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)

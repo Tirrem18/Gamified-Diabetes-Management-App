@@ -26,6 +26,21 @@ class ProfileViewModel(context: Context) : ViewModel() {
     private val _joiningDate = MutableLiveData("Joining Date: ${PreferencesHelper.getJoiningDate(context)}")
     val joiningDate: LiveData<String> = _joiningDate
 
+    // ✅ Profile Picture
+    private val _profilePicture = MutableLiveData(PreferencesHelper.getProfilePicture(context))
+    val profilePicture: LiveData<String> = _profilePicture
+
+    // ✅ Background Picture
+    private val _backgroundPicture = MutableLiveData(PreferencesHelper.getBackgroundPicture(context))
+    val backgroundPicture: LiveData<String> = _backgroundPicture
+
+    private val _boxColor = MutableLiveData(PreferencesHelper.getBoxColor(context))
+    val boxColor: LiveData<String> = _boxColor
+
+
+
+
+
     // ✅ Dynamically generate achievements & descriptions
     private val _activityAchievement = MutableLiveData<Pair<String, String>>(
         getActivityAchievement(PreferencesHelper.getTotalActivityEntries(context))
@@ -42,6 +57,10 @@ class ProfileViewModel(context: Context) : ViewModel() {
     )
     val streakAchievement: LiveData<Pair<String, String>> = _streakAchievement
 
+
+
+
+
     // ✅ Observe changes and update dynamically
     init {
         _activityEntries.observeForever {
@@ -53,6 +72,14 @@ class ProfileViewModel(context: Context) : ViewModel() {
         _highestStreak.observeForever {
             _streakAchievement.value = getStreakAchievement(PreferencesHelper.getUserStreak(context))
         }
+    }
+    // ✅ Ensure data updates properly
+    fun updateProfileData(context: Context) {
+        _profileTitle.value = PreferencesHelper.getUsername(context)
+        _userMotto.value = PreferencesHelper.getUserMotto(context)
+        _profilePicture.value = PreferencesHelper.getProfilePicture(context)
+        _backgroundPicture.value = PreferencesHelper.getBackgroundPicture(context)
+        _boxColor.value = PreferencesHelper.getBoxColor(context)
     }
 
     // ✅ Achievement calculation functions (Title + Description)

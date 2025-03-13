@@ -77,7 +77,7 @@ object PreferencesHelper {
 
         Log.d("DEBUG", "Checking activity entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate")
 
-        // ✅ If the finalized total has never been set, process ALL past data ONCE
+        // ✅ If finalized total has never been set, process ALL past data ONCE
         if (finalizedTotal == -1) {
             Log.d("DEBUG", "🚨 First-time run: Processing ALL past activity data!")
 
@@ -108,25 +108,21 @@ object PreferencesHelper {
             finalizedTotal += yesterdayCount
         }
 
-        // ✅ Use cached today's count to avoid lag
-        var todayCount = sharedPrefs.getInt(KEY_TODAY_ACTIVITY_COUNT, -1)
+        // ✅ Always get the latest today's count (ensure real-time updates)
+        val todayCount = sharedPrefs.all.entries
+            .asSequence()
+            .filter { it.key.endsWith("_activities") && it.key.startsWith(todayDate) } // ✅ Only process today's entries
+            .mapNotNull { entry -> decompressJson(entry.value as? String ?: "[]") }
+            .sumOf { JSONArray(it).length() }
 
-        if (todayCount == -1) {
-            Log.d("DEBUG", "🚀 Recalculating today's activity entries!")
-
-            todayCount = sharedPrefs.all.entries
-                .asSequence()
-                .filter { it.key.endsWith("_activities") && it.key.startsWith(todayDate) } // ✅ Only process today's entries
-                .mapNotNull { entry -> decompressJson(entry.value as? String ?: "[]") }
-                .sumOf { JSONArray(it).length() }
-
-            sharedPrefs.edit().putInt(KEY_TODAY_ACTIVITY_COUNT, todayCount).apply()
-        }
+        // ✅ Store today's count to prevent recalculating unnecessarily
+        sharedPrefs.edit().putInt(KEY_TODAY_ACTIVITY_COUNT, todayCount).apply()
 
         Log.d("DEBUG", "Returning Total Activity Entries: ${finalizedTotal + todayCount}")
 
         return finalizedTotal + todayCount
     }
+
 
 
     fun getTotalGlucoseEntries(context: Context): Int {
@@ -137,7 +133,7 @@ object PreferencesHelper {
 
         Log.d("DEBUG", "Checking glucose entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate")
 
-        // ✅ If the finalized total has never been set, process ALL past data ONCE
+        // ✅ If finalized total has never been set, process ALL past data ONCE
         if (finalizedTotal == -1) {
             Log.d("DEBUG", "🚨 First-time run: Processing ALL past glucose data!")
 
@@ -168,25 +164,22 @@ object PreferencesHelper {
             finalizedTotal += yesterdayCount
         }
 
-        // ✅ Use cached today's count to avoid lag
-        var todayCount = sharedPrefs.getInt(KEY_TODAY_GLUCOSE_COUNT, -1)
+        // ✅ Always get the latest today's count (ensure real-time updates)
+        val todayCount = sharedPrefs.all.entries
+            .asSequence()
+            .filter { it.key.endsWith("_glucose") && it.key.startsWith(todayDate) } // ✅ Only process today's entries
+            .mapNotNull { entry -> decompressJson(entry.value as? String ?: "[]") }
+            .sumOf { JSONArray(it).length() }
 
-        if (todayCount == -1) {
-            Log.d("DEBUG", "🚀 Recalculating today's glucose entries!")
-
-            todayCount = sharedPrefs.all.entries
-                .asSequence()
-                .filter { it.key.endsWith("_glucose") && it.key.startsWith(todayDate) } // ✅ Only process today's entries
-                .mapNotNull { entry -> decompressJson(entry.value as? String ?: "[]") }
-                .sumOf { JSONArray(it).length() }
-
-            sharedPrefs.edit().putInt(KEY_TODAY_GLUCOSE_COUNT, todayCount).apply()
-        }
+        // ✅ Store today's count to prevent recalculating unnecessarily
+        sharedPrefs.edit().putInt(KEY_TODAY_GLUCOSE_COUNT, todayCount).apply()
 
         Log.d("DEBUG", "Returning Total Glucose Entries: ${finalizedTotal + todayCount}")
 
         return finalizedTotal + todayCount
     }
+
+
 
 
 
@@ -201,9 +194,16 @@ object PreferencesHelper {
         getPrefs(context).edit().putString(KEY_USER_MOTTO, value).apply()
     }
 
+
+    fun setProfileBoxColor(context: Context, color: String) {
+        getPrefs(context).edit().putString(KEY_BOX_COLOR, color).apply()
+    }
+
+
+
     // Profile Picture Path
     fun getProfilePicture(context: Context): String {
-        return getPrefs(context).getString(KEY_PROFILE_PIC, "") ?: ""
+        return getPrefs(context).getString(KEY_PROFILE_PIC, "profile_placeholder") ?: "profile_placeholder"
     }
 
     fun setProfilePicture(context: Context, value: String) {
@@ -228,19 +228,6 @@ object PreferencesHelper {
         getPrefs(context).edit().putString(KEY_BOX_COLOR, value).apply()
     }
 
-    // Glucose Entries Count
-    fun getGlucoseEntries(context: Context): Int {
-        return getPrefs(context).getInt(KEY_GLUCOSE_ENTRIES, 0)
-    }
-
-    fun setGlucoseEntries(context: Context, value: Int) {
-        getPrefs(context).edit().putInt(KEY_GLUCOSE_ENTRIES, value).apply()
-    }
-
-    // Activity Entries Count
-    fun getActivityEntries(context: Context): Int {
-        return getPrefs(context).getInt(KEY_ACTIVITY_ENTRIES, 0)
-    }
 
 
 
