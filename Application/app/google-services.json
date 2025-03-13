@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "235498835239",
+    "project_id": "glucohub-61352",
+    "storage_bucket": "glucohub-61352.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:235498835239:android:0c7ed431d490b7d6fe2d02",
+        "android_client_info": {
+          "package_name": "com.b1097780.glucohub"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGLMpr3rn_DWvWXYTFWwR45V0UC6eCsIQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
