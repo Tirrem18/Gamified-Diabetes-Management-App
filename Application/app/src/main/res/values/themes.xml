@@ -13,6 +13,11 @@
         <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
         <!-- Customize your theme here. -->
     </style>
+
+    <declare-styleable name="CustomTheme">
+        <attr name="colorPrimaryVariant" format="color"/>
+    </declare-styleable>
+
     <style name="CustomAlertDialogTheme" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
         <item name="android:background">?attr/colorPrimaryVariant</item>
         <item name="buttonBarPositiveButtonStyle">?attr/colorPrimary</item>

@@ -4,20 +4,315 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.friends.FriendsFragment">
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginTop="60dp"
+    android:background="?attr/android:windowBackground"
+    tools:context=".ui.profile.ProfileFragment">
 
-    <TextView
-        android:id="@+id/text_profile"
+
+    <!-- Top Background (Image or Color) -->
+    <ImageView
+        android:id="@+id/background_image"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/sample_background"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <ImageView
+        android:id="@+id/profile_image"
+        android:layout_width="115dp"
+        android:layout_height="115dp"
+        android:src="@drawable/profile_placeholder"
+        android:background="@drawable/profile_picture_border"
+        android:padding="6dp"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@id/background_image"
+        app:layout_constraintTop_toBottomOf="@id/background_image"
+        app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="-20dp"
+        android:elevation="8dp"
+        android:layout_marginBottom="5dp"
+        android:clipToOutline="true"/>
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.375" />
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/profile_info_box"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        app:cardElevation="6dp"
+        app:cardCornerRadius="20dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/background_image"
+        app:layout_constraintStart_toStartOf="@id/guideline_start"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:gravity="center"
+            android:background="@drawable/box_border"> <!-- ✅ Move background here -->
+
+
+
+            <TextView
+                android:id="@+id/username"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Username"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:gravity="center"
+                android:paddingBottom="0dp"/>
+
+            <TextView
+                android:id="@+id/user_motto"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sample Text"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:textColor="@android:color/black"
+                android:gravity="center"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/stats_box"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textColor="?android:attr/textColorPrimary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        android:layout_marginTop="5dp"
+        app:cardElevation="6dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        android:background="@drawable/box_border"
+        app:layout_constraintTop_toBottomOf="@id/profile_info_box"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="10dp"
+            android:gravity="center"
+            android:background="@drawable/box_border">
+
+            <!-- User Stats Title -->
+            <TextView
+                android:id="@+id/user_stats_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="User Stats"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_gravity="center"
+                android:paddingBottom="0dp"/>
+
+            <!-- Glucose Entries -->
+            <TextView
+                android:id="@+id/glucose_entries"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Glucose Entries: 1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_gravity="start"
+                android:textColor="@android:color/black"
+                android:paddingBottom="10dp"/>
+
+            <!-- Activity Entries -->
+            <TextView
+                android:id="@+id/activity_entries"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="start"
+                android:text="Activity Entries: 1"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:paddingBottom="10dp"/>
+
+            <!-- Highest Streak -->
+            <TextView
+                android:id="@+id/highest_streak"
+                android:layout_width="wrap_content"
+                android:layout_gravity="start"
+                android:layout_height="wrap_content"
+                android:text="Highest Streak: "
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:paddingBottom="15dp"/>
+
+            <!-- Joining Date -->
+            <TextView
+                android:id="@+id/joining_date"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Joining Date: 01/01/2024"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"/>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+    <!-- Achievements Section -->
+    <androidx.cardview.widget.CardView
+        android:id="@+id/achievements_box"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        app:cardElevation="6dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:layout_constraintTop_toBottomOf="@id/stats_box"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:gravity="center"
+            android:background="@drawable/box_border">
+
+            <!-- Achievements Title -->
+            <TextView
+                android:id="@+id/achievements_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Achievements"
+                android:textSize="25sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/black"
+                android:layout_gravity="center"
+                android:paddingBottom="12dp"/>
+
+            <!-- Three Achievements Section -->
+            <LinearLayout
+                android:id="@+id/three_boxes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:padding="10dp">
+
+                <!-- Achievement 1 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/achievements_box_border"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:id="@+id/achievement1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Super Active!"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/achievement1_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Log 100 activities"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Achievement 2 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/achievements_box_border"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="10dp"
+                    android:layout_marginEnd="8dp">
+
+                    <TextView
+                        android:id="@+id/achievement2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Glucose Master"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/achievement2_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Log glucose 50 times"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+                </LinearLayout>
+
+                <!-- Achievement 3 -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="120dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/achievements_box_border"
+                    android:orientation="vertical"
+                    android:gravity="center"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/achievement3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Streak King"
+                        android:textSize="18sp"
+                        android:textStyle="bold"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/achievement3_desc"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Maintain a 30-day streak"
+                        android:textSize="14sp"
+                        android:textColor="@android:color/black"
+                        android:gravity="center"/>
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+
+
+
 </androidx.constraintlayout.widget.ConstraintLayout>

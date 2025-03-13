@@ -1,5 +1,6 @@
 package com.b1097780.glucohub
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -24,17 +25,35 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var appBarConfiguration: AppBarConfiguration
     private var userCoins: Int = 10
+    private var userStreak: Int = 0 // Variable to store the streak
 
     // CUSTOMISE
     private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        //PreferencesHelper.clearAllData(this) // Reset all stored values
+        //PreferencesHelper.populateTestData(this) // Fill with test data
+
+        //PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
+
+        PreferencesHelper.setUserStreak(this, 1149) // Manually set current streak
+        //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
+
+        //PreferencesHelper.setMilestoneClaimed(this, 7) // Mark 7-day milestone as claimed
+        //PreferencesHelper.setMilestoneClaimed(this, 30) // Mark 30-day milestone as claimed
+
+        //PreferencesHelper.setCoinMultiplier(this, 2) // Manually set multiplier to x2
+        //PreferencesHelper.addCoins(this, 100) // Add 100 coins
+
+        //PreferencesHelper.setUserTheme(this, "") // Add 100 coins
+
+
+
+
+        PreferencesHelper.checkAndResetStreak(this)
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
-
-        PreferencesHelper.clearAllData(this)
-        PreferencesHelper.populateTestData(this)
-
-
+        userStreak = PreferencesHelper.getUserStreak(this) // Load streak
+        theme = PreferencesHelper.getUserTheme(this) // Load theme
 
         applyUserTheme(theme)
         super.onCreate(savedInstanceState)
@@ -47,18 +66,26 @@ class MainActivity : AppCompatActivity() {
         setupCustomButtons()
         observeNavDestinationChanges()
         updateCoinButton(userCoins) // Update UI with loaded coins
+        updateStreakButton(userStreak)
     }
 
-    private fun applyUserTheme(selectedTheme: String) {
+    fun applyUserTheme(selectedTheme: String) {
         when (selectedTheme) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
-            "orange" -> setTheme(R.style.Theme_GlucoHub_orange)
+            "spooky" -> setTheme(R.style.Theme_GlucoHub_orange)
             "bubblegum" -> setTheme(R.style.Theme_GlucoHub_bubblegum)
             "dragonfruit" -> setTheme(R.style.Theme_GlucoHub_dragonfruit)
             "peppermint" -> setTheme(R.style.Theme_GlucoHub_peppermint)
-            else -> setTheme(R.style.Theme_GlucoHub_default) // Fallback to default
+            else -> setTheme(R.style.Theme_GlucoHub_default)
         }
+
     }
+
+    fun reloadTheme() {
+        recreate() // Reloads the activity to apply theme changes
+    }
+
+
 
     private fun setupToolbar() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)
@@ -73,8 +100,8 @@ class MainActivity : AppCompatActivity() {
                 setOf(
                     R.id.navigation_home,
                     R.id.navigation_glucose,
-                    R.id.navigation_planner,
-                    R.id.navigation_data
+                    R.id.navigation_logs,
+                    R.id.navigation_profile
                 ),
                 binding.drawerLayout
             )
@@ -97,7 +124,7 @@ class MainActivity : AppCompatActivity() {
 
             when (menuItem.itemId) {
                 R.id.nav_settings -> navController.navigate(R.id.navigation_settings)
-                R.id.nav_profile -> navController.navigate(R.id.navigation_profile)
+                R.id.nav_find_users -> navController.navigate(R.id.navigation_find_users)
                 R.id.nav_logout -> performLogout()
                 else -> menuItem.onNavDestinationSelected(navController)
             }
@@ -115,9 +142,17 @@ class MainActivity : AppCompatActivity() {
         binding.customCoinButton.text = formattedValue
     }
 
+    // Function to update streak button text
+    fun updateStreakButton(value: Int) {
+        val formattedValue = formatNumber(value, true)
+        binding.customStreakButton.text = formattedValue
+    }
+
+
     fun addCoinsFromFragment(amount: Int) {
         addCoins(amount)
     }
+
 
     private fun addCoins(amount: Int) {
         userCoins += amount
@@ -216,7 +251,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.nav_logout,
                 R.id.navigation_streaks,
                 R.id.navigation_coins,
-                R.id.navigation_profile -> {
+                R.id.navigation_find_users -> {
                     supportActionBar?.setDisplayHomeAsUpEnabled(false)
                     binding.navView.visibility = View.GONE
                     customMenuButton.visibility = View.GONE

@@ -1,0 +1,42 @@
+<vector xmlns:aapt="http://schemas.android.com/aapt"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:height="24dp"
+    android:viewportHeight="30"
+    android:viewportWidth="30"
+    android:width="24dp">
+
+    <!-- Black Outline (Slightly Larger Shape) -->
+    <path
+        android:fillColor="#000000"
+        android:strokeWidth="0"
+        android:pathData="M15.002,3C23.746,3 30.528,7.345 30.501,12.398C30.497,13.303 30.275,14.169 29.867,14.981C30.284,15.806 30.506,16.689 30.501,17.611C30.474,22.657 23.696,26.5 15.502,26.5C7.307,26.5 0.529,22.657 0.502,17.611C0.497,16.689 0.719,15.806 1.135,14.98C0.728,14.169 0.506,13.303 0.502,12.398C0.475,7.345 7.257,3 15.502,3Z" />
+
+    <!-- Main Coin Gradient Fill -->
+    <path
+        android:fillType="nonZero"
+        android:pathData="M15.002,3.5C23.246,3.5 30.028,7.345 30.001,12.398C29.997,13.303 29.775,14.169 29.367,14.981C29.784,15.806 30.006,16.689 30.001,17.611C29.974,22.657 23.196,26.5 15.002,26.5C6.807,26.5 0.029,22.657 0.002,17.611C-0.003,16.689 0.219,15.806 0.635,14.98C0.228,14.169 0.006,13.303 0.002,12.398C-0.025,7.345 6.757,3.5 15.002,3.5Z"
+        android:strokeColor="#000000"
+        android:strokeWidth="1">
+
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="15.001"
+                android:endY="26.5"
+                android:startX="15.001"
+                android:startY="3.5"
+                android:type="linear">
+                <item android:color="#FFFFC923" android:offset="0"/>
+                <item android:color="#FFFFAD41" android:offset="1"/>
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Inner Shadow for Depth -->
+    <path
+        android:fillColor="#DF960A"
+        android:fillType="nonZero"
+        android:pathData="M30.001,12.382L30.002,17.158C27.173,20.719 21.447,23.062 15.002,23.062C8.492,23.062 2.768,20.811 -0,17.27L0.001,12.406L30.001,12.382ZM30.002,12.408L0.001,12.398C0.029,17.444 6.807,21.287 15.002,21.287C23.196,21.287 29.974,17.454 30.002,12.408Z"
+        android:strokeColor="#00000000"
+        android:strokeWidth="1"/>
+
+</vector>

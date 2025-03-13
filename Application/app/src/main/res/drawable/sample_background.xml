@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Red Background -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/profile_box_color"/>
+        </shape>
+    </item>
+
+    <!-- Funky Pattern Overlay -->
+    <item>
+        <bitmap
+            android:src="@drawable/pattern_overlay"
+            android:tileMode="repeat"
+            android:gravity="center"/>
+    </item>
+
+</layer-list>

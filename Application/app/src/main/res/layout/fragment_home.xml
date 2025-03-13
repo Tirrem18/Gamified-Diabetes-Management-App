@@ -118,7 +118,7 @@
             android:layout_weight="1"
             android:background="@drawable/custom_button_background"
             android:contentDescription="@string/first_button"
-            android:src="@drawable/ic_menu"
+            android:src="@drawable/blood"
             android:layout_margin="10dp" />
 
         <ImageButton
@@ -128,7 +128,7 @@
             android:layout_weight="1"
             android:background="@drawable/custom_button_background"
             android:contentDescription="@string/second_button"
-            android:src="@drawable/ic_menu"
+            android:src="@drawable/clipboard"
             android:layout_margin="10dp" />
     </LinearLayout>
 

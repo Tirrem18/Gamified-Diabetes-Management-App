@@ -18,7 +18,6 @@ import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogDialog
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogViewModel
 import com.b1097780.glucohub.ui.home.GlucoseGraph.GraphViewModel
-import com.b1097780.glucohub.ui.friends.FriendsViewModel
 import com.b1097780.glucohub.ui.home.GraphDialog.GraphDialog
 import com.github.mikephil.charting.data.Entry
 
@@ -30,6 +29,8 @@ class HomeFragment : Fragment() {
     private lateinit var graphViewModel: GraphViewModel
     private lateinit var activityLogViewModel: ActivityLogViewModel
     private var lastEntryTime: Long = 0
+
+
 
     // ✅ Lifecycle Method: Create View & Initialize ViewModels
     override fun onCreateView(
@@ -136,8 +137,6 @@ class HomeFragment : Fragment() {
             }
         }.show()
     }
-
-    // ✅ Process and save glucose entry
     private fun processGlucoseEntry(currentTime: Float, number: Float) {
         (activity as? MainActivity)?.let { mainActivity ->
             graphViewModel.addGlucoseEntry(Entry(currentTime, number), mainActivity)
@@ -147,53 +146,43 @@ class HomeFragment : Fragment() {
         lastEntryTime = System.currentTimeMillis()
         PreferencesHelper.setLastEntryTime(requireContext(), lastEntryTime)
 
+        // ✅ Update user streak
+        PreferencesHelper.updateStreakOnEntry(requireContext())
+
         // ✅ Refresh recent blood glucose entry
         activityLogViewModel.loadRecentBloodEntry(requireContext())
 
-        // ✅ Coin reward logic
-        val friendsViewModel = ViewModelProvider(requireActivity())[FriendsViewModel::class.java]
-        friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
-        friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
-            val coinsEarned = 1 * multiplier
-            (requireActivity() as? MainActivity)?.addCoinsFromFragment(coinsEarned)
+        // ✅ Add Coins (Multiplier applied inside PreferencesHelper)
+        PreferencesHelper.addCoins(requireContext(), 1)
 
-
-            AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-                .setTitle("Coins Earned!")
-                .setMessage("You've earned $coinsEarned coins!")
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .show()
-        }
+        // ✅ Show confirmation dialog
+        AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
+            .setTitle("Coins Earned!")
+            .setMessage("You've earned coins!")
+            .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
+            .show()
     }
 
-    // ✅ Process and save activity entry
     private fun processActivityEntry(activity: String, startTime: String, endTime: String?, description: String) {
         val entry = ActivityLogEntry(activity, startTime, endTime, description)
         requireActivity().let {
             activityLogViewModel.addActivityEntry(entry, it)
         }
 
+        // ✅ Update user streak
+        PreferencesHelper.updateStreakOnEntry(requireContext())
+
+        // ✅ Add Coins (Multiplier applied inside PreferencesHelper)
+        PreferencesHelper.addCoins(requireContext(), 1)
+
+        // ✅ Show confirmation dialog
         AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-            .setTitle("Activity Logged")
-            .setMessage("You've successfully logged: $activity at $startTime.")
+            .setTitle("Coins Earned!")
+            .setMessage("You've earned coins!")
             .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
             .show()
-
-        // ✅ Coin reward logic
-        val friendsViewModel = ViewModelProvider(requireActivity())[FriendsViewModel::class.java]
-        friendsViewModel.coinMultiplier.removeObservers(viewLifecycleOwner)
-        friendsViewModel.coinMultiplier.observe(viewLifecycleOwner) { multiplier ->
-            val coinsEarned = 1 * multiplier
-            (requireActivity() as? MainActivity)?.addCoinsFromFragment(coinsEarned)
-
-
-            AlertDialog.Builder(requireContext(), R.style.CustomAlertDialogTheme)
-                .setTitle("Coins Earned!")
-                .setMessage("You've earned $coinsEarned coins!")
-                .setPositiveButton("OK") { dialog, _ -> dialog.dismiss() }
-                .show()
-        }
-
     }
+
+
 
 }

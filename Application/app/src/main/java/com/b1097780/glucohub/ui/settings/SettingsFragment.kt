@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.lifecycle.ViewModelProvider
-import com.b1097780.glucohub.R
 import com.b1097780.glucohub.databinding.FragmentSettingsBinding
 
 class SettingsFragment : Fragment() {

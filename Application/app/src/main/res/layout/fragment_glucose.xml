@@ -1,23 +1,233 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:layout_marginTop="50dp"
     tools:context=".ui.glucose.GlucoseFragment">
 
+        <!-- Title -->
     <TextView
-        android:id="@+id/text_dashboard"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="Glucose Overview"
+    android:textSize="40sp"
+    android:textStyle="bold"
+    android:textColor="?attr/android:textColorPrimary"
+    android:layout_gravity="center_horizontal"
+    android:paddingBottom="16dp"/>
+
+        <!-- "View Entries within the past..." Text -->
+    <TextView
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="View entries within the past..."
+    android:textSize="18sp"
+    android:textColor="?attr/android:textColorPrimary"
+    android:layout_gravity="center_horizontal"
+    android:paddingBottom="8dp"/>
+
+        <!-- Time Selector Buttons -->
+    <LinearLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center"
+    android:paddingBottom="0dp">
+
+    <Button
+        android:id="@+id/btn_day"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Day"
+        android:backgroundTint="?attr/colorPrimary"
+        android:textColor="?attr/colorOnPrimary"/>
+
+    <Button
+        android:id="@+id/btn_week"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Week"
+        android:backgroundTint="?attr/colorPrimary"
+        android:textColor="?attr/colorOnPrimary"/>
+
+    <Button
+        android:id="@+id/btn_month"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Month"
+        android:backgroundTint="?attr/colorPrimary"
+        android:textColor="?attr/colorOnPrimary"/>
+
+    <Button
+        android:id="@+id/btn_year"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:text="Year"
+        android:backgroundTint="?attr/colorPrimary"
+        android:textColor="?attr/colorOnPrimary"/>
+    </LinearLayout>
+
+        <!-- Selected Date Range (Moved Under Buttons) -->
+    <TextView
+    android:id="@+id/text_selected_range"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:textSize="16sp"
+    android:textStyle="bold"
+    android:textColor="?attr/android:textColorPrimary"
+    android:layout_gravity="center_horizontal"
+    android:paddingBottom="45dp"/>
+
+        <!-- Placeholder for Average Glucose -->
+    <!-- Enlarge Average Glucose Text -->
+    <TextView
+        android:id="@+id/text_average_glucose"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Average Glucose: -- mg/dL"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="?attr/android:textColorPrimary"
+        android:layout_gravity="center_horizontal"/>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textAlignment="center"
-        android:textSize="20sp"
-        android:textColor="?android:attr/textColorPrimary"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        android:orientation="horizontal"
+        android:gravity="start"
+        android:layout_marginTop="16dp">
+
+        <!-- Left Side: Bar Chart -->
+        <com.github.mikephil.charting.charts.BarChart
+            android:id="@+id/bar_chart_time_in_range"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="300dp"
+            android:layout_gravity="start"/>
+
+        <!-- Right Side: Labels & Percentages -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="start"
+            android:paddingLeft="8dp">
+
+            <TextView
+                android:id="@+id/text_time_very_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Very High:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_very_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_time_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time High:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_high"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_time_in_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time In Range:"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="6dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_in_range"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="--%"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="6dp"/>
+
+            <TextView
+                android:id="@+id/text_time_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Low:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_percent_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="--%"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"
+                android:paddingBottom="4dp"/>
+
+            <TextView
+                android:id="@+id/text_time_very_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Time Very Low:"
+                android:textSize="16sp"
+                android:textColor="?attr/android:textColorPrimary"/>
+
+            <TextView
+                android:id="@+id/text_percent_very_low"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textStyle="bold"
+                android:text="--%"
+                android:textSize="16sp"
+                android:textColor="@android:color/holo_green_light"/>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Total Entries -->
+    <TextView
+        android:id="@+id/text_total_entries"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Total Entries: --"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:textColor="?attr/android:textColorPrimary"
+        android:layout_gravity="center_horizontal"/>
+
+
+
+</LinearLayout>
