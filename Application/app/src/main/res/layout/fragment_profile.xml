@@ -85,6 +85,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sample Text"
+                android:textStyle="bold"
                 android:textSize="15sp"
                 android:textColor="@android:color/black"
                 android:gravity="center"/>
@@ -131,7 +132,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Glucose Entries: 1"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_gravity="start"
                 android:textColor="@android:color/black"
@@ -144,7 +145,7 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="start"
                 android:text="Activity Entries: 1"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 android:paddingBottom="10dp"/>
@@ -156,7 +157,7 @@
                 android:layout_gravity="start"
                 android:layout_height="wrap_content"
                 android:text="Highest Streak: "
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="@android:color/black"
                 android:paddingBottom="15dp"/>

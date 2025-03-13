@@ -36,7 +36,7 @@ class MainActivity : AppCompatActivity() {
 
         //PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
 
-        //PreferencesHelper.setUserStreak(this, 49) // Manually set current streak
+        PreferencesHelper.setUserStreak(this, 1149) // Manually set current streak
         //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
 
         //PreferencesHelper.setMilestoneClaimed(this, 7) // Mark 7-day milestone as claimed
@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity() {
         //PreferencesHelper.setCoinMultiplier(this, 2) // Manually set multiplier to x2
         //PreferencesHelper.addCoins(this, 100) // Add 100 coins
 
-        PreferencesHelper.setUserTheme(this, "") // Add 100 coins
+        //PreferencesHelper.setUserTheme(this, "") // Add 100 coins
 
 
 
@@ -69,16 +69,23 @@ class MainActivity : AppCompatActivity() {
         updateStreakButton(userStreak)
     }
 
-    private fun applyUserTheme(selectedTheme: String) {
+    fun applyUserTheme(selectedTheme: String) {
         when (selectedTheme) {
             "default" -> setTheme(R.style.Theme_GlucoHub_default)
-            "orange" -> setTheme(R.style.Theme_GlucoHub_orange)
+            "spooky" -> setTheme(R.style.Theme_GlucoHub_orange)
             "bubblegum" -> setTheme(R.style.Theme_GlucoHub_bubblegum)
             "dragonfruit" -> setTheme(R.style.Theme_GlucoHub_dragonfruit)
             "peppermint" -> setTheme(R.style.Theme_GlucoHub_peppermint)
-            else -> setTheme(R.style.Theme_GlucoHub_default) // Fallback to default
+            else -> setTheme(R.style.Theme_GlucoHub_default)
         }
+
     }
+
+    fun reloadTheme() {
+        recreate() // Reloads the activity to apply theme changes
+    }
+
+
 
     private fun setupToolbar() {
         val toolbar = findViewById<Toolbar>(R.id.toolbar)

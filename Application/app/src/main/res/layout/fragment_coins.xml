@@ -14,33 +14,24 @@
         android:orientation="vertical"
         android:gravity="center_horizontal">
 
-        <!-- Shop Title -->
+        <!-- Coin Display -->
         <TextView
-            android:id="@+id/text_shop_title"
+            android:paddingTop="15dp"
+            android:id="@+id/text_coins_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="This Week's Shop"
-            android:textSize="24sp"
+            android:text="Your Coins: 0"
+            android:textSize="30sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary" />
-
         <TextView
             android:id="@+id/text_shop_subtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="New items every week"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="?android:attr/textColorPrimary" />
 
-        <!-- Coin Display -->
-        <TextView
-            android:id="@+id/text_coins_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Your Coins: 0"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:textColor="?android:attr/textColorPrimary" />
 
         <!-- Product Discounts -->
         <TextView
@@ -51,7 +42,7 @@
             android:textSize="18sp"
             android:textStyle="bold"
             android:textColor="?android:attr/textColorPrimary"
-            android:paddingTop="16dp" />
+            android:paddingTop="15dp" />
 
         <TextView
             android:id="@+id/text_discount_desc"

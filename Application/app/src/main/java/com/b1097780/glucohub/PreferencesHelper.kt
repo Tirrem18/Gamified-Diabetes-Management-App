@@ -6,9 +6,13 @@ import android.util.Log
 import com.b1097780.glucohub.ui.home.ActivityLog.ActivityLogEntry
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.*
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Base64
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.random.Random
@@ -32,7 +36,6 @@ object PreferencesHelper {
     private const val KEY_TODAY_ACTIVITY_COUNT = "today_activity_count"
 
 
-
     private const val KEY_CARB_RATIO = "carb_ratio"
     private const val KEY_NIGHT_UNITS = "night_time_units"
     private const val KEY_USER_COINS = "userCoins"
@@ -45,11 +48,11 @@ object PreferencesHelper {
     private const val KEY_USER_THEME = "userTheme"
 
 
-
     // Get SharedPreferences instance
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
     }
+
     // Get User Theme
     fun getUserTheme(context: Context): String {
         return getPrefs(context).getString(KEY_USER_THEME, "default") ?: "default"
@@ -71,11 +74,15 @@ object PreferencesHelper {
 
     fun getTotalActivityEntries(context: Context): Int {
         val sharedPrefs = getPrefs(context)
-        var finalizedTotal = sharedPrefs.getInt(KEY_LAST_ACTIVITY_TOTAL, -1) // -1 means uninitialized
+        var finalizedTotal =
+            sharedPrefs.getInt(KEY_LAST_ACTIVITY_TOTAL, -1) // -1 means uninitialized
         var lastUpdateDate = sharedPrefs.getString(KEY_LAST_UPDATE_DATE, "") ?: ""
         val todayDate = getCurrentDate()
 
-        Log.d("DEBUG", "Checking activity entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate")
+        Log.d(
+            "DEBUG",
+            "Checking activity entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate"
+        )
 
         // ✅ If finalized total has never been set, process ALL past data ONCE
         if (finalizedTotal == -1) {
@@ -86,7 +93,10 @@ object PreferencesHelper {
                 .filter { it.key.endsWith("_activities") }
                 .mapNotNull { entry ->
                     val decompressedJson = decompressJson(entry.value as? String ?: "[]")
-                    Log.d("DEBUG", "Processing Key: ${entry.key}, Data: $decompressedJson") // ✅ Log decompressed data
+                    Log.d(
+                        "DEBUG",
+                        "Processing Key: ${entry.key}, Data: $decompressedJson"
+                    ) // ✅ Log decompressed data
                     decompressedJson
                 }
                 .sumOf { JSONArray(it).length() }
@@ -100,7 +110,10 @@ object PreferencesHelper {
             val yesterdayCount = sharedPrefs.getInt(KEY_TODAY_ACTIVITY_COUNT, 0)
 
             sharedPrefs.edit()
-                .putInt(KEY_LAST_ACTIVITY_TOTAL, finalizedTotal + yesterdayCount) // ✅ Store permanent total
+                .putInt(
+                    KEY_LAST_ACTIVITY_TOTAL,
+                    finalizedTotal + yesterdayCount
+                ) // ✅ Store permanent total
                 .putString(KEY_LAST_UPDATE_DATE, todayDate) // ✅ Mark today as processed
                 .putInt(KEY_TODAY_ACTIVITY_COUNT, 0) // ✅ Reset today's count
                 .apply()
@@ -124,14 +137,17 @@ object PreferencesHelper {
     }
 
 
-
     fun getTotalGlucoseEntries(context: Context): Int {
         val sharedPrefs = getPrefs(context)
-        var finalizedTotal = sharedPrefs.getInt(KEY_LAST_GLUCOSE_TOTAL, -1) // -1 means uninitialized
+        var finalizedTotal =
+            sharedPrefs.getInt(KEY_LAST_GLUCOSE_TOTAL, -1) // -1 means uninitialized
         var lastUpdateDate = sharedPrefs.getString(KEY_LAST_UPDATE_DATE, "") ?: ""
         val todayDate = getCurrentDate()
 
-        Log.d("DEBUG", "Checking glucose entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate")
+        Log.d(
+            "DEBUG",
+            "Checking glucose entries... Finalized Total: $finalizedTotal, Last Update: $lastUpdateDate"
+        )
 
         // ✅ If finalized total has never been set, process ALL past data ONCE
         if (finalizedTotal == -1) {
@@ -142,7 +158,10 @@ object PreferencesHelper {
                 .filter { it.key.endsWith("_glucose") }
                 .mapNotNull { entry ->
                     val decompressedJson = decompressJson(entry.value as? String ?: "[]")
-                    Log.d("DEBUG", "Processing Key: ${entry.key}, Data: $decompressedJson") // ✅ Log decompressed data
+                    Log.d(
+                        "DEBUG",
+                        "Processing Key: ${entry.key}, Data: $decompressedJson"
+                    ) // ✅ Log decompressed data
                     decompressedJson
                 }
                 .sumOf { JSONArray(it).length() }
@@ -156,7 +175,10 @@ object PreferencesHelper {
             val yesterdayCount = sharedPrefs.getInt(KEY_TODAY_GLUCOSE_COUNT, 0)
 
             sharedPrefs.edit()
-                .putInt(KEY_LAST_GLUCOSE_TOTAL, finalizedTotal + yesterdayCount) // ✅ Store permanent total
+                .putInt(
+                    KEY_LAST_GLUCOSE_TOTAL,
+                    finalizedTotal + yesterdayCount
+                ) // ✅ Store permanent total
                 .putString(KEY_LAST_UPDATE_DATE, todayDate) // ✅ Mark today as processed
                 .putInt(KEY_TODAY_GLUCOSE_COUNT, 0) // ✅ Reset today's count
                 .apply()
@@ -180,11 +202,6 @@ object PreferencesHelper {
     }
 
 
-
-
-
-
-
     // User Motto
     fun getUserMotto(context: Context): String {
         return getPrefs(context).getString(KEY_USER_MOTTO, "New User") ?: "New User"
@@ -195,15 +212,10 @@ object PreferencesHelper {
     }
 
 
-    fun setProfileBoxColor(context: Context, color: String) {
-        getPrefs(context).edit().putString(KEY_BOX_COLOR, color).apply()
-    }
-
-
-
     // Profile Picture Path
     fun getProfilePicture(context: Context): String {
-        return getPrefs(context).getString(KEY_PROFILE_PIC, "profile_placeholder") ?: "profile_placeholder"
+        return getPrefs(context).getString(KEY_PROFILE_PIC, "profile_placeholder")
+            ?: "profile_placeholder"
     }
 
     fun setProfilePicture(context: Context, value: String) {
@@ -215,20 +227,14 @@ object PreferencesHelper {
         return getPrefs(context).getString(KEY_BACKGROUND_PIC, "") ?: ""
     }
 
-    fun setBackgroundPicture(context: Context, value: String) {
-        getPrefs(context).edit().putString(KEY_BACKGROUND_PIC, value).apply()
-    }
-
     // Box Background Color
     fun getBoxColor(context: Context): String {
-        return getPrefs(context).getString(KEY_BOX_COLOR, "#FFCDD2") ?: "#FFCDD2" // Default red
+        return getPrefs(context).getString(KEY_BOX_COLOR, "#f8f9ff") ?: "#f8f9ff" // Default red
     }
 
     fun setBoxColor(context: Context, value: String) {
         getPrefs(context).edit().putString(KEY_BOX_COLOR, value).apply()
     }
-
-
 
 
     // Joining Date
@@ -241,33 +247,33 @@ object PreferencesHelper {
     }
 
 
-
     // Get the current streak (default 0)
-        fun getUserStreak(context: Context): Int {
-            return getPrefs(context).getInt(KEY_USER_STREAK, 0)
-        }
+    fun getUserStreak(context: Context): Int {
+        return getPrefs(context).getInt(KEY_USER_STREAK, 0)
+    }
 
-        // Set the new streak count
-        fun setUserStreak(context: Context, value: Int) {
-            getPrefs(context).edit().putInt(KEY_USER_STREAK, value).apply() // Update streak achievement when streak changes
-        }
+    // Set the new streak count
+    fun setUserStreak(context: Context, value: Int) {
+        getPrefs(context).edit().putInt(KEY_USER_STREAK, value)
+            .apply() // Update streak achievement when streak changes
+    }
 
 
     // Get the last streak date (default to empty if not set)
-        fun getLastStreakDate(context: Context): String {
-            return getPrefs(context).getString(KEY_LAST_STREAK_DATE, "") ?: ""
-        }
+    fun getLastStreakDate(context: Context): String {
+        return getPrefs(context).getString(KEY_LAST_STREAK_DATE, "") ?: ""
+    }
 
-        // Set the last streak date
-        fun setLastStreakDate(context: Context, date: String) {
-            getPrefs(context).edit().putString(KEY_LAST_STREAK_DATE, date).apply()
-        }
+    // Set the last streak date
+    fun setLastStreakDate(context: Context, date: String) {
+        getPrefs(context).edit().putString(KEY_LAST_STREAK_DATE, date).apply()
+    }
 
-        // Get today's date in "yyyyMMdd" format
-        fun getCurrentDate(): String {
-            val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
-            return sdf.format(Date())
-        }
+    // Get today's date in "yyyyMMdd" format
+    fun getCurrentDate(): String {
+        val sdf = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        return sdf.format(Date())
+    }
 
     fun checkAndResetStreak(context: Context) {
         val lastStreakDate = getLastStreakDate(context)
@@ -313,8 +319,6 @@ object PreferencesHelper {
 
         Log.d("PreferencesHelper", "Deleted activity entry at $time on $date")
     }
-
-
 
 
     fun updateStreakOnEntry(context: Context) {
@@ -372,7 +376,10 @@ object PreferencesHelper {
         val multiplier = getCoinMultiplier(context) // Get stored multiplier
         val finalCoins = baseAmount * multiplier // Apply multiplier
 
-        Log.d("DEBUG", "Adding $baseAmount coins with multiplier x$multiplier. Total added: $finalCoins")
+        Log.d(
+            "DEBUG",
+            "Adding $baseAmount coins with multiplier x$multiplier. Total added: $finalCoins"
+        )
 
         // ✅ Save new coin total
         sharedPrefs.edit().putInt(KEY_USER_COINS, currentCoins + finalCoins).apply()
@@ -380,8 +387,6 @@ object PreferencesHelper {
         // ✅ Update UI in MainActivity
         (context as? MainActivity)?.updateCoinButton(currentCoins + finalCoins)
     }
-
-
 
 
     // Check if Milestone is Claimed
@@ -393,11 +398,6 @@ object PreferencesHelper {
     fun setMilestoneClaimed(context: Context, days: Int) {
         getPrefs(context).edit().putBoolean("$KEY_MILESTONE_PREFIX$days", true).apply()
     }
-
-
-
-
-
 
 
     // -------------------------
@@ -456,7 +456,11 @@ object PreferencesHelper {
     // ✅ SAVE GLUCOSE & ACTIVITY LOG DATA (WITH COMPRESSION)
     // -------------------------
 
-    fun saveGlucoseEntries(context: Context, date: String, glucoseEntries: List<Pair<String, Float>>) {
+    fun saveGlucoseEntries(
+        context: Context,
+        date: String,
+        glucoseEntries: List<Pair<String, Float>>
+    ) {
         val sharedPrefs = getPrefs(context)
         val editor = sharedPrefs.edit()
 
@@ -473,7 +477,11 @@ object PreferencesHelper {
         editor.apply()
     }
 
-    fun saveActivityEntries(context: Context, date: String, activityEntries: List<ActivityLogEntry>) {
+    fun saveActivityEntries(
+        context: Context,
+        date: String,
+        activityEntries: List<ActivityLogEntry>
+    ) {
         val sharedPrefs = getPrefs(context)
         val editor = sharedPrefs.edit()
 
@@ -550,7 +558,8 @@ object PreferencesHelper {
     private fun decompressJson(compressed: String): String {
         return try {
             val bytes = Base64.getDecoder().decode(compressed)
-            GZIPInputStream(ByteArrayInputStream(bytes)).bufferedReader(Charsets.UTF_8).use { it.readText() }
+            GZIPInputStream(ByteArrayInputStream(bytes)).bufferedReader(Charsets.UTF_8)
+                .use { it.readText() }
         } catch (e: Exception) {
             "[]" // Return empty JSON array if decompression fails
         }
@@ -560,7 +569,11 @@ object PreferencesHelper {
     // ✅ GET GLUCOSE ENTRIES IN A DATE RANGE
     // -------------------------
 
-    fun getGlucoseEntriesBetweenDates(context: Context, startDate: String, endDate: String): Map<String, List<Pair<String, Float>>> {
+    fun getGlucoseEntriesBetweenDates(
+        context: Context,
+        startDate: String,
+        endDate: String
+    ): Map<String, List<Pair<String, Float>>> {
         val result = mutableMapOf<String, List<Pair<String, Float>>>()
         val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
         val calendar = Calendar.getInstance()
@@ -630,7 +643,6 @@ object PreferencesHelper {
     }
 
 
-
     // -------------------------
     // ✅ POPULATE TEST DATA (WITH COMPRESSION)
     // -------------------------
@@ -656,7 +668,11 @@ object PreferencesHelper {
             val adjustedYear = tempCalendar.get(Calendar.YEAR)
             val adjustedMonth = tempCalendar.get(Calendar.MONTH)
 
-            tempCalendar.set(adjustedYear, adjustedMonth, 1) // Set to first day of the adjusted month
+            tempCalendar.set(
+                adjustedYear,
+                adjustedMonth,
+                1
+            ) // Set to first day of the adjusted month
 
             val maxDay = tempCalendar.getActualMaximum(Calendar.DAY_OF_MONTH)
             val lastDay = if (monthOffset == 0) today else maxDay
@@ -671,7 +687,8 @@ object PreferencesHelper {
                 tempCalendar.set(adjustedYear, adjustedMonth, day)
                 val date = dateFormat.format(tempCalendar.time)
 
-                val isToday = (day == today && adjustedMonth == currentMonth && adjustedYear == currentYear)
+                val isToday =
+                    (day == today && adjustedMonth == currentMonth && adjustedYear == currentYear)
 
                 val glucoseEntries = getRandomGlucoseDataSet(date)
                     .map { entry ->
@@ -683,7 +700,11 @@ object PreferencesHelper {
                 val activityEntries = generateActivityLog(date)
                     .map { entry ->
                         val parts = entry.split(",")
-                        ActivityLogEntry(parts[1], parts[2], parts.getOrNull(3)?.takeIf { it != "null" }, parts.getOrNull(4)?.takeIf { it != "null" })
+                        ActivityLogEntry(
+                            parts[1],
+                            parts[2],
+                            parts.getOrNull(3)?.takeIf { it != "null" },
+                            parts.getOrNull(4)?.takeIf { it != "null" })
                     }
                     .filter { !isToday || it.startTime <= currentTimeMinus20 }
 
@@ -693,54 +714,82 @@ object PreferencesHelper {
         }
 
 
-
-
     }
-
-
-
-
 
 
     fun getRandomGlucoseDataSet(date: String): List<String> {
         val goodDay = listOf(
-            "$date,00.05f,${randomGlucose(1.9, 4.4)}f", "$date,00.45f,${randomGlucose(1.1, 6.6)}f",
-            "$date,01.20f,${randomGlucose(2.8, 6.3)}f", "$date,01.55f,${randomGlucose(4.0, 6.5)}f",
-            "$date,02.30f,${randomGlucose(2.6, 6.1)}f", "$date,03.15f,${randomGlucose(3.9, 6.4)}f",
-            "$date,04.00f,${randomGlucose(2.5, 6.0)}f", "$date,04.45f,${randomGlucose(4.2, 6.7)}f",
-            "$date,05.20f,${randomGlucose(2.9, 6.4)}f", "$date,06.10f,${randomGlucose(4.3, 6.7)}f", // Pre-exercise
-            "$date,06.40f,${randomGlucose(3.5, 6.0)}f", "$date,07.10f,${randomGlucose(3.8, 6.3)}f", // Post-exercise drop
-            "$date,07.45f,${randomGlucose(1.9, 6.4)}f", "$date,08.15f,${randomGlucose(5.0, 7.5)}f", // Breakfast spike
-            "$date,08.50f,${randomGlucose(3.2, 7.7)}f", "$date,09.30f,${randomGlucose(5.0, 7.5)}f",
-            "$date,10.05f,${randomGlucose(1.5, 7.0)}f", "$date,10.45f,${randomGlucose(4.2, 6.7)}f",
-            "$date,11.20f,${randomGlucose(1.0, 6.5)}f", "$date,12.00f,${randomGlucose(5.5, 8.0)}f", // Lunch spike
-            "$date,12.40f,${randomGlucose(1.2, 7.7)}f", "$date,13.15f,${randomGlucose(4.8, 7.3)}f",
-            "$date,14.00f,${randomGlucose(1.2, 6.7)}f", "$date,14.45f,${randomGlucose(4.0, 6.5)}f",
-            "$date,15.30f,${randomGlucose(1.9, 6.4)}f", "$date,16.10f,${randomGlucose(4.2, 6.7)}f",
-            "$date,17.00f,${randomGlucose(1.5, 6.0)}f", "$date,17.45f,${randomGlucose(3.8, 6.3)}f",
-            "$date,18.30f,${randomGlucose(5.0, 7.5)}f", "$date,19.10f,${randomGlucose(5.8, 8.3)}f", // Dinner spike
-            "$date,19.55f,${randomGlucose(5.2, 7.7)}f", "$date,20.30f,${randomGlucose(4.8, 7.3)}f",
-            "$date,21.15f,${randomGlucose(4.3, 6.8)}f", "$date,22.00f,${randomGlucose(3.9, 6.4)}f",
-            "$date,22.40f,${randomGlucose(3.5, 6.0)}f", "$date,23.25f,${randomGlucose(3.8, 6.3)}f"
+            "$date,00.05f,${randomGlucose(1.9, 4.4)}f",
+            "$date,00.45f,${randomGlucose(1.1, 6.6)}f",
+            "$date,01.20f,${randomGlucose(2.8, 6.3)}f",
+            "$date,01.55f,${randomGlucose(4.0, 6.5)}f",
+            "$date,02.30f,${randomGlucose(2.6, 6.1)}f",
+            "$date,03.15f,${randomGlucose(3.9, 6.4)}f",
+            "$date,04.00f,${randomGlucose(2.5, 6.0)}f",
+            "$date,04.45f,${randomGlucose(4.2, 6.7)}f",
+            "$date,05.20f,${randomGlucose(2.9, 6.4)}f",
+            "$date,06.10f,${randomGlucose(4.3, 6.7)}f", // Pre-exercise
+            "$date,06.40f,${randomGlucose(3.5, 6.0)}f",
+            "$date,07.10f,${randomGlucose(3.8, 6.3)}f", // Post-exercise drop
+            "$date,07.45f,${randomGlucose(1.9, 6.4)}f",
+            "$date,08.15f,${randomGlucose(5.0, 7.5)}f", // Breakfast spike
+            "$date,08.50f,${randomGlucose(3.2, 7.7)}f",
+            "$date,09.30f,${randomGlucose(5.0, 7.5)}f",
+            "$date,10.05f,${randomGlucose(1.5, 7.0)}f",
+            "$date,10.45f,${randomGlucose(4.2, 6.7)}f",
+            "$date,11.20f,${randomGlucose(1.0, 6.5)}f",
+            "$date,12.00f,${randomGlucose(5.5, 8.0)}f", // Lunch spike
+            "$date,12.40f,${randomGlucose(1.2, 7.7)}f",
+            "$date,13.15f,${randomGlucose(4.8, 7.3)}f",
+            "$date,14.00f,${randomGlucose(1.2, 6.7)}f",
+            "$date,14.45f,${randomGlucose(4.0, 6.5)}f",
+            "$date,15.30f,${randomGlucose(1.9, 6.4)}f",
+            "$date,16.10f,${randomGlucose(4.2, 6.7)}f",
+            "$date,17.00f,${randomGlucose(1.5, 6.0)}f",
+            "$date,17.45f,${randomGlucose(3.8, 6.3)}f",
+            "$date,18.30f,${randomGlucose(5.0, 7.5)}f",
+            "$date,19.10f,${randomGlucose(5.8, 8.3)}f", // Dinner spike
+            "$date,19.55f,${randomGlucose(5.2, 7.7)}f",
+            "$date,20.30f,${randomGlucose(4.8, 7.3)}f",
+            "$date,21.15f,${randomGlucose(4.3, 6.8)}f",
+            "$date,22.00f,${randomGlucose(3.9, 6.4)}f",
+            "$date,22.40f,${randomGlucose(3.5, 6.0)}f",
+            "$date,23.25f,${randomGlucose(3.8, 6.3)}f"
         )
 
         val badDay = listOf(
-            "$date,00.10f,${randomGlucose(8.0, 10.5)}f", "$date,00.50f,${randomGlucose(8.5, 11.0)}f",
-            "$date,01.30f,${randomGlucose(8.2, 10.7)}f", "$date,02.15f,${randomGlucose(8.0, 10.5)}f",
-            "$date,03.00f,${randomGlucose(7.8, 13.3)}f", "$date,03.45f,${randomGlucose(7.6, 10.1)}f",
-            "$date,04.30f,${randomGlucose(7.5, 13.0)}f", "$date,05.15f,${randomGlucose(7.8, 10.3)}f",
-            "$date,06.00f,${randomGlucose(7.0, 9.5)}f", "$date,06.45f,${randomGlucose(6.8, 9.3)}f", // Exercise drop
-            "$date,07.30f,${randomGlucose(6.5, 9.0)}f", "$date,08.10f,${randomGlucose(9.0, 11.5)}f", // Breakfast spike
-            "$date,08.55f,${randomGlucose(9.5, 12.0)}f", "$date,09.40f,${randomGlucose(9.2, 11.7)}f",
-            "$date,10.25f,${randomGlucose(8.8, 11.3)}f", "$date,11.10f,${randomGlucose(8.5, 11.0)}f",
-            "$date,12.00f,${randomGlucose(9.5, 12.0)}f", "$date,12.50f,${randomGlucose(9.8, 12.3)}f",
-            "$date,13.35f,${randomGlucose(9.2, 11.7)}f", "$date,14.20f,${randomGlucose(8.5, 11.0)}f",
-            "$date,15.05f,${randomGlucose(8.0, 10.5)}f", "$date,15.50f,${randomGlucose(7.8, 33.3)}f",
-            "$date,16.35f,${randomGlucose(7.5, 10.0)}f", "$date,17.20f,${randomGlucose(6.8, 24.3)}f", // Exercise drop
-            "$date,18.10f,${randomGlucose(9.5, 22.0)}f", "$date,18.55f,${randomGlucose(10.2, 12.7)}f",
-            "$date,19.40f,${randomGlucose(9.8, 22.3)}f", "$date,20.25f,${randomGlucose(9.2, 21.7)}f",
-            "$date,21.10f,${randomGlucose(8.5, 21.0)}f", "$date,22.00f,${randomGlucose(7.8, 10.3)}f",
-            "$date,22.45f,${randomGlucose(7.2, 22.7)}f", "$date,23.30f,${randomGlucose(6.8, 9.3)}f"
+            "$date,00.10f,${randomGlucose(8.0, 10.5)}f",
+            "$date,00.50f,${randomGlucose(8.5, 11.0)}f",
+            "$date,01.30f,${randomGlucose(8.2, 10.7)}f",
+            "$date,02.15f,${randomGlucose(8.0, 10.5)}f",
+            "$date,03.00f,${randomGlucose(7.8, 13.3)}f",
+            "$date,03.45f,${randomGlucose(7.6, 10.1)}f",
+            "$date,04.30f,${randomGlucose(7.5, 13.0)}f",
+            "$date,05.15f,${randomGlucose(7.8, 10.3)}f",
+            "$date,06.00f,${randomGlucose(7.0, 9.5)}f",
+            "$date,06.45f,${randomGlucose(6.8, 9.3)}f", // Exercise drop
+            "$date,07.30f,${randomGlucose(6.5, 9.0)}f",
+            "$date,08.10f,${randomGlucose(9.0, 11.5)}f", // Breakfast spike
+            "$date,08.55f,${randomGlucose(9.5, 12.0)}f",
+            "$date,09.40f,${randomGlucose(9.2, 11.7)}f",
+            "$date,10.25f,${randomGlucose(8.8, 11.3)}f",
+            "$date,11.10f,${randomGlucose(8.5, 11.0)}f",
+            "$date,12.00f,${randomGlucose(9.5, 12.0)}f",
+            "$date,12.50f,${randomGlucose(9.8, 12.3)}f",
+            "$date,13.35f,${randomGlucose(9.2, 11.7)}f",
+            "$date,14.20f,${randomGlucose(8.5, 11.0)}f",
+            "$date,15.05f,${randomGlucose(8.0, 10.5)}f",
+            "$date,15.50f,${randomGlucose(7.8, 33.3)}f",
+            "$date,16.35f,${randomGlucose(7.5, 10.0)}f",
+            "$date,17.20f,${randomGlucose(6.8, 24.3)}f", // Exercise drop
+            "$date,18.10f,${randomGlucose(9.5, 22.0)}f",
+            "$date,18.55f,${randomGlucose(10.2, 12.7)}f",
+            "$date,19.40f,${randomGlucose(9.8, 22.3)}f",
+            "$date,20.25f,${randomGlucose(9.2, 21.7)}f",
+            "$date,21.10f,${randomGlucose(8.5, 21.0)}f",
+            "$date,22.00f,${randomGlucose(7.8, 10.3)}f",
+            "$date,22.45f,${randomGlucose(7.2, 22.7)}f",
+            "$date,23.30f,${randomGlucose(6.8, 9.3)}f"
         )
 
         return if (Random.nextBoolean()) goodDay else badDay
@@ -884,5 +933,5 @@ object PreferencesHelper {
     }
 
 
-    }
+}
 
