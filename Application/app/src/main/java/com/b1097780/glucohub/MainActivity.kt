@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
@@ -24,6 +25,7 @@ import com.google.firebase.FirebaseApp
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
+    private lateinit var firebaseHelper: FirebaseHelper
     private lateinit var appBarConfiguration: AppBarConfiguration
     private var userCoins: Int = 10
     private var userStreak: Int = 0 // Variable to store the streak
@@ -32,7 +34,8 @@ class MainActivity : AppCompatActivity() {
     private var theme = "" // Change this to "default", "purple", or "plain"
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        FirebaseApp.initializeApp(this)
+
+
         //PreferencesHelper.clearAllData(this) // Reset all stored values
         //PreferencesHelper.populateTestData(this) // Fill with test data
 
@@ -69,6 +72,27 @@ class MainActivity : AppCompatActivity() {
         observeNavDestinationChanges()
         updateCoinButton(userCoins) // Update UI with loaded coins
         updateStreakButton(userStreak)
+
+
+
+
+        try {
+            // ✅ Make sure Firebase is initialized BEFORE using FirebaseHelper
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                FirebaseApp.initializeApp(this)
+                Log.d("MainActivity", "✅ FirebaseApp manually initialized in MainActivity")
+            }
+
+            // Now we initialize FirebaseHelper
+            firebaseHelper = FirebaseHelper(this)
+            Log.d("MainActivity", "✅ FirebaseHelper Initialized in MainActivity")
+
+        } catch (e: Exception) {
+            Log.e("MainActivity", "❌ FirebaseHelper Initialization Failed: ${e.message}")
+        }
+
+        firebaseHelper.signInAnonymously()
+
     }
 
     fun applyUserTheme(selectedTheme: String) {
@@ -286,6 +310,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-
-
 }
