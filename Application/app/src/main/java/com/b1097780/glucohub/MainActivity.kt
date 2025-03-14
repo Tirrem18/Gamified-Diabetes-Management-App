@@ -1,11 +1,9 @@
 package com.b1097780.glucohub
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.Button
@@ -20,7 +18,7 @@ import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
 import com.b1097780.glucohub.databinding.ActivityMainBinding
-import com.google.firebase.FirebaseApp
+import com.b1097780.glucohub.ui.login.FirebaseHelper
 import com.google.firebase.auth.FirebaseAuth
 
 
@@ -40,22 +38,7 @@ class MainActivity : AppCompatActivity() {
 
         //PreferencesHelper.clearAllData(this) // Reset all stored values
         //PreferencesHelper.populateTestData(this) // Fill with test data
-
-       // PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
-
-        PreferencesHelper.setUserStreak(this, 1149) // Manually set current streak
-        //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
-
-        //PreferencesHelper.setMilestoneClaimed(this, 7) // Mark 7-day milestone as claimed
-        //PreferencesHelper.setMilestoneClaimed(this, 30) // Mark 30-day milestone as claimed
-
-        //PreferencesHelper.setCoinMultiplier(this, 2) // Manually set multiplier to x2
-        //PreferencesHelper.addCoins(this, 100) // Add 100 coins
-
-        //PreferencesHelper.setUserTheme(this, "") // Add 100 coins
-
-
-
+        //PreferencesHelper.setUserStreak(this, 49) // Manually set current streak
 
         PreferencesHelper.checkAndResetStreak(this)
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
@@ -72,7 +55,8 @@ class MainActivity : AppCompatActivity() {
         setupDrawerNavigation()
         setupCustomButtons()
         observeNavDestinationChanges()
-        updateCoinButton(userCoins) // Update UI with loaded coins
+        // Update UI with loaded coins
+        updateCoinButton(userCoins)
         updateStreakButton(userStreak)
 
 
@@ -100,9 +84,9 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-
+    //Reloads the activity to apply theme changes
     fun reloadTheme() {
-        recreate() // Reloads the activity to apply theme changes
+        recreate()
     }
 
 
@@ -140,7 +124,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             // Clear back stack before navigating
-            navController.popBackStack(R.id.navigation_home, false) // Keep Home in stack
+            navController.popBackStack(R.id.navigation_home, false)
 
             when (menuItem.itemId) {
                 R.id.nav_settings -> navController.navigate(R.id.navigation_settings)

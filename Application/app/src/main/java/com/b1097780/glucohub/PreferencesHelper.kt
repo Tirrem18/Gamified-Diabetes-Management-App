@@ -37,8 +37,6 @@ object PreferencesHelper {
     private const val KEY_LAST_UPDATE_DATE = "last_update_date"
     private const val KEY_TODAY_GLUCOSE_COUNT = "today_glucose_count"
     private const val KEY_TODAY_ACTIVITY_COUNT = "today_activity_count"
-
-
     private const val KEY_CARB_RATIO = "carb_ratio"
     private const val KEY_NIGHT_UNITS = "night_time_units"
     private const val KEY_USER_COINS = "userCoins"
@@ -54,14 +52,6 @@ object PreferencesHelper {
     // Get SharedPreferences instance
     private fun getPrefs(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    }
-
-    fun getUsername(context: Context): String {
-        return getPrefs(context).getString(KEY_USERNAME, "Unknown User") ?: "Unknown User"
-    }
-
-    fun setUsername(context: Context, username: String) {
-        getPrefs(context).edit().putString(KEY_USERNAME, username).apply()
     }
 
     // ✅ Function to sync username from Firebase Firestore
@@ -85,6 +75,125 @@ object PreferencesHelper {
         }
     }
 
+    private fun syncAllUserDataFromFirebase(context: Context, onComplete: () -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        if (userId == null) {
+            Log.e("PreferencesHelper", "User ID is null. Cannot sync data.")
+            onComplete()
+            return
+        }
+
+        val db = FirebaseFirestore.getInstance()
+        db.collection("users").document(userId).get()
+            .addOnSuccessListener { document ->
+                if (document.exists()) {
+                    val sharedPrefs = getPrefs(context)
+                    val editor = sharedPrefs.edit()
+
+                    document.data?.forEach { (key, value) ->
+                        try {
+                            when (key) {
+                                "username" -> editor.putString(KEY_USERNAME, value as? String ?: "Unknown User")
+                                "user_motto" -> editor.putString(KEY_USER_MOTTO, value as? String ?: "No Motto")
+                                "profile_picture" -> editor.putString(KEY_PROFILE_PIC, value as? String ?: "default_profile")
+                                "background_picture" -> editor.putString(KEY_BACKGROUND_PIC, value as? String ?: "default_background")
+                                "box_color" -> editor.putString(KEY_BOX_COLOR, value as? String ?: "#FFFFFF")
+                                "joining_date" -> editor.putString(KEY_JOINING_DATE, value as? String ?: "01/01/2024")
+                                "last_activity_total" -> editor.putInt(KEY_LAST_ACTIVITY_TOTAL, (value as? Long)?.toInt() ?: 0)
+                                "last_glucose_total" -> editor.putInt(KEY_LAST_GLUCOSE_TOTAL, (value as? Long)?.toInt() ?: 0)
+                                "last_update_date" -> editor.putString(KEY_LAST_UPDATE_DATE, value as? String ?: "N/A")
+                                "today_glucose_count" -> editor.putInt(KEY_TODAY_GLUCOSE_COUNT, (value as? Long)?.toInt() ?: 0)
+                                "today_activity_count" -> editor.putInt(KEY_TODAY_ACTIVITY_COUNT, (value as? Long)?.toInt() ?: 0)
+                                "carb_ratio" -> editor.putFloat(KEY_CARB_RATIO, (value as? Double)?.toFloat() ?: 10.0f)
+                                "night_time_units" -> editor.putInt(KEY_NIGHT_UNITS, (value as? Long)?.toInt() ?: 0)
+                                "userCoins" -> editor.putInt(KEY_USER_COINS, (value as? Long)?.toInt() ?: 0)
+                                "lastEntryTime" -> editor.putLong(KEY_LAST_ENTRY_TIME, value as? Long ?: 0L)
+                                "userStreak" -> editor.putInt(KEY_USER_STREAK, (value as? Long)?.toInt() ?: 0)
+                                "lastStreakDate" -> editor.putString(KEY_LAST_STREAK_DATE, value as? String ?: "N/A")
+                                "highestStreak" -> editor.putInt(KEY_HIGHEST_STREAK, (value as? Long)?.toInt() ?: 0)
+                                "coinMultiplier" -> editor.putInt(KEY_COIN_MULTIPLIER, (value as? Long)?.toInt() ?: 1)
+                                "userTheme" -> editor.putString(KEY_USER_THEME, value as? String ?: "default")
+                                else -> Log.w("PreferencesHelper", "Unknown key from Firebase: $key")
+                            }
+                        } catch (e: Exception) {
+                            Log.e("PreferencesHelper", "Error processing key: $key", e)
+                        }
+                    }
+                    editor.apply()
+                    Log.d("PreferencesHelper", "Successfully synced user data from Firebase.")
+                } else {
+                    Log.w("PreferencesHelper", "User document does not exist in Firestore.")
+                }
+
+                // Sync glucose and activity entries
+                syncUserEntriesFromFirebase(context, onComplete)
+            }
+            .addOnFailureListener { exception ->
+                Log.e("PreferencesHelper", "Failed to sync user data from Firebase", exception)
+                onComplete()
+            }
+    }
+
+    private fun syncUserEntriesFromFirebase(context: Context, onComplete: () -> Unit) {
+        val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return onComplete()
+        val db = FirebaseFirestore.getInstance()
+        val sharedPrefs = getPrefs(context)
+        val editor = sharedPrefs.edit()
+        val dateFormat = SimpleDateFormat("yyyyMMdd", Locale.getDefault())
+        val calendar = Calendar.getInstance()
+
+        // Loop through past 90 days to retrieve glucose and activity logs
+        for (i in 0 until 90) {
+            val date = dateFormat.format(calendar.time)
+            calendar.add(Calendar.DAY_OF_MONTH, -1) // Move to previous day
+
+            db.collection("users").document(userId).collection("glucoseEntries").document(date).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val glucoseEntries = document.get("entries") as? List<Map<String, Any>>
+                        val jsonArray = JSONArray()
+                        glucoseEntries?.forEach { entry ->
+                            val jsonObject = JSONObject().apply {
+                                put("time", entry["time"] as? String ?: "00:00")
+                                put("glucose_level", entry["glucose_level"] as? Double ?: 0.0)
+                            }
+                            jsonArray.put(jsonObject)
+                        }
+                        editor.putString("${date}_glucose", jsonArray.toString())
+                    }
+                }
+
+            db.collection("users").document(userId).collection("activityEntries").document(date).get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val activityEntries = document.get("entries") as? List<Map<String, Any>>
+                        val jsonArray = JSONArray()
+                        activityEntries?.forEach { entry ->
+                            val jsonObject = JSONObject().apply {
+                                put("name", entry["name"] as? String ?: "Unknown")
+                                put("start_time", entry["start_time"] as? String ?: "00:00")
+                                put("end_time", entry["end_time"] as? String ?: "null")
+                                put("description", entry["description"] as? String ?: "null")
+                            }
+                            jsonArray.put(jsonObject)
+                        }
+                        editor.putString("${date}_activities", jsonArray.toString())
+                    }
+                }
+        }
+        editor.apply()
+        onComplete()
+    }
+
+
+
+    fun getUsername(context: Context): String {
+        return getPrefs(context).getString(KEY_USERNAME, "Unknown User") ?: "Unknown User"
+    }
+
+    private fun setUsername(context: Context, username: String) {
+        getPrefs(context).edit().putString(KEY_USERNAME, username).apply()
+    }
 
 
     // Get User Theme
@@ -158,7 +267,6 @@ object PreferencesHelper {
 
         return finalizedTotal + todayCount
     }
-
 
     fun getTotalGlucoseEntries(context: Context): Int {
         val sharedPrefs = getPrefs(context)
@@ -269,7 +377,6 @@ object PreferencesHelper {
         getPrefs(context).edit().putString(KEY_JOINING_DATE, value).apply()
     }
 
-
     // Get the current streak (default 0)
     fun getUserStreak(context: Context): Int {
         return getPrefs(context).getInt(KEY_USER_STREAK, 0)
@@ -280,7 +387,6 @@ object PreferencesHelper {
         getPrefs(context).edit().putInt(KEY_USER_STREAK, value)
             .apply() // Update streak achievement when streak changes
     }
-
 
     // Get the last streak date (default to empty if not set)
     fun getLastStreakDate(context: Context): String {
@@ -342,7 +448,6 @@ object PreferencesHelper {
 
         Log.d("PreferencesHelper", "Deleted activity entry at $time on $date")
     }
-
 
     fun updateStreakOnEntry(context: Context) {
         val lastStreakDate = getLastStreakDate(context)
@@ -420,36 +525,6 @@ object PreferencesHelper {
     // Mark Milestone as Claimed
     fun setMilestoneClaimed(context: Context, days: Int) {
         getPrefs(context).edit().putBoolean("$KEY_MILESTONE_PREFIX$days", true).apply()
-    }
-
-
-    // -------------------------
-    // ✅ CLEAR ALL DATA
-    // -------------------------
-    fun clearAllData(context: Context) {
-        getPrefs(context).edit().clear().apply()
-    }
-
-    // -------------------------
-    // ✅ CARB RATIO
-    // -------------------------
-    fun getCarbRatio(context: Context): Int {
-        return getPrefs(context).getInt(KEY_CARB_RATIO, 9) // Default 9:1
-    }
-
-    fun setCarbRatio(context: Context, value: Int) {
-        getPrefs(context).edit().putInt(KEY_CARB_RATIO, value).apply()
-    }
-
-    // -------------------------
-    // ✅ NIGHT TIME UNITS
-    // -------------------------
-    fun getNightTimeUnits(context: Context): Int {
-        return getPrefs(context).getInt(KEY_NIGHT_UNITS, 30) // Default 30 units
-    }
-
-    fun setNightTimeUnits(context: Context, value: Int) {
-        getPrefs(context).edit().putInt(KEY_NIGHT_UNITS, value).apply()
     }
 
     // -------------------------
@@ -665,7 +740,6 @@ object PreferencesHelper {
         )
     }
 
-
     // -------------------------
     // ✅ POPULATE TEST DATA (WITH COMPRESSION)
     // -------------------------
@@ -678,7 +752,7 @@ object PreferencesHelper {
         val currentMonth = calendar.get(Calendar.MONTH)
         val currentYear = calendar.get(Calendar.YEAR)
 
-        calendar.add(Calendar.MINUTE, -20) // Move back 20 minutes from current time
+        calendar.add(Calendar.MINUTE, -40) // Move back 20 minutes from current time
         val currentTimeMinus20 = timeFormat.format(calendar.time)
 
         val random = Random(System.currentTimeMillis())
@@ -738,7 +812,6 @@ object PreferencesHelper {
 
 
     }
-
 
     fun getRandomGlucoseDataSet(date: String): List<String> {
         val goodDay = listOf(
@@ -823,6 +896,16 @@ object PreferencesHelper {
         return String.format("%.1f", Random.nextDouble(min, max)).toDouble()
     }
 
+    //Possible pushing test data straight to firebase in future
+    fun AddTestDataToFireBase(context: Context, onComplete: () -> Unit) {
+        syncAllUserDataFromFirebase(context) {
+            syncUsernameFromFirebase(context) {
+                // Add more sync functions here if needed
+                onComplete()
+            }
+        }
+    }
+
 
     // Generates Activity Data with Meals, Insulin, and General Activities
     // Generates Activity Data with More Variety
@@ -887,7 +970,6 @@ object PreferencesHelper {
             "$date,Insulin,22:45,null,Long-Acting: 35u",
             "$date,Insulin,23:00,null,Long-Acting: 35u"
         )
-
 
         val activities = listOf(
             // Gym & Sports
@@ -955,6 +1037,13 @@ object PreferencesHelper {
         return eventMap.values.toList()
     }
 
+    fun clearAllData(mainActivity: MainActivity) {
+        val sharedPrefs = mainActivity.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val editor = sharedPrefs.edit()
+        editor.clear()
+        editor.apply()
+
+    }
 
 }
 

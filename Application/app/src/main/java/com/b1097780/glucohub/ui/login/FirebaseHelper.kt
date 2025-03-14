@@ -1,4 +1,4 @@
-package com.b1097780.glucohub
+package com.b1097780.glucohub.ui.login
 
 import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
