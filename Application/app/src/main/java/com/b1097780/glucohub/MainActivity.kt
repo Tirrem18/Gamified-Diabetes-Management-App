@@ -25,20 +25,15 @@ import com.google.firebase.auth.FirebaseAuth
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var firebaseHelper: FirebaseHelper
     private lateinit var appBarConfiguration: AppBarConfiguration
     private var userCoins: Int = 10
     private var userStreak: Int = 0 // Variable to store the streak
-
-    // CUSTOMISE
-    private var theme = "" // Change this to "default", "purple", or "plain"
+    private var theme = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
 
-        //PreferencesHelper.clearAllData(this) // Reset all stored values
-        //PreferencesHelper.populateTestData(this) // Fill with test data
-        //PreferencesHelper.setUserStreak(this, 49) // Manually set current streak
+        PreferencesHelper.setUserStreak(this, 99) // Manually set current streak
 
         PreferencesHelper.checkAndResetStreak(this)
         userCoins = PreferencesHelper.getUserCoins(this) // Load coins from PreferencesHelper
@@ -71,6 +66,8 @@ class MainActivity : AppCompatActivity() {
             finish() // Prevent back navigation to main activity
         }
     }
+
+
 
 
     fun applyUserTheme(selectedTheme: String) {
@@ -143,8 +140,11 @@ class MainActivity : AppCompatActivity() {
 
     fun updateCoinButton(value: Int) {
         val formattedValue = formatNumber(value, false)
-        binding.customCoinButton.text = formattedValue
+        if (::binding.isInitialized) { // ✅ Prevents crashes
+            binding.customCoinButton.text = formattedValue
+        }
     }
+
 
     // Function to update streak button text
     fun updateStreakButton(value: Int) {

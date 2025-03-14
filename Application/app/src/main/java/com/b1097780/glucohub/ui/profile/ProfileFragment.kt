@@ -54,9 +54,6 @@ class ProfileFragment : Fragment() {
             binding.highestStreak.text = it
         }
 
-        profileViewModel.joiningDate.observe(viewLifecycleOwner) {
-            binding.joiningDate.text = it
-        }
 
         // ✅ Observe dynamically calculated achievements and descriptions
         profileViewModel.activityAchievement.observe(viewLifecycleOwner) {

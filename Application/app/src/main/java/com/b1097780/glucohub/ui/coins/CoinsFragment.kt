@@ -152,6 +152,9 @@ class CoinsFragment : Fragment() {
     private fun updateCoinDisplay() {
         val coins = PreferencesHelper.getUserCoins(requireContext())
         textCoins.text = "Your Coins: $coins"
+
+        // ✅ Ensure MainActivity updates the main coin button
+        (activity as? MainActivity)?.updateCoinButton(coins)
     }
 
     private fun setupDiscountButton(button: Button) {
