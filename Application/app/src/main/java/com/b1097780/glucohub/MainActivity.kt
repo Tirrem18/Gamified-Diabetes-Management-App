@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         //PreferencesHelper.clearAllData(this) // Reset all stored values
         //PreferencesHelper.populateTestData(this) // Fill with test data
 
-        //PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
+       // PreferencesHelper.setLastStreakDate(this, "20250309") // Set last streak to 3 days ago (break streak)
 
         PreferencesHelper.setUserStreak(this, 1149) // Manually set current streak
         //PreferencesHelper.setHighestStreak(this, 15) // Manually set highest streak
